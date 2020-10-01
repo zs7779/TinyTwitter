@@ -1,5 +1,29 @@
 {% extends "network/layout.html" %}
+{% load static %}
 
 {% block body %}
-    TODO
+
+<div id="project4" class="container">
+    <div class="row justify-content-center">
+        <div class="col-8">
+            <new_post></new_post>
+            <ul class="list-group">
+                <li v-for="post in posts" v-bind:key="post.index">
+                    <div class="card">
+                        [[ post ]]
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+    <script type="text/javascript">
+        const posts_endpoint = "{% url 'posts' %}";
+        const post_endpoint = "{% url 'post' %}";
+        const user_endpoint = "{% url 'user' %}";
+    </script>
+    <script type="text/javascript" src="{% static 'network/index.js' %}"></script>
 {% endblock %}

@@ -1,14 +1,33 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User
+from .models import User, Post
 
 
 def index(request):
     return render(request, "network/index.html")
+
+
+def posts_view(request):
+    posts = Post.objects.all().order_by("-post_time")
+    return JsonResponse([post.serialize() for post in posts], safe=False)
+
+
+def post_view(request, post_id):
+    try:
+        post = Post.objects.get(id=post_id)
+    except Post.DoesNotExist:
+        return JsonResponse({"error": "Post does not exist"}, status=404)
+
+    if request.method == "GET":
+        return JsonResponse(post.serialize())
+
+
+def user_view(request, user_id=None):
+    pass
 
 
 def login_view(request):

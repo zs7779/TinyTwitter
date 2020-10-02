@@ -1,3 +1,4 @@
+import json
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
@@ -11,22 +12,29 @@ def index(request):
     return render(request, "network/index.html")
 
 
-def posts_view(request):
+def posts_endpoint(request):
     posts = Post.objects.all().order_by("-post_time")
     return JsonResponse([post.serialize() for post in posts], safe=False)
 
 
-def post_view(request, post_id):
-    try:
-        post = Post.objects.get(id=post_id)
-    except Post.DoesNotExist:
-        return JsonResponse({"error": "Post does not exist"}, status=404)
+def post_endpoint(request, post_id=-1):
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            return JsonResponse({"message": "Please log in or register"}, status=401)
+        post_text = json.loads(request.body)['newPostText']
+        post = Post(author=request.user, text=post_text)
+        post.save()
+        return JsonResponse({"message": "Post succesful"}, status=201)
 
     if request.method == "GET":
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return JsonResponse({"error": "Post does not exist"}, status=404)
         return JsonResponse(post.serialize())
 
 
-def user_view(request, user_id=None):
+def user_endpoint(request, user_id=None):
     pass
 
 

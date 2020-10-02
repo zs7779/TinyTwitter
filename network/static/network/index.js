@@ -1,51 +1,97 @@
-Vue.component('post', {
-  template: '\
-    <li>\
-      {{ title }}\
-      <button v-on:click="$emit(\'remove\')">Remove</button>\
-    </li>\
-  ',
-  props: ['title'],
+function printError (error) {
+    if (error.response) {
+      console.log(error.response.data);
+      console.log(error.response.status);
+      console.log(error.response.headers);
+    } else if (error.request) {
+      console.log(error.request);
+    } else {
+      console.log('Error', error.message);
+    }
+}
+
+Vue.component("post-feed", {
+    props: ['posts'],
+    template: `
+    <div>
+        <ul class="list-group mt-2">
+            <post-card v-for="post in posts" v-bind:key="post.index" v-bind:post="post"></post-card>
+        </ul>
+    </div>
+    `,
 })
 
-Vue.component("new_post", {
-    props: [],
-    template: '\
-        <div class="class_new_post_input_area">\
-            <form>\
-                <textarea class="form-control" v-model="new_post_text" placeholder="Say something..." v-on:keypress="onTextInput"></textarea>\
-                <span>{{ char_remaining }} characters remaining</span>\
-                <button type="button" class="btn btn-outline-primary float-right mt-1">Post</button>\
-            </form>\
-        </div>\
-    ',
+Vue.component('post-card', {
+    props: ['post'],
+    template: `
+    <li class="list-group-item">
+        <div class="card-text">
+            <p> {{ post.text }} </p>
+        </div>
+    </li>
+    `,
+})
+
+Vue.component("new-post", {
+    template: `
+    <div>
+        <form v-on:submit.prevent="onSubmitPost">
+            <slot></slot>
+            <textarea class="form-control" v-model="newPostText" placeholder="Say something..." v-on:keypress="onTextInput"></textarea>
+            <span>{{ charRemaining }} characters remaining</span>
+            <button type="submit" class="btn btn-outline-primary float-right btn-sm mt-1">Post</button>
+        </form>
+    </div>
+    `,
     data: function () {
         return {
-            new_post_text: "",
-            char_remaining: 140,
+            newPostText: "",
         }
+    },
+    computed: {
+        charRemaining: function() {
+            return 140 - this.newPostText.length
+        },
     },
     methods: {
         onTextInput: function (event) {
-            if (this.char_remaining > 0) {
-                this.char_remaining--
-            } else {
+            if (this.newPostText.length >= 140) {
                 event.preventDefault()
             }
+        },
+        onSubmitPost: function (event) {
+            if (this.newPostText.length == 0) {
+                return
+            }
+            axios.post(endpoint_post, {
+                newPostText: this.newPostText,
+            }, {
+                headers: {
+                    'X-CSRFTOKEN': event.target.elements.csrfmiddlewaretoken.value,
+                },
+            }).then(response => {
+                this.newPostText = ""
+                this.$emit("new-post-ok")
+            }, printError)
         },
     },
 })
 
-new Vue({
-  el: '#project4',
-  data: {
-    posts: [],
-  },
-  methods: {
-    get_posts: function () {
-        axios.get(posts_endpoint).then(response => {
-            posts = response.json().data
-        })
-    }
-  }
+var app = new Vue({
+    el: '#project4',
+    data: {
+        posts: [],
+    },
+    methods: {
+        getPosts: function () {
+            axios.get(endpoint_posts).then(response => {
+                this.posts = response.data
+                console.log("armed")
+            })
+        },
+    },
+    created: function () {
+        this.getPosts()
+    },
+    delimiters: ['[[', ']]'],
 })

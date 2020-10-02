@@ -13,8 +13,9 @@ function printError (error) {
 Vue.component("post-feed", {
     props: ['posts'],
     template: `
-    <div>
-        <ul class="list-group mt-2">
+    <div class="post-feed">
+        <slot></slot>
+        <ul class="list-group">
             <post-card v-for="post in posts" v-bind:key="post.index" v-bind:post="post"></post-card>
         </ul>
     </div>
@@ -25,9 +26,10 @@ Vue.component('post-card', {
     props: ['post'],
     template: `
     <li class="list-group-item">
-        <div class="card-text">
-            <p> {{ post.text }} </p>
-        </div>
+            <div class="card-text">
+                <p>{{ post.author }} <span class="small text-muted">at {{ post.timestamp }} said:</span></p>
+                <p> {{ post.text }} </p>
+            </div>
     </li>
     `,
 })
@@ -37,9 +39,11 @@ Vue.component("new-post", {
     <div>
         <form v-on:submit.prevent="onSubmitPost">
             <slot></slot>
-            <textarea class="form-control" v-model="newPostText" placeholder="Say something..." v-on:keypress="onTextInput"></textarea>
-            <span>{{ charRemaining }} characters remaining</span>
-            <button type="submit" class="btn btn-outline-primary float-right btn-sm mt-1">Post</button>
+            <textarea rows=3 class="form-control border-0" v-model="newPostText" placeholder="Say something..." v-on:keypress="onTextInput"></textarea>
+            <div class="d-flex justify-content-end">
+            <span class="mx-1">{{ charRemaining }}</span>
+            <button type="submit" class="btn btn-primary rounded-pill new-post-button">Post</button>
+            </div>
         </form>
     </div>
     `,
@@ -50,7 +54,8 @@ Vue.component("new-post", {
     },
     computed: {
         charRemaining: function() {
-            return 140 - this.newPostText.length
+            this.newPostText = this.newPostText.substr(0, 140)
+            return `${this.newPostText.length}/140`
         },
     },
     methods: {

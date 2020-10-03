@@ -16,7 +16,13 @@ Vue.component("post-feed", {
     <div class="post-feed">
         <slot></slot>
         <ul class="list-group">
-            <post-card v-for="post in posts" v-bind:key="post.index" v-bind:post="post" v-on="$listeners"></post-card>
+            <transition-group name="list" tag="p">
+                <post-card
+                    v-for="(post, index) in posts"
+                    v-bind:key="post.id" v-bind:post="post"
+                    v-on="$listeners">
+                </post-card>
+            </transition-group>
         </ul>
     </div>
     `,
@@ -56,7 +62,6 @@ Vue.component('post-card', {
     `,
     methods: {
         onLike: function(event) {
-//            console.log(event.target)
             axios.put(endpoint_post+this.post.id, {
                 like: !this.post.liked,
             }, {
@@ -64,7 +69,9 @@ Vue.component('post-card', {
                     'X-CSRFTOKEN': document.getElementsByName('csrfmiddlewaretoken')[0].value,
                 },
             }).then(response => {
-                this.$emit("post-ok")
+                this.post.likes = this.post.liked ? this.post.likes - 1 : this.post.likes + 1
+                this.post.liked = !this.post.liked
+                this.$emit("post-ok", this.post)
             }, printError)
         },
         onEdit: function(event) {
@@ -103,7 +110,6 @@ Vue.component("new-post", {
             if (this.newPostText.length == 0) {
                 return
             }
-//            console.log(event.target)
             axios.post(endpoint_post, {
                 newPostText: this.newPostText,
             }, {
@@ -127,8 +133,17 @@ var app = new Vue({
         getPosts: function () {
             axios.get(endpoint_posts).then(response => {
                 this.posts = response.data
-                console.log("app.getPosts")
             })
+        },
+        insertPost: function(newPost) {
+            this.posts.unshift(newPost)
+        },
+        updatePost: function(editedPost) {
+            for (var i=0; i<this.posts.length; i++) {
+                if (this.posts[i].id == editedPost.id) {
+                    this.posts[i] = editedPost
+                }
+            }
         },
     },
     created: function () {

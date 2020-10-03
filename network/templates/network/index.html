@@ -11,7 +11,7 @@
                     <b-icon icon="arrow-clockwise"></b-icon>
                 </button>
             </div>
-            <post-feed v-bind:posts="posts" v-on:post-ok="getPosts">
+            <post-feed v-bind:posts="posts" v-on:post-ok="updatePost($event)">
                 {% if request.user.is_authenticated %}
                 <ul class="list-group-item"><new-post v-on:post-ok="getPosts">{% csrf_token %}</new-post></ul>
                 {% endif %}

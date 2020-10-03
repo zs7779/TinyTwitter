@@ -10,3 +10,12 @@
 .card-button {
     color: #909090;
 }
+
+.list-enter-active, .list-leave-active {
+  transition: all 1s;
+}
+.list-enter, .list-leave-to {
+  opacity: 0;
+  max-height: 0px;
+  transform: translateY(20px);
+}

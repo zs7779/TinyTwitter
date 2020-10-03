@@ -11,7 +11,7 @@
                     <b-icon icon="arrow-clockwise"></b-icon>
                 </button>
             </div>
-            <post-feed v-bind:posts="posts" v-on:post-ok="updatePost($event)">
+            <post-feed v-bind:posts="posts" v-on:post-ok="updatePost($event)" v-on:delete-ok="deletePost($event)">
                 {% if request.user.is_authenticated %}
                 <ul class="list-group-item"><new-post v-on:post-ok="getPosts">{% csrf_token %}</new-post></ul>
                 {% endif %}
@@ -22,10 +22,5 @@
 {% endblock %}
 
 {% block javascript %}
-    <script type="text/javascript">
-        const endpoint_posts = "{% url 'posts' %}";
-        const endpoint_post = "{% url 'post' %}";
-        const endpoint_user = "{% url 'user' %}";
-    </script>
     <script type="text/javascript" src="{% static 'network/index.js' %}"></script>
 {% endblock %}

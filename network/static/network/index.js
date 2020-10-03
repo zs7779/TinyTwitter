@@ -52,7 +52,7 @@ Vue.component('post-card', {
                 </button>
                 <b-dropdown id="dropdown-dropup" dropup variant="btn btn-transparent px-1 py-0" no-caret title="Options">
                     <template v-slot:button-content><b-icon icon="chevron-up" class="card-button"></b-icon></template>
-                    <b-dropdown-item-button><b-icon icon="x" class="card-button"></b-icon> Delete</b-dropdown-item-button>
+                    <b-dropdown-item-button v-on:click="onDelete"><b-icon icon="x" class="card-button"></b-icon> Delete</b-dropdown-item-button>
                     <b-dropdown-item-button><b-icon icon="pencil" class="card-button"></b-icon> Edit</b-dropdown-item-button>
                     <b-dropdown-item-button><b-icon icon="share" class="card-button"></b-icon> Share</b-dropdown-item-button>
                 </b-dropdown>
@@ -62,7 +62,7 @@ Vue.component('post-card', {
     `,
     methods: {
         onLike: function(event) {
-            axios.put(endpoint_post+this.post.id, {
+            axios.put(`/post/${this.post.id}`, {
                 like: !this.post.liked,
             }, {
                 headers: {
@@ -77,6 +77,13 @@ Vue.component('post-card', {
         onEdit: function(event) {
         },
         onDelete: function(event) {
+            axios.delete(`/post/${this.post.id}`, {
+                headers: {
+                    'X-CSRFTOKEN': document.getElementsByName('csrfmiddlewaretoken')[0].value,
+                },
+            }).then(response => {
+                this.$emit("delete-ok", this.post.id)
+            }, printError)
         },
     },
 })
@@ -110,7 +117,7 @@ Vue.component("new-post", {
             if (this.newPostText.length == 0) {
                 return
             }
-            axios.post(endpoint_post, {
+            axios.post('/post/', {
                 newPostText: this.newPostText,
             }, {
                 headers: {
@@ -131,7 +138,12 @@ var app = new Vue({
     },
     methods: {
         getPosts: function () {
-            axios.get(endpoint_posts).then(response => {
+            axios.get('/posts/', {
+                params: {
+                    after: 0,
+                    count: 20,
+                },
+            }).then(response => {
                 this.posts = response.data
             })
         },
@@ -142,6 +154,14 @@ var app = new Vue({
             for (var i=0; i<this.posts.length; i++) {
                 if (this.posts[i].id == editedPost.id) {
                     this.posts[i] = editedPost
+                }
+            }
+        },
+        deletePost: function(delete_id) {
+            for (var i=0; i<this.posts.length; i++) {
+                if (this.posts[i].id == delete_id) {
+                    this.posts.splice(i, 1)
+                    break
                 }
             }
         },

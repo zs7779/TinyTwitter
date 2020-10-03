@@ -1,4 +1,12 @@
-.new-post-button {
-    padding-top: 1px;
-    padding-bottom: 1px;
+.container{
+    background-color: #f4f6f6;
+}
+
+.btn-transparent {
+    background-color: Transparent;
+    border-color: #fff;
+}
+
+.card-button {
+    color: #909090;
 }

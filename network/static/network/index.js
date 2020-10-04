@@ -10,6 +10,7 @@ function printError (error) {
     }
 }
 
+
 Vue.component("post-feed", {
     props: ['posts'],
     template: `
@@ -25,6 +26,7 @@ Vue.component("post-feed", {
     </div>
     `,
 })
+
 
 Vue.component('post-card', {
     props: ['post'],
@@ -60,7 +62,7 @@ Vue.component('post-card', {
     `,
     methods: {
         onLike: function(event) {
-            axios.put(`/post/${this.post.id}`, {
+            axios.put(`/post_mod/${this.post.id}`, {
                 like: !this.post.liked,
             }, {
                 headers: {
@@ -75,7 +77,7 @@ Vue.component('post-card', {
         onEdit: function(event) {
         },
         onDelete: function(event) {
-            axios.delete(`/post/${this.post.id}`, {
+            axios.delete(`/post_mod/${this.post.id}`, {
                 headers: {
                     'X-CSRFTOKEN': document.getElementsByName('csrfmiddlewaretoken')[0].value,
                 },
@@ -85,6 +87,7 @@ Vue.component('post-card', {
         },
     },
 })
+
 
 Vue.component("new-post", {
     template: `
@@ -115,7 +118,7 @@ Vue.component("new-post", {
             if (this.newPostText.length == 0) {
                 return
             }
-            axios.post('/post/', {
+            axios.post('/posts_new/', {
                 newPostText: this.newPostText,
             }, {
                 headers: {

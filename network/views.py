@@ -1,6 +1,7 @@
 import json
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods, require_GET, require_POST
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, QueryDict
 from django.shortcuts import render
@@ -13,43 +14,46 @@ def index(request):
     return render(request, "network/index.html")
 
 
-def posts_endpoint(request, post_id=None):
-    if request.method == "GET":
-        data = request.GET
-        print(data.get("count"), data.get("after"))
-        if post_id is not None:
-            try:
-                post = Post.objects.get(id=post_id)
-            except Post.DoesNotExist:
-                return JsonResponse({"error": "Post does not exist"}, status=404)
-            return JsonResponse(post.serialize())
+@require_GET
+def posts_view(request):
+    data = request.GET
+    print(data.get("count"), data.get("after"))
+    if data.get("count") is not None and data.get("after") is not None:
+        pass
 
-        if data.get("count") is not None and data.get("after") is not None:
-            pass
+    posts = Post.objects.all().order_by("-post_time")
+    return JsonResponse([post.serialize(request.user) for post in posts], safe=False)
 
-        posts = Post.objects.all().order_by("-post_time")
-        user = request.user if request.user.is_authenticated else None
-        return JsonResponse([post.serialize(user) for post in posts], safe=False)
 
-    return JsonResponse({
-        "error": "Request unknown"
-    }, status=400)
+@require_GET
+def post_view(request, post_id):
+    try:
+        post = Post.objects.get(id=post_id)
+    except Post.DoesNotExist:
+        return JsonResponse({"error": "Post does not exist"}, status=404)
+    return JsonResponse(post.serialize(request.user))
+
+
+@require_GET
+def profile_view(request, user_id):
+    pass
 
 
 @login_required
-def post_endpoint(request, post_id=None):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        if data.get('newPostText') is not None and 140 >= len(data['newPostText']) > 0:
-            post_text = data['newPostText']
-            post = Post(author=request.user, text=post_text)
+@require_POST
+def posts_endpoint(request):
+    data = json.loads(request.body)
+    if data.get('newPostText') is not None:
+        post = Post(author=request.user, text=data['newPostText'])
+        if post.is_valid():
             post.save()
             return JsonResponse({"message": "Post successful"}, status=201)
-        else:
-            return JsonResponse({"message": "Post body illegal"}, status=400)
+    return JsonResponse({"message": "Post body is illegal"}, status=400)
 
-    if post_id is None:
-        return JsonResponse({"message": "Post ID required"}, status=400)
+
+@login_required
+@require_http_methods(["PUT", "DELETE"])
+def post_endpoint(request, post_id):
     try:
         post = Post.objects.get(id=post_id)
     except Post.DoesNotExist:
@@ -80,7 +84,9 @@ def post_endpoint(request, post_id=None):
     }, status=400)
 
 
-def user_endpoint(request, user_id=None):
+@login_required
+@require_http_methods(["PUT"])
+def profile_endpoint(request, user_id):
     pass
 
 

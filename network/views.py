@@ -40,13 +40,13 @@ def posts_endpoint(request, post_id=None):
 def post_endpoint(request, post_id=None):
     if request.method == "POST":
         data = json.loads(request.body)
-        if data.get('newPostText') is not None and len(data['newPostText']) > 0:
+        if data.get('newPostText') is not None and 140 >= len(data['newPostText']) > 0:
             post_text = data['newPostText']
             post = Post(author=request.user, text=post_text)
             post.save()
             return JsonResponse({"message": "Post successful"}, status=201)
         else:
-            return JsonResponse({"message": "Empty post"}, status=400)
+            return JsonResponse({"message": "Post body illegal"}, status=400)
 
     if post_id is None:
         return JsonResponse({"message": "Post ID required"}, status=400)

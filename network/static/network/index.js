@@ -30,9 +30,9 @@ Vue.component('post-card', {
     props: ['post'],
     template: `
     <div class="card p-3">
-        <div class="card-text">
-            <p>{{ post.author }} <span class="small text-muted">at {{ post.timestamp }} said:</span></p>
-            <p> {{ post.text }} </p>
+        <div class="card-text card-view">
+            <h6 class="card-title mb-1">{{ post.author }} <span class="small text-muted">at {{ post.timestamp }} said:</span></h6>
+            <p>{{ post.text }}</p>
         </div>
         <div class="card-footer bg-transparent p-0">
             {{ post.likes }} likes
@@ -50,9 +50,9 @@ Vue.component('post-card', {
                 </button>
                 <b-dropdown id="dropdown-dropup" dropup variant="btn btn-transparent px-1 py-0" no-caret title="Options">
                     <template v-slot:button-content><b-icon icon="chevron-up" class="card-button"></b-icon></template>
-                    <b-dropdown-item-button v-if="post.owner" v-on:click="onDelete"><b-icon icon="x" class="card-button"></b-icon> Delete</b-dropdown-item-button>
-                    <b-dropdown-item-button v-if="post.owner"><b-icon icon="pencil" class="card-button"></b-icon> Edit</b-dropdown-item-button>
-                    <b-dropdown-item-button><b-icon icon="share" class="card-button"></b-icon> Share</b-dropdown-item-button>
+                    <b-dropdown-item v-if="post.owner" v-on:click="onDelete"><b-icon icon="x" class="card-button"></b-icon> Delete</b-dropdown-item>
+                    <b-dropdown-item v-if="post.owner"><b-icon icon="pencil" class="card-button"></b-icon> Edit</b-dropdown-item>
+                    <b-dropdown-item><b-icon icon="share" class="card-button"></b-icon> Share</b-dropdown-item>
                 </b-dropdown>
             </div>
         </div>
@@ -91,8 +91,8 @@ Vue.component("new-post", {
     <div class="card p-3 my-3">
         <form v-on:submit.prevent="onSubmitPost">
             <slot></slot>
-            <textarea rows=3 class="form-control border-0" v-model="newPostText" placeholder="Say something..."></textarea>
-            <div class="d-flex justify-content-end">
+            <textarea rows=4 class="form-control border-0" v-model="newPostText" placeholder="Say something..."></textarea>
+            <div class="d-flex justify-content-end mt-2">
                 <span class="mx-1">{{ charRemaining }}</span>
                 <button type="submit" class="btn btn-primary rounded-pill py-0">Post</button>
             </div>

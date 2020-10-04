@@ -1,5 +1,15 @@
-.container{
+.container {
     background-color: #f4f6f6;
+}
+
+.card-view {
+    white-space: pre-line;
+    max-height: 300px;
+    -webkit-line-clamp: 6;
+    overflow : hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
 }
 
 .btn-transparent {
@@ -16,12 +26,12 @@
 }
 
 .list-enter-active {
-    animation: list-appear 0.8s;
-    animation-timing-function: ease-in-out;
+    animation: list-appear 0.5s;
+    animation-timing-function: linear;
 }
 .list-leave-active {
-    animation: list-appear 0.8s reverse;
-    animation-timing-function: ease-in-out;
+    animation: list-appear 0.5s reverse;
+    animation-timing-function: linear;
 }
 @keyframes list-appear {
     0% {
@@ -30,10 +40,10 @@
     }
     50% {
         opacity: 0;
-        max-height: 200px;
+        max-height: 360px;
     }
     100% {
         opacity: 1;
-        max-height: 200px;
+        max-height: 360px;
     }
 }

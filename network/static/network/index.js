@@ -15,15 +15,13 @@ Vue.component("post-feed", {
     template: `
     <div class="post-feed">
         <slot></slot>
-        <ul class="list-group">
-            <transition-group name="list" tag="p">
-                <post-card
-                    v-for="(post, index) in posts"
-                    v-bind:key="post.id" v-bind:post="post"
-                    v-on="$listeners">
-                </post-card>
-            </transition-group>
-        </ul>
+        <transition-group name="list">
+            <post-card
+                v-for="(post, index) in posts"
+                v-bind:key="post.id" v-bind:post="post"
+                v-on="$listeners">
+            </post-card>
+        </transition-group>
     </div>
     `,
 })
@@ -31,7 +29,7 @@ Vue.component("post-feed", {
 Vue.component('post-card', {
     props: ['post'],
     template: `
-    <li class="list-group-item">
+    <div class="card p-3">
         <div class="card-text">
             <p>{{ post.author }} <span class="small text-muted">at {{ post.timestamp }} said:</span></p>
             <p> {{ post.text }} </p>
@@ -48,17 +46,17 @@ Vue.component('post-card', {
                     <b-icon icon="arrow-repeat" class="card-button"></b-icon>
                 </button>
                 <button type="button" class="btn btn-transparent px-1 py-0" title="Like" v-on:click="onLike">
-                    <b-icon icon="heart" class="card-button"></b-icon> {{ post.likes }}
+                    <b-icon icon="heart" v-bind:class="[post.liked ? 'card-button-active' : 'card-button', '']"></b-icon> {{ post.likes }}
                 </button>
                 <b-dropdown id="dropdown-dropup" dropup variant="btn btn-transparent px-1 py-0" no-caret title="Options">
                     <template v-slot:button-content><b-icon icon="chevron-up" class="card-button"></b-icon></template>
-                    <b-dropdown-item-button v-on:click="onDelete"><b-icon icon="x" class="card-button"></b-icon> Delete</b-dropdown-item-button>
-                    <b-dropdown-item-button><b-icon icon="pencil" class="card-button"></b-icon> Edit</b-dropdown-item-button>
+                    <b-dropdown-item-button v-if="post.owner" v-on:click="onDelete"><b-icon icon="x" class="card-button"></b-icon> Delete</b-dropdown-item-button>
+                    <b-dropdown-item-button v-if="post.owner"><b-icon icon="pencil" class="card-button"></b-icon> Edit</b-dropdown-item-button>
                     <b-dropdown-item-button><b-icon icon="share" class="card-button"></b-icon> Share</b-dropdown-item-button>
                 </b-dropdown>
             </div>
         </div>
-    </li>
+    </div>
     `,
     methods: {
         onLike: function(event) {
@@ -90,7 +88,7 @@ Vue.component('post-card', {
 
 Vue.component("new-post", {
     template: `
-    <div>
+    <div class="card p-3 my-3">
         <form v-on:submit.prevent="onSubmitPost">
             <slot></slot>
             <textarea rows=3 class="form-control border-0" v-model="newPostText" placeholder="Say something..."></textarea>
@@ -135,6 +133,7 @@ var app = new Vue({
     el: '#project4',
     data: {
         posts: [],
+        user: false,
     },
     methods: {
         getPosts: function () {

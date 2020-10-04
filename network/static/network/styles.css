@@ -11,11 +11,29 @@
     color: #909090;
 }
 
-.list-enter-active, .list-leave-active {
-  transition: all 1s;
+.card-button-active {
+    color: red;
 }
-.list-enter, .list-leave-to {
-  opacity: 0;
-  max-height: 0px;
-  transform: translateY(20px);
+
+.list-enter-active {
+    animation: list-appear 0.8s;
+    animation-timing-function: ease-in-out;
+}
+.list-leave-active {
+    animation: list-appear 0.8s reverse;
+    animation-timing-function: ease-in-out;
+}
+@keyframes list-appear {
+    0% {
+        opacity: 0;
+        max-height: 0px;
+    }
+    50% {
+        opacity: 0;
+        max-height: 200px;
+    }
+    100% {
+        opacity: 1;
+        max-height: 200px;
+    }
 }

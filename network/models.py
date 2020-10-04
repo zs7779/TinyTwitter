@@ -19,5 +19,6 @@ class Post(models.Model):
             "text": self.text,
             "timestamp": self.post_time.strftime("%b %d %Y, %I:%M %p"),
             "likes": self.likes.count(),
-            "liked": self.likes.filter(id=user.id).count() > 0 if user is not None else False
+            "liked": self.likes.filter(id=user.id).count() > 0 if user is not None else False,
+            "owner": self.author == user,
         }

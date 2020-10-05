@@ -108,7 +108,7 @@ Vue.component('post-card', {
             }, printError)
         },
         goProfile: function(event) {
-            this.$emit("go-profile", event.target.href)
+            this.$emit("go-profile", this.post.author.id)
         },
     },
 })
@@ -193,6 +193,10 @@ var app = new Vue({
                 },
             }).then(response => {
                 this.posts = response.data
+                history.pushState({
+                    user: this.user,
+                    posts: this.posts,
+                }, "", "/")
             })
         },
         updatePost: function(editedPost) {
@@ -210,7 +214,12 @@ var app = new Vue({
                 }
             }
         },
-        getProfile: function(profile_url) {
+        getProfile: function(user_id) {
+            profile_url = `${read_user}${user_id}`
+            history.pushState({
+                user: this.user,
+                posts: this.posts,
+            }, "", profile_url)
             axios.get(profile_url).then(response => {
                 data = response.data
                 this.user = data.user
@@ -223,3 +232,8 @@ var app = new Vue({
     },
     delimiters: ['[[', ']]'],
 })
+
+window.addEventListener('popstate', function(event) {
+    app.user = event.state.user
+    app.posts = event.state.posts
+});

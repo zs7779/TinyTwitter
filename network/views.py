@@ -7,7 +7,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, QueryD
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Post
+from .models import User, Post, Follow, Comment, Like, HashTag, Mention
 
 
 def index(request):
@@ -15,18 +15,35 @@ def index(request):
 
 
 @require_GET
+def current_user(request):
+    if request.user.is_authenticated:
+        return JsonResponse({"user": request.user.snippet()})
+    else:
+        return JsonResponse({"user": {}})
+
+
+@require_GET
 def posts_view(request):
+    if not request.GET.get("json"):
+        return render(request, "network/index.html")
+
     data = request.GET
-    print(data.get("count"), data.get("after"))
+    print(data.get("count"), data.get("after"), data.get("json"))
     if data.get("count") is not None and data.get("after") is not None:
         pass
 
-    posts = Post.objects.all().order_by("-post_time")
-    return JsonResponse([post.serialize(request.user) for post in posts], safe=False)
+    posts = Post.objects.all().order_by("-create_time")
+    return JsonResponse({
+        "user": {},
+        "posts": [post.serialize(request.user) for post in posts],
+    }, safe=False)
 
 
 @require_GET
 def post_view(request, post_id):
+    if not request.GET.get("json"):
+        return render(request, "network/index.html")
+
     try:
         post = Post.objects.get(id=post_id)
     except Post.DoesNotExist:
@@ -36,13 +53,18 @@ def post_view(request, post_id):
 
 @require_GET
 def profile_view(request, user_id):
+    if not request.GET.get("json"):
+        return render(request, "network/index.html")
+
     try:
         user = User.objects.get(id=user_id)
-        posts = Post.objects.filter(author=user).order_by("-post_time")
+        posts = Post.objects.filter(author=user).order_by("-create_time")
     except User.DoesNotExist:
         return JsonResponse({"error": "User does not exist"}, status=404)
-    return JsonResponse({"user": user.serialize(),
-                         "posts": [post.serialize(request.user) for post in posts]})
+    return JsonResponse({
+        "user": user.serialize(),
+        "posts": [post.serialize(request.user) for post in posts],
+    })
 
 
 @login_required
@@ -58,7 +80,7 @@ def posts_endpoint(request):
 
 
 @login_required
-@require_http_methods(["PUT", "DELETE"])
+@require_http_methods(["POST", "PUT", "DELETE"])
 def post_endpoint(request, post_id):
     try:
         post = Post.objects.get(id=post_id)
@@ -69,11 +91,19 @@ def post_endpoint(request, post_id):
         data = json.loads(request.body)
         if data.get('like') is not None:
             if data['like']:
-                post.likes.add(request.user)
+                try:
+                    like = Like.objects.get(user=request.user, post=post)
+                except Like.DoesNotExist:
+                    like = Like(user=request.user, post=post)
+                    like.save()
             else:
-                post.likes.remove(request.user)
+                likes = Like.objects.filter(user=request.user, post=post)
+                for like in likes:
+                    like.delete()
+            post.update_counts()
             post.save()
             return JsonResponse({"message": "Like succesful"}, status=200)
+
         if data.get('newPostText') is not None:
             if post.author != request.user:
                 return JsonResponse({"message": "Not authorized"}, status=401)

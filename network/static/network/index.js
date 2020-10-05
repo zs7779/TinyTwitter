@@ -1,12 +1,14 @@
-const read_posts = "/posts/"
-const read_post = "/post/"
-const read_user = "/user/"
-const write_posts = "/posts_new/"
-const write_post = "/post_mod/"
-const write_user = "/user_mid/"
+const URLS = {
+    read_posts: "/posts/",
+    read_post: "/post/",
+    read_user: "/user/",
+    write_posts: "/posts_new/",
+    write_post: "/post_mod/",
+    write_user: "/user_mid/",
+};
 
 
-function printError (error) {
+function printError(error) {
     if (error.response) {
       console.log(error.response.data);
       console.log(error.response.status);
@@ -16,6 +18,14 @@ function printError (error) {
     } else {
       console.log('Error', error.message);
     }
+}
+
+function getToken() {
+    if (document.getElementsByName('csrfmiddlewaretoken').length > 0) {
+        return document.getElementsByName('csrfmiddlewaretoken')[0].value;
+    }
+    window.location.href = "/login/";
+    return false;
 }
 
 
@@ -53,13 +63,13 @@ Vue.component('post-card', {
     <div class="card p-3">
         <div class="card-text card-view">
             <h6 class="card-title mb-1">
-                <a v-bind:href='${read_user}+post.author.id' v-on:click.prevent="goProfile">{{ post.author.username }}</a>
+                <a v-bind:href='${URLS.read_user}+post.author.id' v-on:click.prevent="goProfile">{{ post.author.username }}</a>
                 <span class="small text-muted">at {{ post.timestamp }} said:</span>
             </h6>
             <p>{{ post.text }}</p>
         </div>
         <div class="card-footer bg-transparent p-0">
-            {{ post.likes }} likes
+            {{ post.like_count }} likes
         </div>
         <div class="card-footer bg-transparent p-0">
             <div class="d-flex justify-content-around">
@@ -70,7 +80,7 @@ Vue.component('post-card', {
                     <b-icon icon="arrow-repeat" class="card-button"></b-icon>
                 </button>
                 <button type="button" class="btn btn-transparent px-1 py-0" title="Like" v-on:click="onLike">
-                    <b-icon icon="heart" v-bind:class="[post.liked ? 'card-button-active' : 'card-button', '']"></b-icon> {{ post.likes }}
+                    <b-icon icon="heart" v-bind:class="[post.liked ? 'card-button-active' : 'card-button', '']"></b-icon> {{ post.like_count }}
                 </button>
                 <b-dropdown id="dropdown-dropup" dropup variant="btn btn-transparent px-1 py-0" no-caret title="Options">
                     <template v-slot:button-content><b-icon icon="chevron-up" class="card-button"></b-icon></template>
@@ -84,31 +94,37 @@ Vue.component('post-card', {
     `,
     methods: {
         onLike: function(event) {
-            axios.put(`${write_post}${this.post.id}`, {
+            token = getToken();
+            if (!token) {return;}
+            axios.put(`${URLS.write_post}${this.post.id}`, {
                 like: !this.post.liked,
             }, {
                 headers: {
-                    'X-CSRFTOKEN': document.getElementsByName('csrfmiddlewaretoken')[0].value,
+                    'X-CSRFTOKEN': token,
                 },
             }).then(response => {
-                this.post.likes = this.post.liked ? this.post.likes - 1 : this.post.likes + 1
-                this.post.liked = !this.post.liked
-                this.$emit("edit-ok", this.post)
+                this.post.like_count = this.post.liked ? this.post.like_count - 1 : this.post.like_count + 1;
+                this.post.liked = !this.post.liked;
+                this.$emit("edit-ok", this.post);
             }, printError)
         },
         onEdit: function(event) {
+            token = getToken();
+            if (!token) {return;}
         },
         onDelete: function(event) {
-            axios.delete(`${write_post}${this.post.id}`, {
+            token = getToken();
+            if (!token) {return;}
+            axios.delete(`${URLS.write_post}${this.post.id}`, {
                 headers: {
-                    'X-CSRFTOKEN': document.getElementsByName('csrfmiddlewaretoken')[0].value,
+                    'X-CSRFTOKEN': token,
                 },
             }).then(response => {
-                this.$emit("delete-ok", this.post.id)
+                this.$emit("delete-ok", this.post.id);
             }, printError)
         },
         goProfile: function(event) {
-            this.$emit("go-profile", this.post.author.id)
+            this.$emit("go-profile", this.post.author.id);
         },
     },
 })
@@ -134,24 +150,22 @@ Vue.component("new-post", {
     },
     computed: {
         charRemaining: function() {
-            this.newPostText = this.newPostText.substr(0, 140)
-            return `${this.newPostText.length}/140`
+            this.newPostText = this.newPostText.substr(0, 140);
+            return `${this.newPostText.length}/140`;
         },
     },
     methods: {
         onSubmitPost: function (event) {
-            if (this.newPostText.length == 0) {
-                return
-            }
-            axios.post(`${write_posts}`, {
+            if (this.newPostText.length == 0) {return;}
+            axios.post(`${URLS.write_posts}`, {
                 newPostText: this.newPostText,
             }, {
                 headers: {
-                    'X-CSRFTOKEN': document.getElementsByName('csrfmiddlewaretoken')[0].value,
+                    'X-CSRFTOKEN': getToken(),
                 },
             }).then(response => {
-                this.newPostText = ""
-                this.$emit("post-ok")
+                this.newPostText = "";
+                this.$emit("post-ok");
             }, printError)
         },
     },
@@ -170,8 +184,8 @@ Vue.component("user-profile", {
 
         <div class="card-footer bg-transparent p-0">
             <p class="mx-1">{{ user.bio }}</p>
-            <span class="mx-1"><span class="font-weight-bold">{{user.followings}}</span> Following</span>
-            <span class="mx-1"><span class="font-weight-bold">{{user.followers}}</span> Followers</span>
+            <span class="mx-1"><span class="font-weight-bold">{{user.following_count}}</span> Following</span>
+            <span class="mx-1"><span class="font-weight-bold">{{user.follower_count}}</span> Followers</span>
         </div>
     </div>
     `,
@@ -185,55 +199,55 @@ var app = new Vue({
         user: {},
     },
     methods: {
-        getPosts: function () {
-            axios.get('/posts/', {
+        pushHistory: function(url) {
+            history.pushState({
+                user: this.user,
+                posts: this.posts,
+            }, "", url)
+        },
+        getJSON: function(endpoint, url) {
+            axios.get(endpoint, {
                 params: {
+                    json: true,
                     after: 0,
                     count: 20,
                 },
             }).then(response => {
-                this.posts = response.data
-                history.pushState({
-                    user: this.user,
-                    posts: this.posts,
-                }, "", "/")
+                this.user = response.data.user;
+                this.posts = response.data.posts;
+                this.pushHistory(url);
             })
+        },
+        getPosts: function() {
+            this.getJSON(`${URLS.read_posts}`, '/');
+        },
+        getProfile: function(user_id) {
+            profile_url = `${URLS.read_user}${user_id}`;
+            this.getJSON(profile_url, profile_url);
         },
         updatePost: function(editedPost) {
             for (var i=0; i<this.posts.length; i++) {
                 if (this.posts[i].id == editedPost.id) {
-                    this.posts[i] = editedPost
+                    this.posts[i] = editedPost;
                 }
             }
         },
         deletePost: function(delete_id) {
             for (var i=0; i<this.posts.length; i++) {
                 if (this.posts[i].id == delete_id) {
-                    this.posts.splice(i, 1)
-                    break
+                    this.posts.splice(i, 1);
+                    break;
                 }
             }
         },
-        getProfile: function(user_id) {
-            profile_url = `${read_user}${user_id}`
-            history.pushState({
-                user: this.user,
-                posts: this.posts,
-            }, "", profile_url)
-            axios.get(profile_url).then(response => {
-                data = response.data
-                this.user = data.user
-                this.posts = data.posts
-            })
-        },
     },
     created: function () {
-        this.getPosts()
+        this.getPosts();
     },
     delimiters: ['[[', ']]'],
 })
 
 window.addEventListener('popstate', function(event) {
-    app.user = event.state.user
-    app.posts = event.state.posts
+    app.user = event.state.user;
+    app.posts = event.state.posts;
 });

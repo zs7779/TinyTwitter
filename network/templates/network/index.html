@@ -4,17 +4,15 @@
 {% block body %}
 
 <div id="project4" class="container">
-    <div class="row justify-content-center ">
+    <div class="row justify-content-center">
         <div class="col-6">
-            <div class="my-2">
-                <button class="btn btn-outline-primary btn-sm" type="button" v-on:click="getPosts">
-                    <b-icon icon="arrow-clockwise"></b-icon>
-                </button>
-            </div>
-            <post-feed v-bind:posts="posts" v-on:post-ok="updatePost($event)" v-on:delete-ok="deletePost($event)">
-                {% if request.user.is_authenticated %}
-                <new-post v-on:post-ok="getPosts">{% csrf_token %}</new-post>
-                {% endif %}
+            <refresh-button v-on:refresh="getPosts"></refresh-button>
+            <user-profile v-if="user.id" v-bind:user="user"></user-profile>
+            {% if request.user.is_authenticated %}
+            <new-post v-else v-on:post-ok="getPosts"></new-post>
+            {% csrf_token %}
+            {% endif %}
+            <post-feed v-bind:posts="posts" v-on:edit-ok="updatePost($event)" v-on:delete-ok="deletePost($event)" v-on:go-profile="getProfile($event)">
             </post-feed>
         </div>
     </div>

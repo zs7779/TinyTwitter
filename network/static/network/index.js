@@ -1,3 +1,11 @@
+const read_posts = "/posts/"
+const read_post = "/post/"
+const read_user = "/user/"
+const write_posts = "/posts_new/"
+const write_post = "/post_mod/"
+const write_user = "/user_mid/"
+
+
 function printError (error) {
     if (error.response) {
       console.log(error.response.data);
@@ -11,10 +19,21 @@ function printError (error) {
 }
 
 
+Vue.component("refresh-button", {
+    template: `
+    <div class="my-2 text-center">
+        <button class="btn btn-outline-primary btn-sm border-transparent" type="button" v-on:click="$emit('refresh')">
+            <b-icon icon="arrow-clockwise"></b-icon>
+        </button>
+    </div>
+    `,
+})
+
+
 Vue.component("post-feed", {
     props: ['posts'],
     template: `
-    <div class="post-feed">
+    <div class="post-feed mt-2">
         <slot></slot>
         <transition-group name="list">
             <post-card
@@ -33,7 +52,10 @@ Vue.component('post-card', {
     template: `
     <div class="card p-3">
         <div class="card-text card-view">
-            <h6 class="card-title mb-1">{{ post.author }} <span class="small text-muted">at {{ post.timestamp }} said:</span></h6>
+            <h6 class="card-title mb-1">
+                <a v-bind:href='${read_user}+post.author.id' v-on:click.prevent="goProfile">{{ post.author.username }}</a>
+                <span class="small text-muted">at {{ post.timestamp }} said:</span>
+            </h6>
             <p>{{ post.text }}</p>
         </div>
         <div class="card-footer bg-transparent p-0">
@@ -62,7 +84,7 @@ Vue.component('post-card', {
     `,
     methods: {
         onLike: function(event) {
-            axios.put(`/post_mod/${this.post.id}`, {
+            axios.put(`${write_post}${this.post.id}`, {
                 like: !this.post.liked,
             }, {
                 headers: {
@@ -71,13 +93,13 @@ Vue.component('post-card', {
             }).then(response => {
                 this.post.likes = this.post.liked ? this.post.likes - 1 : this.post.likes + 1
                 this.post.liked = !this.post.liked
-                this.$emit("post-ok", this.post)
+                this.$emit("edit-ok", this.post)
             }, printError)
         },
         onEdit: function(event) {
         },
         onDelete: function(event) {
-            axios.delete(`/post_mod/${this.post.id}`, {
+            axios.delete(`${write_post}${this.post.id}`, {
                 headers: {
                     'X-CSRFTOKEN': document.getElementsByName('csrfmiddlewaretoken')[0].value,
                 },
@@ -85,13 +107,16 @@ Vue.component('post-card', {
                 this.$emit("delete-ok", this.post.id)
             }, printError)
         },
+        goProfile: function(event) {
+            this.$emit("go-profile", event.target.href)
+        },
     },
 })
 
 
 Vue.component("new-post", {
     template: `
-    <div class="card p-3 my-3">
+    <div class="card p-3">
         <form v-on:submit.prevent="onSubmitPost">
             <slot></slot>
             <textarea rows=4 class="form-control border-0" v-model="newPostText" placeholder="Say something..."></textarea>
@@ -118,7 +143,7 @@ Vue.component("new-post", {
             if (this.newPostText.length == 0) {
                 return
             }
-            axios.post('/posts_new/', {
+            axios.post(`${write_posts}`, {
                 newPostText: this.newPostText,
             }, {
                 headers: {
@@ -132,11 +157,32 @@ Vue.component("new-post", {
     },
 })
 
+
+Vue.component("user-profile", {
+    props: ["user"],
+    template: `
+    <div class="card p-3">
+        <h5 class="card-title">
+            {{ user.username }}
+            <span class="small text-muted">@{{ user.id }}</span>
+            <button class="btn btn-outline-primary rounded-pill float-right">Follow</button>
+        </h5>
+
+        <div class="card-footer bg-transparent p-0">
+            <p class="mx-1">{{ user.bio }}</p>
+            <span class="mx-1"><span class="font-weight-bold">{{user.followings}}</span> Following</span>
+            <span class="mx-1"><span class="font-weight-bold">{{user.followers}}</span> Followers</span>
+        </div>
+    </div>
+    `,
+})
+
+
 var app = new Vue({
     el: '#project4',
     data: {
         posts: [],
-        user: false,
+        user: {},
     },
     methods: {
         getPosts: function () {
@@ -148,9 +194,6 @@ var app = new Vue({
             }).then(response => {
                 this.posts = response.data
             })
-        },
-        insertPost: function(newPost) {
-            this.posts.unshift(newPost)
         },
         updatePost: function(editedPost) {
             for (var i=0; i<this.posts.length; i++) {
@@ -166,6 +209,13 @@ var app = new Vue({
                     break
                 }
             }
+        },
+        getProfile: function(profile_url) {
+            axios.get(profile_url).then(response => {
+                data = response.data
+                this.user = data.user
+                this.posts = data.posts
+            })
         },
     },
     created: function () {

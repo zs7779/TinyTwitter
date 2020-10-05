@@ -36,7 +36,13 @@ def post_view(request, post_id):
 
 @require_GET
 def profile_view(request, user_id):
-    pass
+    try:
+        user = User.objects.get(id=user_id)
+        posts = Post.objects.filter(author=user).order_by("-post_time")
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User does not exist"}, status=404)
+    return JsonResponse({"user": user.serialize(),
+                         "posts": [post.serialize(request.user) for post in posts]})
 
 
 @login_required

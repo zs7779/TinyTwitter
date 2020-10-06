@@ -14,18 +14,22 @@ class User(AbstractUser):
             "username": self.username,
         }
 
-    def serialize(self):
+    def serialize(self, user):
         return {
             "id": self.id,
             "username": self.username,
             "bio": self.bio,
             "following_count": self.following_count,
             "follower_count": self.follower_count,
+            "following": self.followers.filter(user__id=self.id, follower__id=user.id).count() > 0,
+            "followed": self.followers.filter(user__id=user.id, follower__id=self.id).count() > 0,
+            "owner": self == user,
         }
 
     def update_counts(self):
         self.following_count = self.following.all().count()
         self.follower_count = self.followers.all().count()
+        return self
 
     def is_valid(self):
         return len(self.bio) <= self.MAX_LENGTH
@@ -70,6 +74,7 @@ class Post(models.Model):
         self.comment_count = self.comments.all().count()
         self.repost_count = self.reposts.all().count()
         self.like_count = self.likes.all().count()
+        return self
 
     def is_valid(self):
         return 0 < len(self.text) <= self.MAX_LENGTH

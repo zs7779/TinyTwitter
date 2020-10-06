@@ -4,7 +4,7 @@ const URLS = {
     read_user: "/user/",
     write_posts: "/posts_new/",
     write_post: "/post_mod/",
-    write_user: "/user_mid/",
+    write_user: "/user_mod/",
 };
 
 
@@ -135,7 +135,7 @@ Vue.component("new-post", {
     <div class="card p-3">
         <form v-on:submit.prevent="onSubmitPost">
             <slot></slot>
-            <textarea rows=4 class="form-control border-0" v-model="newPostText" placeholder="Say something..."></textarea>
+            <textarea rows=4 class="form-control border-0" v-model="postText" placeholder="Say something..."></textarea>
             <div class="d-flex justify-content-end mt-2">
                 <span class="mx-1">{{ charRemaining }}</span>
                 <button type="submit" class="btn btn-primary rounded-pill py-0">Post</button>
@@ -145,26 +145,28 @@ Vue.component("new-post", {
     `,
     data: function () {
         return {
-            newPostText: "",
+            postText: "",
         }
     },
     computed: {
         charRemaining: function() {
-            this.newPostText = this.newPostText.substr(0, 140);
-            return `${this.newPostText.length}/140`;
+            this.postText = this.postText.substr(0, 140);
+            return `${this.postText.length}/140`;
         },
     },
     methods: {
         onSubmitPost: function (event) {
-            if (this.newPostText.length == 0) {return;}
+            if (this.postText.length == 0) {return;}
+            token = getToken();
+            if (!token) {return;}
             axios.post(`${URLS.write_posts}`, {
-                newPostText: this.newPostText,
+                postText: this.postText,
             }, {
                 headers: {
-                    'X-CSRFTOKEN': getToken(),
+                    'X-CSRFTOKEN': token,
                 },
             }).then(response => {
-                this.newPostText = "";
+                this.postText = "";
                 this.$emit("post-ok");
             }, printError)
         },
@@ -176,11 +178,16 @@ Vue.component("user-profile", {
     props: ["user"],
     template: `
     <div class="card p-3">
-        <h5 class="card-title">
-            {{ user.username }}
-            <span class="small text-muted">@{{ user.id }}</span>
-            <button class="btn btn-outline-primary rounded-pill float-right">Follow</button>
-        </h5>
+        <h5 class="card-title">{{ user.username }}</h5>
+        <div class="row justify-content-between mx-1">
+            <div class="">
+                <span class="small text-muted">@{{ user.id }}</span>
+            </div>
+            <div v-if="!user.owner">
+                <button type="button" v-if="user.following" class="btn btn-primary rounded-pill" v-on:click="onFollow" v-on:hover="">Following</button>
+                <button type="button" v-else class="btn btn-outline-primary rounded-pill" v-on:click="onFollow">Follow</button>
+            </div>
+        </div>
 
         <div class="card-footer bg-transparent p-0">
             <p class="mx-1">{{ user.bio }}</p>
@@ -189,6 +196,23 @@ Vue.component("user-profile", {
         </div>
     </div>
     `,
+    methods: {
+        onFollow: function() {
+            token = getToken();
+            if (!token) {return;}
+            axios.post(`${URLS.write_user}${this.user.id}`, {
+                follow: !this.user.following,
+            }, {
+                headers: {
+                    'X-CSRFTOKEN': token,
+                },
+            }).then(response => {
+                this.user.follower_count = this.user.following ? this.user.follower_count - 1 : this.user.follower_count + 1;
+                this.user.following = !this.user.following;
+                this.$emit("user-ok", this.user);
+            }, printError)
+        }
+    }
 })
 
 
@@ -252,6 +276,7 @@ var app = new Vue({
     },
     delimiters: ['[[', ']]'],
 })
+
 
 window.addEventListener('popstate', function(event) {
     if (event.state) {

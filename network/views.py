@@ -28,8 +28,8 @@ def posts_view(request):
         return render(request, "network/index.html")
 
     data = request.GET
-    print(data.get("count"), data.get("after"), data.get("json"))
     if data.get("count") is not None and data.get("after") is not None:
+        # todo: pages
         pass
 
     posts = Post.objects.all().order_by("-create_time")
@@ -58,11 +58,11 @@ def profile_view(request, user_id):
 
     try:
         user = User.objects.get(id=user_id)
-        posts = Post.objects.filter(author=user).order_by("-create_time")
     except User.DoesNotExist:
         return JsonResponse({"error": "User does not exist"}, status=404)
+    posts = Post.objects.filter(author=user).order_by("-create_time")
     return JsonResponse({
-        "user": user.serialize(),
+        "user": user.serialize(request.user),
         "posts": [post.serialize(request.user) for post in posts],
     })
 
@@ -71,8 +71,12 @@ def profile_view(request, user_id):
 @require_POST
 def posts_endpoint(request):
     data = json.loads(request.body)
-    if data.get('newPostText') is not None:
-        post = Post(author=request.user, text=data['newPostText'])
+    if data.get('isComment') is True:
+        # todo: comment
+        pass
+
+    if data.get('postText') is not None:
+        post = Post(author=request.user, text=data['postText'])
         if post.is_valid():
             post.save()
             return JsonResponse({"message": "Post successful"}, status=201)
@@ -80,7 +84,7 @@ def posts_endpoint(request):
 
 
 @login_required
-@require_http_methods(["POST", "PUT", "DELETE"])
+@require_http_methods(["PUT", "DELETE"])
 def post_endpoint(request, post_id):
     try:
         post = Post.objects.get(id=post_id)
@@ -100,14 +104,14 @@ def post_endpoint(request, post_id):
                 likes = Like.objects.filter(user=request.user, post=post)
                 for like in likes:
                     like.delete()
-            post.update_counts()
-            post.save()
+            post.update_counts().save()
             return JsonResponse({"message": "Like succesful"}, status=200)
 
-        if data.get('newPostText') is not None:
+        if data.get('postText') is not None:
+            # todo: edit post
             if post.author != request.user:
-                return JsonResponse({"message": "Not authorized"}, status=401)
-            pass
+                pass
+            return JsonResponse({"message": "Not authorized"}, status=401)
 
     if request.method == "DELETE":
         if post.author != request.user:
@@ -121,9 +125,38 @@ def post_endpoint(request, post_id):
 
 
 @login_required
-@require_http_methods(["PUT"])
+@require_http_methods(["POST", "PUT"])
 def profile_endpoint(request, user_id):
-    pass
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return JsonResponse({"error": "User does not exist"}, status=404)
+
+    if request.method == "POST":
+        data = json.loads(request.body)
+        if data.get('follow') is not None:
+            if data['follow'] and request.user != user:
+                try:
+                    follow = Follow.objects.get(user=user, follower=request.user)
+                except Follow.DoesNotExist:
+                    follow = Follow(user=user, follower=request.user)
+                    follow.save()
+            else:
+                follows = Follow.objects.filter(user=user, follower=request.user)
+                for follow in follows:
+                    follow.delete()
+            request.user.update_counts().save()
+            user.update_counts().save()
+            return JsonResponse({"message": "Follow succesful"}, status=200)
+
+    if request.method == "PUT":
+        # todo: edit pofile
+        if request.user == user:
+            pass
+
+    return JsonResponse({
+        "error": "Bad request"
+    }, status=400)
 
 
 def login_view(request):

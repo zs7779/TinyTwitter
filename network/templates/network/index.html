@@ -2,8 +2,8 @@
 {% load static %}
 
 {% block body %}
-
 <div id="project4" class="container">
+    {% include "network/navbar.html" %}
     <div class="row justify-content-center">
         <div class="col-6">
             <refresh-button v-on:refresh="getPosts"></refresh-button>

@@ -215,7 +215,9 @@ var app = new Vue({
             }).then(response => {
                 this.user = response.data.user;
                 this.posts = response.data.posts;
-                this.pushHistory(url);
+                if (url != window.location.pathname) {
+                    this.pushHistory(url);
+                }
             })
         },
         getPosts: function() {
@@ -242,12 +244,18 @@ var app = new Vue({
         },
     },
     created: function () {
-        this.getPosts();
+        if (window.location.pathname === "/") {
+            this.getPosts();
+        } else {
+            this.getJSON(window.location.pathname, window.location.pathname);
+        }
     },
     delimiters: ['[[', ']]'],
 })
 
 window.addEventListener('popstate', function(event) {
-    app.user = event.state.user;
-    app.posts = event.state.posts;
+    if (event.state) {
+        app.user = event.state.user;
+        app.posts = event.state.posts;
+    }
 });

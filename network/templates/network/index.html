@@ -2,18 +2,20 @@
 {% load static %}
 
 {% block body %}
-<div id="project4" class="container">
+<div id="project4">
     {% include "network/navbar.html" %}
-    <div class="row justify-content-center">
-        <div class="col-6">
-            <refresh-button v-on:refresh="getPosts"></refresh-button>
-            <user-profile v-if="user.id" v-bind:user="user"></user-profile>
-            {% if request.user.is_authenticated %}
-            <new-post v-else v-on:post-ok="getPosts"></new-post>
-            {% csrf_token %}
-            {% endif %}
-            <post-feed v-bind:posts="posts" v-on:edit-ok="updatePost($event)" v-on:delete-ok="deletePost($event)" v-on:go-profile="getProfile($event)">
-            </post-feed>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-6 main-content">
+                <refresh-button v-on:refresh="getPosts"></refresh-button>
+                <user-profile v-if="user.id" v-bind:user="user"></user-profile>
+                {% if request.user.is_authenticated %}
+                <new-post v-else v-on:post-ok="getPosts"></new-post>
+                {% csrf_token %}
+                {% endif %}
+                <post-feed v-bind:posts="posts" v-on:edit-ok="updatePost($event)" v-on:delete-ok="deletePost($event)" v-on:go-profile="getProfile($event)">
+                </post-feed>
+            </div>
         </div>
     </div>
 </div>

@@ -1,5 +1,15 @@
+#project4 {
+
+}
+
+.navbar {
+    height: 5vh;
+}
+
 .container {
     background-color: #f4f6f6;
+    min-height: 95vh;
+    display: flex;
 }
 
 .card-view {

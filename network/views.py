@@ -3,15 +3,20 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_GET, require_POST
 from django.db import IntegrityError
+from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, QueryDict
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 
 from .models import User, Post, Follow, Comment, Like, HashTag, Mention
 
 
 def index(request):
-    return render(request, "network/index.html")
+    if request.user.is_authenticated:
+        return redirect("home", path="home")
+    else:
+        return redirect("home", path="all")
+    # return render(request, "network/index.html")
 
 
 @require_GET
@@ -23,7 +28,7 @@ def current_user(request):
 
 
 @require_GET
-def posts_view(request):
+def posts_view(request, path=""):
     if not request.GET.get("json"):
         return render(request, "network/index.html")
 
@@ -32,11 +37,25 @@ def posts_view(request):
         # todo: pages
         pass
 
-    posts = Post.objects.all().order_by("-create_time")
-    return JsonResponse({
-        "user": {},
-        "posts": [post.serialize(request.user) for post in posts],
-    }, safe=False)
+    if path == "home" and request.user.is_authenticated:
+        posts = Post.objects.filter(Q(author__followers__follower=request.user) | Q(author=request.user)).order_by("-create_time")
+        return JsonResponse({
+            "user": {},
+            "posts": [post.serialize(request.user) for post in posts],
+        }, safe=False)
+    elif path == "all":
+        posts = Post.objects.all().order_by("-create_time")
+        return JsonResponse({
+            "user": {},
+            "posts": [post.serialize(request.user) for post in posts],
+        }, safe=False)
+    else:
+        # todo: query for username, but lookout for conflict with keywords
+        posts = Post.objects.all().order_by("-create_time")
+        return JsonResponse({
+            "user": {},
+            "posts": [post.serialize(request.user) for post in posts],
+        }, safe=False)
 
 
 @require_GET
@@ -170,7 +189,7 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
-            return HttpResponseRedirect(reverse("index"))
+            return redirect("home", path="home")
         else:
             return render(request, "network/login.html", {
                 "message": "Invalid username and/or password."
@@ -181,7 +200,7 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return HttpResponseRedirect(reverse("index"))
+    return redirect("home", path="all")
 
 
 def register(request):
@@ -206,6 +225,6 @@ def register(request):
                 "message": "Username already taken."
             })
         login(request, user)
-        return HttpResponseRedirect(reverse("index"))
+        return redirect("home", path="home")
     else:
         return render(request, "network/register.html")

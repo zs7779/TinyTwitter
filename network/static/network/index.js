@@ -1,5 +1,5 @@
 const URLS = {
-    read_posts: "/posts/",
+    read_posts: "/",
     read_post: "/post/",
     read_user: "/user/",
     write_posts: "/posts_new/",
@@ -64,7 +64,7 @@ Vue.component('post-card', {
         <div class="card-text card-view">
             <h6 class="card-title mb-1">
                 <a v-bind:href='${URLS.read_user}+post.author.id' v-on:click.prevent="goProfile">{{ post.author.username }}</a>
-                <span class="small text-muted">at {{ post.timestamp }} said:</span>
+                <span class="small text-muted">at {{ post.create_time }} said:</span>
             </h6>
             <p>{{ post.text }}</p>
         </div>
@@ -180,7 +180,7 @@ Vue.component("user-profile", {
     <div class="card p-3">
         <h5 class="card-title">{{ user.username }}</h5>
         <div class="row justify-content-between mx-1">
-            <div class="">
+            <div>
                 <span class="small text-muted">@{{ user.id }}</span>
             </div>
             <div v-if="!user.owner">
@@ -229,8 +229,8 @@ var app = new Vue({
                 posts: this.posts,
             }, "", url)
         },
-        getJSON: function(endpoint, url) {
-            axios.get(endpoint, {
+        getJSON: function(url) {
+            axios.get(url, {
                 params: {
                     json: true,
                     after: 0,
@@ -244,12 +244,12 @@ var app = new Vue({
                 }
             })
         },
-        getPosts: function() {
-            this.getJSON(`${URLS.read_posts}`, '/');
+        getPosts: function(path='') {
+            const posts_url = path === '' ? window.location.pathname : `${URLS.read_posts}${path}`;
+            this.getJSON(posts_url);
         },
         getProfile: function(user_id) {
-            profile_url = `${URLS.read_user}${user_id}`;
-            this.getJSON(profile_url, profile_url);
+            this.getJSON(`${URLS.read_user}${user_id}`);
         },
         updatePost: function(editedPost) {
             for (var i=0; i<this.posts.length; i++) {
@@ -271,7 +271,7 @@ var app = new Vue({
         if (window.location.pathname === "/") {
             this.getPosts();
         } else {
-            this.getJSON(window.location.pathname, window.location.pathname);
+            this.getJSON(window.location.pathname);
         }
     },
     delimiters: ['[[', ']]'],

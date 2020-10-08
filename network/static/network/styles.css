@@ -9,7 +9,6 @@
 .container {
     background-color: #f4f6f6;
     min-height: 95vh;
-    display: flex;
 }
 
 .card-view {

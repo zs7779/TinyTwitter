@@ -127,9 +127,10 @@ def post_endpoint(request, post_id):
             return JsonResponse({"message": "Like succesful"}, status=200)
 
         if data.get('postText') is not None:
-            # todo: edit post
-            if post.author != request.user:
-                pass
+            if post.author == request.user and data.get('postText') is not None:
+                post.text = data['postText']
+                post.save()
+                return JsonResponse({"message": "Like succesful"}, status=200)
             return JsonResponse({"message": "Not authorized"}, status=401)
 
     if request.method == "DELETE":

@@ -11,12 +11,8 @@ from django.urls import reverse
 from .models import User, Post, Follow, Comment, Like, HashTag, Mention
 
 
-def index(request):
-    if request.user.is_authenticated:
-        return redirect("home", path="home")
-    else:
-        return redirect("home", path="all")
-    # return render(request, "network/index.html")
+def index(request, path=''):
+    return render(request, "network/index.html")
 
 
 @require_GET
@@ -28,7 +24,7 @@ def current_user(request):
 
 
 @require_GET
-def posts_view(request, path=""):
+def posts_read(request, path=""):
     if not request.GET.get("json"):
         return render(request, "network/index.html")
 
@@ -37,14 +33,14 @@ def posts_view(request, path=""):
         # todo: pages
         pass
 
-    if path == "home" and request.user.is_authenticated:
-        posts = Post.objects.filter(Q(author__followers__follower=request.user) | Q(author=request.user)).order_by("-create_time")
+    if path == "all" or path == "home" and not request.user.is_authenticated:
+        posts = Post.objects.all().order_by("-create_time")
         return JsonResponse({
             "user": {},
             "posts": [post.serialize(request.user) for post in posts],
         }, safe=False)
-    elif path == "all":
-        posts = Post.objects.all().order_by("-create_time")
+    elif path == "home" and request.user.is_authenticated:
+        posts = Post.objects.filter(Q(author__followers__follower=request.user) | Q(author=request.user)).order_by("-create_time")
         return JsonResponse({
             "user": {},
             "posts": [post.serialize(request.user) for post in posts],
@@ -59,7 +55,7 @@ def posts_view(request, path=""):
 
 
 @require_GET
-def post_view(request, post_id):
+def post_read(request, post_id):
     if not request.GET.get("json"):
         return render(request, "network/index.html")
 
@@ -71,7 +67,7 @@ def post_view(request, post_id):
 
 
 @require_GET
-def profile_view(request, user_id):
+def profile_read(request, user_id):
     if not request.GET.get("json"):
         return render(request, "network/index.html")
 
@@ -88,7 +84,7 @@ def profile_view(request, user_id):
 
 @login_required
 @require_POST
-def posts_endpoint(request):
+def posts_write(request):
     data = json.loads(request.body)
     if data.get('isComment') is True:
         # todo: comment
@@ -104,7 +100,7 @@ def posts_endpoint(request):
 
 @login_required
 @require_http_methods(["PUT", "DELETE"])
-def post_endpoint(request, post_id):
+def post_write(request, post_id):
     try:
         post = Post.objects.get(id=post_id)
     except Post.DoesNotExist:
@@ -131,11 +127,11 @@ def post_endpoint(request, post_id):
                 post.text = data['postText']
                 post.save()
                 return JsonResponse({"message": "Like succesful"}, status=200)
-            return JsonResponse({"message": "Not authorized"}, status=401)
+            return JsonResponse({"message": "Forbidden"}, status=403)
 
     if request.method == "DELETE":
         if post.author != request.user:
-            return JsonResponse({"message": "Not authorized"}, status=401)
+            return JsonResponse({"message": "Forbidden"}, status=403)
         post.delete()
         return JsonResponse({"message": "Delete succesful"}, status=200)
 
@@ -146,7 +142,7 @@ def post_endpoint(request, post_id):
 
 @login_required
 @require_http_methods(["POST", "PUT"])
-def profile_endpoint(request, user_id):
+def profile_write(request, user_id):
     try:
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
@@ -179,6 +175,27 @@ def profile_endpoint(request, user_id):
     }, status=400)
 
 
+def posts_view(request, path=''):
+    if request.method == "GET":
+        return posts_read(request, path)
+    else:
+        return posts_write(request)
+
+
+def post_view(request, post_id):
+    if request.method == "GET":
+        return post_read(request, post_id)
+    else:
+        return post_write(request, post_id)
+
+
+def profile_view(request, user_id):
+    if request.method == "GET":
+        return profile_read(request, user_id)
+    else:
+        return profile_write(request, user_id)
+
+
 def login_view(request):
     if request.method == "POST":
 
@@ -190,7 +207,7 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
-            return redirect("home", path="home")
+            return redirect("posts", path="home")
         else:
             return render(request, "network/login.html", {
                 "message": "Invalid username and/or password."
@@ -201,7 +218,7 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return redirect("home", path="all")
+    return redirect("posts", path="all")
 
 
 def register(request):
@@ -226,6 +243,6 @@ def register(request):
                 "message": "Username already taken."
             })
         login(request, user)
-        return redirect("home", path="home")
+        return redirect("posts", path="home")
     else:
         return render(request, "network/register.html")

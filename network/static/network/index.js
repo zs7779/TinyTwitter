@@ -1,10 +1,10 @@
 const URLS = {
-    read_posts: "/",
-    read_post: "/post/",
-    read_user: "/user/",
-    write_posts: "/posts_new/",
-    write_post: "/post_mod/",
-    write_user: "/user_mod/",
+    read_posts: "/posts/",
+    read_post: "/posts/",
+    read_user: "/users/",
+    write_posts: "/posts/",
+    write_post: "/posts/",
+    write_user: "/users/",
 };
 
 
@@ -66,7 +66,7 @@ Vue.component('post-card', {
         </new-post>
         <div v-else class="card-text card-view">
             <h6 class="card-title mb-1">
-                <a v-bind:href='${URLS.read_user}+post.author.id' v-on:click.prevent="goProfile">{{ post.author.username }}</a>
+                <router-link :to="{ name: 'user', params: {id: post.author.id} }">{{ post.author.username }}</router-link>
                 <span class="small text-muted">at {{ post.create_time }} said:</span>
             </h6>
             <p>{{ post.text }}</p>
@@ -141,9 +141,6 @@ Vue.component('post-card', {
             }).then(response => {
                 this.$emit("delete-ok", this.post.id);
             }, printError)
-        },
-        goProfile: function(event) {
-            this.$emit("go-profile", this.post.author.id);
         },
     },
 })
@@ -257,20 +254,23 @@ Vue.component("user-profile", {
 })
 
 
-var app = new Vue({
-    el: '#project4',
-    data: {
-        posts: [],
-        user: {},
+const posts_view = {
+    props: ['all'],
+    template: `
+        <div>
+        posts view {{all}}
+        <post-feed v-bind:posts="posts" v-on:edit-ok="updatePost($event)" v-on:delete-ok="deletePost($event)">
+        </post-feed>
+        </div>
+    `,
+    data: function () {
+        return {
+            posts: [],
+        }
     },
     methods: {
-        pushHistory: function(url) {
-            history.pushState({
-                user: this.user,
-                posts: this.posts,
-            }, "", url)
-        },
-        getJSON: function(url) {
+        getPosts: function(all, query) {
+            const url = all ? '/posts/all': '/posts/home';
             axios.get(url, {
                 params: {
                     json: true,
@@ -278,19 +278,9 @@ var app = new Vue({
                     count: 20,
                 },
             }).then(response => {
-                this.user = response.data.user;
+                console.log(response)
                 this.posts = response.data.posts;
-                if (url != window.location.pathname) {
-                    this.pushHistory(url);
-                }
             })
-        },
-        getPosts: function(path='') {
-            const posts_url = path === '' ? window.location.pathname : `${URLS.read_posts}${path}`;
-            this.getJSON(posts_url);
-        },
-        getProfile: function(user_id) {
-            this.getJSON(`${URLS.read_user}${user_id}`);
         },
         updatePost: function(editedPost) {
             for (var i=0; i<this.posts.length; i++) {
@@ -309,19 +299,92 @@ var app = new Vue({
         },
     },
     created: function () {
-        if (window.location.pathname === "/") {
-            this.getPosts();
-        } else {
-            this.getJSON(window.location.pathname);
+        this.getPosts(this.all, '');
+    },
+    watch: {
+        $route(to, from) {
+            this.getPosts(this.all, '');
+        }
+    }
+};
+
+const profile_view = {
+    props: ['id'],
+    template: `
+        <div>
+        profile view {{id}}
+        <user-profile v-if="id" v-bind:user="user"></user-profile>
+        <post-feed v-bind:posts="posts" v-on:edit-ok="updatePost($event)" v-on:delete-ok="deletePost($event)">
+        </post-feed>
+        </div>
+    `,
+    data: function () {
+        return {
+            user: {},
+            posts: [],
+        }
+    },
+    methods: {
+        getProfile: function(id, query) {
+            axios.get(`/users/${id}`, {
+                params: {
+                    json: true,
+                    after: 0,
+                    count: 20,
+                },
+            }).then(response => {
+                console.log(response)
+                this.user = response.data.user;
+                this.posts = response.data.posts;
+            })
+        },
+        updatePost: function(editedPost) {
+            for (var i=0; i<this.posts.length; i++) {
+                if (this.posts[i].id == editedPost.id) {
+                    this.posts[i] = editedPost;
+                }
+            }
+        },
+        deletePost: function(delete_id) {
+            for (var i=0; i<this.posts.length; i++) {
+                if (this.posts[i].id == delete_id) {
+                    this.posts.splice(i, 1);
+                    break;
+                }
+            }
+        },
+    },
+    created: function () {
+        this.getProfile(this.id, '');
+    },
+    watch: {
+        $route(to, from) {
+            this.getProfile(this.id, '');
+        }
+    }
+};
+
+
+const router = new VueRouter({
+    mode: 'history',
+    routes: [
+        {path: '/', component: posts_view, name: "home"},
+        {path: '/all', name: "all", component: posts_view, props: {all: true}},
+        {path: '/user/:id', component: profile_view, name: "user", props: true},
+        {path: '*', component: posts_view, name: "home"},
+    ]
+})
+
+const vm = new Vue({
+    el: '#app',
+    router,
+    data: {
+        pathname: window.location.pathname,
+    },
+    computed: {
+        updatePath: function() {
+            this.pathname = window.location.pathname;
         }
     },
     delimiters: ['[[', ']]'],
 })
-
-
-window.addEventListener('popstate', function(event) {
-    if (event.state) {
-        app.user = event.state.user;
-        app.posts = event.state.posts;
-    }
-});

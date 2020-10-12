@@ -66,7 +66,7 @@ Vue.component('post-card', {
         </new-post>
         <div v-else class="card-text card-view">
             <h6 class="card-title mb-1">
-                <router-link :to="{ name: 'user', params: {id: post.author.id} }">{{ post.author.username }}</router-link>
+                <router-link :to="{ name: 'user', params: {username: post.author.username} }">{{ post.author.username }}</router-link>
                 <span class="small text-muted">at {{ post.create_time }} said:</span>
             </h6>
             <p>{{ post.text }}</p>
@@ -238,7 +238,7 @@ Vue.component("user-profile", {
         onFollow: function() {
             token = getToken();
             if (!token) {return;}
-            axios.post(`${URLS.write_user}${this.user.id}`, {
+            axios.post(`${URLS.write_user}${this.user.username}`, {
                 follow: !this.user.following,
             }, {
                 headers: {
@@ -254,6 +254,35 @@ Vue.component("user-profile", {
 })
 
 
+const viewsMixin = {
+    methods: {
+        updatePost: function(editedPost) {
+            for (var i=0; i<this.posts.length; i++) {
+                if (this.posts[i].id == editedPost.id) {
+                    this.posts[i] = editedPost;
+                }
+            }
+        },
+        deletePost: function(delete_id) {
+            for (var i=0; i<this.posts.length; i++) {
+                if (this.posts[i].id == delete_id) {
+                    this.posts.splice(i, 1);
+                    break;
+                }
+            }
+        },
+    },
+    created: function () {
+        this.refreshView('');
+    },
+    watch: {
+        $route(to, from) {
+            this.refreshView('');
+        }
+    },
+};
+
+
 const posts_view = {
     props: ['all'],
     template: `
@@ -263,14 +292,15 @@ const posts_view = {
         </post-feed>
         </div>
     `,
+    mixins: [viewsMixin],
     data: function () {
         return {
             posts: [],
         }
     },
     methods: {
-        getPosts: function(all, query) {
-            const url = all ? '/posts/all': '/posts/home';
+        refreshView: function(query) {
+            const url = this.all ? '/posts/all': '/posts/home';
             axios.get(url, {
                 params: {
                     json: true,
@@ -282,42 +312,20 @@ const posts_view = {
                 this.posts = response.data.posts;
             })
         },
-        updatePost: function(editedPost) {
-            for (var i=0; i<this.posts.length; i++) {
-                if (this.posts[i].id == editedPost.id) {
-                    this.posts[i] = editedPost;
-                }
-            }
-        },
-        deletePost: function(delete_id) {
-            for (var i=0; i<this.posts.length; i++) {
-                if (this.posts[i].id == delete_id) {
-                    this.posts.splice(i, 1);
-                    break;
-                }
-            }
-        },
     },
-    created: function () {
-        this.getPosts(this.all, '');
-    },
-    watch: {
-        $route(to, from) {
-            this.getPosts(this.all, '');
-        }
-    }
 };
 
 const profile_view = {
-    props: ['id'],
+    props: ['username'],
     template: `
         <div>
-        profile view {{id}}
-        <user-profile v-if="id" v-bind:user="user"></user-profile>
+        profile view {{username}}
+        <user-profile v-bind:user="user"></user-profile>
         <post-feed v-bind:posts="posts" v-on:edit-ok="updatePost($event)" v-on:delete-ok="deletePost($event)">
         </post-feed>
         </div>
     `,
+    mixins: [viewsMixin],
     data: function () {
         return {
             user: {},
@@ -325,8 +333,8 @@ const profile_view = {
         }
     },
     methods: {
-        getProfile: function(id, query) {
-            axios.get(`/users/${id}`, {
+        refreshView: function(query) {
+            axios.get(`/users/${this.username}`, {
                 params: {
                     json: true,
                     after: 0,
@@ -338,30 +346,7 @@ const profile_view = {
                 this.posts = response.data.posts;
             })
         },
-        updatePost: function(editedPost) {
-            for (var i=0; i<this.posts.length; i++) {
-                if (this.posts[i].id == editedPost.id) {
-                    this.posts[i] = editedPost;
-                }
-            }
-        },
-        deletePost: function(delete_id) {
-            for (var i=0; i<this.posts.length; i++) {
-                if (this.posts[i].id == delete_id) {
-                    this.posts.splice(i, 1);
-                    break;
-                }
-            }
-        },
     },
-    created: function () {
-        this.getProfile(this.id, '');
-    },
-    watch: {
-        $route(to, from) {
-            this.getProfile(this.id, '');
-        }
-    }
 };
 
 
@@ -370,8 +355,7 @@ const router = new VueRouter({
     routes: [
         {path: '/', component: posts_view, name: "home"},
         {path: '/all', name: "all", component: posts_view, props: {all: true}},
-        {path: '/user/:id', component: profile_view, name: "user", props: true},
-        {path: '*', component: posts_view, name: "home"},
+        {path: '/:username', component: profile_view, name: "user", props: true},
     ]
 })
 

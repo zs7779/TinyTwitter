@@ -67,12 +67,12 @@ def post_read(request, post_id):
 
 
 @require_GET
-def profile_read(request, user_id):
+def profile_read(request, username):
     if not request.GET.get("json"):
         return render(request, "network/index.html")
 
     try:
-        user = User.objects.get(id=user_id)
+        user = User.objects.get(username=username)
     except User.DoesNotExist:
         return JsonResponse({"error": "User does not exist"}, status=404)
     posts = Post.objects.filter(author=user).order_by("-create_time")
@@ -142,9 +142,9 @@ def post_write(request, post_id):
 
 @login_required
 @require_http_methods(["POST", "PUT"])
-def profile_write(request, user_id):
+def profile_write(request, username):
     try:
-        user = User.objects.get(id=user_id)
+        user = User.objects.get(id=username)
     except User.DoesNotExist:
         return JsonResponse({"error": "User does not exist"}, status=404)
 
@@ -189,11 +189,11 @@ def post_view(request, post_id):
         return post_write(request, post_id)
 
 
-def profile_view(request, user_id):
+def profile_view(request, username):
     if request.method == "GET":
-        return profile_read(request, user_id)
+        return profile_read(request, username)
     else:
-        return profile_write(request, user_id)
+        return profile_write(request, username)
 
 
 def login_view(request):

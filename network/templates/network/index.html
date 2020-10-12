@@ -7,8 +7,6 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-6 main-content">
-                <refresh-button v-on:refresh="getPosts()"></refresh-button>
-
                 {% if request.user.is_authenticated %}
                 <new-post v-if="pathname==='/'"></new-post>
                 {% csrf_token %}

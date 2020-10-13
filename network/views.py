@@ -55,7 +55,7 @@ def posts_read(request, path=""):
 
 
 @require_GET
-def post_read(request, post_id):
+def post_read(request, post_id, username=None):
     if not request.GET.get("json"):
         return render(request, "network/index.html")
 
@@ -100,7 +100,7 @@ def posts_write(request):
 
 @login_required
 @require_http_methods(["PUT", "DELETE"])
-def post_write(request, post_id):
+def post_write(request, post_id, username=None):
     try:
         post = Post.objects.get(id=post_id)
     except Post.DoesNotExist:
@@ -182,11 +182,11 @@ def posts_view(request, path=''):
         return posts_write(request)
 
 
-def post_view(request, post_id):
+def post_view(request, post_id, username=None):
     if request.method == "GET":
-        return post_read(request, post_id)
+        return post_read(request, post_id, username)
     else:
-        return post_write(request, post_id)
+        return post_write(request, post_id, username)
 
 
 def profile_view(request, username):
@@ -207,7 +207,7 @@ def login_view(request):
         # Check if authentication successful
         if user is not None:
             login(request, user)
-            return redirect("posts", path="home")
+            return redirect("/")
         else:
             return render(request, "network/login.html", {
                 "message": "Invalid username and/or password."
@@ -218,7 +218,7 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return redirect("posts", path="all")
+    return redirect("/")
 
 
 def register(request):
@@ -243,6 +243,6 @@ def register(request):
                 "message": "Username already taken."
             })
         login(request, user)
-        return redirect("posts", path="home")
+        return redirect("/")
     else:
         return render(request, "network/register.html")

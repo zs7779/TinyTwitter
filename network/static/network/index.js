@@ -43,7 +43,7 @@ Vue.component("refresh-button", {
 Vue.component("post-feed", {
     props: ['posts'],
     template: `
-    <div class="post-feed mt-2">
+    <div class="post-feed">
         <slot></slot>
         <transition-group name="list">
             <post-card
@@ -64,13 +64,13 @@ Vue.component('post-card', {
         <new-post v-if="editMode" v-bind:oldPost="post" v-bind:noPost="true" v-on:post-ok="onEdit($event)">
             <button type="button" class="btn btn-outline-secondary rounded-pill py-0" v-on:click.prevent="editMode=false">Cancel</button>
         </new-post>
-        <div v-else class="card-text card-view">
+        <router-link :to='{name: "post", params: {username: post.author.username, post_id: post.id}}' tag='div' class="card-text card-view" v-else>
             <h6 class="card-title mb-1">
                 <router-link :to="{ name: 'user', params: {username: post.author.username} }">{{ post.author.username }}</router-link>
                 <span class="small text-muted">at {{ post.create_time }} said:</span>
             </h6>
             <p>{{ post.text }}</p>
-        </div>
+        </router-link>
         <div class="card-footer bg-transparent p-0">
             {{ post.like_count }} likes
         </div>
@@ -215,7 +215,7 @@ Vue.component("new-post", {
 Vue.component("user-profile", {
     props: ["user"],
     template: `
-    <div class="card p-3">
+    <div class="card p-3 mb-2">
         <h5 class="card-title">{{ user.username }}</h5>
         <div class="row justify-content-between mx-1">
             <div>
@@ -263,9 +263,9 @@ const viewsMixin = {
                 }
             }
         },
-        deletePost: function(delete_id) {
+        deletePost: function(deleteID) {
             for (var i=0; i<this.posts.length; i++) {
-                if (this.posts[i].id == delete_id) {
+                if (this.posts[i].id == deleteID) {
                     this.posts.splice(i, 1);
                     break;
                 }
@@ -283,11 +283,10 @@ const viewsMixin = {
 };
 
 
-const posts_view = {
+const postsView = {
     props: ['all'],
     template: `
         <div>
-        posts view {{all}}
         <post-feed v-bind:posts="posts" v-on:edit-ok="updatePost($event)" v-on:delete-ok="deletePost($event)">
         </post-feed>
         </div>
@@ -315,14 +314,58 @@ const posts_view = {
     },
 };
 
-const profile_view = {
-    props: ['username'],
+const userPostView = {
+    props: ['posts', 'username', 'id'],
     template: `
         <div>
-        profile view {{username}}
-        <user-profile v-bind:user="user"></user-profile>
-        <post-feed v-bind:posts="posts" v-on:edit-ok="updatePost($event)" v-on:delete-ok="deletePost($event)">
-        </post-feed>
+            <post-card :post="post"></post-card>
+        </div>
+    `,
+    data: function() {
+        return {
+            post: {
+                author: {id: null, username: 'username'},
+                id: -1,
+                text: "",
+                create_time: null,
+                like_count: null,
+            },
+        };
+    },
+    mounted: function() {
+        let posts = this.posts.filter(p => p.id == this.id);
+        if (posts.length !== 1) {
+            axios.get(`/users/${this.username}/${this.id}`, {
+                params: {
+                    json: true,
+                },
+            }).then(response => {
+                console.log(response)
+                this.post = response.data;
+            })
+        } else {
+            this.post = posts[0];
+        }
+    }
+};
+
+const userPostsView = {
+    props: ['posts'],
+    template: `
+        <div>
+            <post-feed v-bind:posts="posts" v-on="$listeners">
+            </post-feed>
+        </div>
+    `,
+}
+
+const profileView = {
+    props: ['username', 'post_id'],
+    template: `
+        <div>
+            <user-profile v-bind:user="user"></user-profile>
+            <router-view v-bind:posts="posts" :username="username" :id="post_id" name="post"></router-view>
+            <router-view v-bind:posts="posts" v-on:edit-ok="updatePost($event)" v-on:delete-ok="deletePost($event)" name="posts"></router-view>
         </div>
     `,
     mixins: [viewsMixin],
@@ -353,9 +396,18 @@ const profile_view = {
 const router = new VueRouter({
     mode: 'history',
     routes: [
-        {path: '/', component: posts_view, name: "home"},
-        {path: '/all', name: "all", component: posts_view, props: {all: true}},
-        {path: '/:username', component: profile_view, name: "user", props: true},
+        {path: '/', component: postsView, name: "home"},
+        {path: '/all', component: postsView, props: {all: true}, name: "all"},
+        {path: '/:username', component: profileView, props: true,
+            children: [
+                {path:'', components: {
+                    posts: userPostsView,
+                }, name: 'user'},
+                {path:':post_id', components: {
+                    post: userPostView,
+                }, props:true, name: 'post'},
+            ]
+        },
     ]
 })
 

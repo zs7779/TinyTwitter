@@ -59,42 +59,6 @@ Vue.component("post-feed", {
 
 Vue.component('post-card', {
     props: ['post'],
-    template: `
-    <div class="card p-3">
-        <new-post v-if="editMode" v-bind:oldPost="post" v-bind:noPost="true" v-on:post-ok="onEdit($event)">
-            <button type="button" class="btn btn-outline-secondary rounded-pill py-0" v-on:click.prevent="editMode=false">Cancel</button>
-        </new-post>
-        <router-link :to='{name: "post", params: {username: post.author.username, post_id: post.id}}' tag='div' class="card-text card-view" v-else>
-            <h6 class="card-title mb-1">
-                <router-link :to="{ name: 'user', params: {username: post.author.username} }">{{ post.author.username }}</router-link>
-                <span class="small text-muted">at {{ post.create_time }} said:</span>
-            </h6>
-            <p>{{ post.text }}</p>
-        </router-link>
-        <div class="card-footer bg-transparent p-0">
-            {{ post.like_count }} likes
-        </div>
-        <div class="card-footer bg-transparent p-0">
-            <div class="d-flex justify-content-around">
-                <button type="button" class="btn btn-transparent px-1 py-0" title="Comment">
-                    <b-icon icon="chat" class="card-button"></b-icon>
-                </button>
-                <button type="button" class="btn btn-transparent px-1 py-0" title="Repost">
-                    <b-icon icon="arrow-repeat" class="card-button"></b-icon>
-                </button>
-                <button type="button" class="btn btn-transparent px-1 py-0" title="Like" v-on:click="onLike">
-                    <b-icon icon="heart" v-bind:class="[post.liked ? 'card-button-active' : 'card-button', '']"></b-icon> {{ post.like_count }}
-                </button>
-                <b-dropdown id="dropdown-dropup" dropup variant="btn btn-transparent px-1 py-0" no-caret title="Options">
-                    <template v-slot:button-content><b-icon icon="chevron-up" class="card-button"></b-icon></template>
-                    <b-dropdown-item v-if="post.owner" v-on:click="onDelete"><b-icon icon="x" class="card-button"></b-icon> Delete</b-dropdown-item>
-                    <b-dropdown-item v-if="post.owner" v-on:click="editMode=true"><b-icon icon="pencil" class="card-button"></b-icon> Edit</b-dropdown-item>
-                    <b-dropdown-item><b-icon icon="share" class="card-button"></b-icon> Share</b-dropdown-item>
-                </b-dropdown>
-            </div>
-        </div>
-    </div>
-    `,
     data: function() {
         return {
             editMode: false,
@@ -143,6 +107,42 @@ Vue.component('post-card', {
             }, printError)
         },
     },
+    template: `
+    <div class="card p-3">
+        <new-post v-if="editMode" v-bind:oldPost="post" v-bind:noPost="true" v-on:post-ok="onEdit($event)">
+            <button type="button" class="btn btn-outline-secondary rounded-pill py-0" v-on:click.prevent="editMode=false">Cancel</button>
+        </new-post>
+        <router-link :to='{name: "post", params: {username: post.author.username, post_id: post.id}}' tag='div' class="card-text card-view" v-else>
+            <h6 class="card-title mb-1">
+                <router-link :to="{ name: 'user', params: {username: post.author.username} }">{{ post.author.username }}</router-link>
+                <span class="small text-muted">at {{ post.create_time }} said:</span>
+            </h6>
+            <p>{{ post.text }}</p>
+        </router-link>
+        <div class="card-footer bg-transparent p-0">
+            {{ post.like_count }} likes
+        </div>
+        <div class="card-footer bg-transparent p-0">
+            <div class="d-flex justify-content-around">
+                <button type="button" class="btn btn-transparent px-1 py-0" title="Comment">
+                    <b-icon icon="chat" class="card-button"></b-icon>
+                </button>
+                <button type="button" class="btn btn-transparent px-1 py-0" title="Repost">
+                    <b-icon icon="arrow-repeat" class="card-button"></b-icon>
+                </button>
+                <button type="button" class="btn btn-transparent px-1 py-0" title="Like" v-on:click="onLike">
+                    <b-icon icon="heart" v-bind:class="[post.liked ? 'card-button-active' : 'card-button', '']"></b-icon> {{ post.like_count }}
+                </button>
+                <b-dropdown id="dropdown-dropup" dropup variant="btn btn-transparent px-1 py-0" no-caret title="Options">
+                    <template v-slot:button-content><b-icon icon="chevron-up" class="card-button"></b-icon></template>
+                    <b-dropdown-item v-if="post.owner" v-on:click="onDelete"><b-icon icon="x" class="card-button"></b-icon> Delete</b-dropdown-item>
+                    <b-dropdown-item v-if="post.owner" v-on:click="editMode=true"><b-icon icon="pencil" class="card-button"></b-icon> Edit</b-dropdown-item>
+                    <b-dropdown-item><b-icon icon="share" class="card-button"></b-icon> Share</b-dropdown-item>
+                </b-dropdown>
+            </div>
+        </div>
+    </div>
+    `,
 })
 
 
@@ -164,18 +164,6 @@ Vue.component("new-post", {
             },
         },
     },
-    template: `
-    <div class="card p-3">
-        <form v-on:submit.prevent="onSubmitPost">
-            <textarea rows=4 class="form-control border-0" v-model="postText" placeholder="Say something..."></textarea>
-            <div class="d-flex justify-content-end mt-2">
-                <span class="mx-1">{{ charRemaining }}</span>
-                <button type="submit" class="btn btn-primary rounded-pill py-0">Post</button>
-                <slot></slot>
-            </div>
-        </form>
-    </div>
-    `,
     data: function() {
         return {
             postID: this.oldPost.id,
@@ -209,31 +197,23 @@ Vue.component("new-post", {
             }
         },
     },
+    template: `
+    <div class="card p-3">
+        <form v-on:submit.prevent="onSubmitPost">
+            <textarea rows=4 class="form-control border-0" v-model="postText" placeholder="Say something..."></textarea>
+            <div class="d-flex justify-content-end mt-2">
+                <span class="mx-1">{{ charRemaining }}</span>
+                <button type="submit" class="btn btn-primary rounded-pill py-0">Post</button>
+                <slot></slot>
+            </div>
+        </form>
+    </div>
+    `,
 })
 
 
 Vue.component("user-profile", {
     props: ["user"],
-    template: `
-    <div class="card p-3 mb-2">
-        <h5 class="card-title">{{ user.username }}</h5>
-        <div class="row justify-content-between mx-1">
-            <div>
-                <span class="small text-muted">@{{ user.id }}</span>
-            </div>
-            <div v-if="!user.owner">
-                <button type="button" v-if="user.following" class="btn btn-primary rounded-pill" v-on:click="onFollow" v-on:hover="">Following</button>
-                <button type="button" v-else class="btn btn-outline-primary rounded-pill" v-on:click="onFollow">Follow</button>
-            </div>
-        </div>
-
-        <div class="card-footer bg-transparent p-0">
-            <p class="mx-1">{{ user.bio }}</p>
-            <span class="mx-1"><span class="font-weight-bold">{{user.following_count}}</span> Following</span>
-            <span class="mx-1"><span class="font-weight-bold">{{user.follower_count}}</span> Followers</span>
-        </div>
-    </div>
-    `,
     methods: {
         onFollow: function() {
             token = getToken();
@@ -250,7 +230,27 @@ Vue.component("user-profile", {
                 this.$emit("user-ok", this.user);
             }, printError)
         }
-    }
+    },
+    template: `
+    <div class="card p-3 mb-2">
+        <h5 class="card-title">{{ user.username }}</h5>
+        <div class="row justify-content-between mx-1">
+            <div>
+                <span class="small text-muted">@{{ user.id }}</span>
+            </div>
+            <div v-if="user.owner===false">
+                <button type="button" v-if="user.following" class="btn btn-primary rounded-pill" v-on:click="onFollow" v-on:hover="">Following</button>
+                <button type="button" v-else class="btn btn-outline-primary rounded-pill" v-on:click="onFollow">Follow</button>
+            </div>
+        </div>
+
+        <div class="card-footer bg-transparent p-0">
+            <p class="mx-1">{{ user.bio }}</p>
+            <span class="mx-1"><span class="font-weight-bold">{{user.following_count}}</span> Following</span>
+            <span class="mx-1"><span class="font-weight-bold">{{user.follower_count}}</span> Followers</span>
+        </div>
+    </div>
+    `,
 })
 
 
@@ -282,37 +282,6 @@ const viewsMixin = {
     },
 };
 
-
-const postsView = {
-    props: ['all'],
-    template: `
-        <div>
-        <post-feed v-bind:posts="posts" v-on:edit-ok="updatePost($event)" v-on:delete-ok="deletePost($event)">
-        </post-feed>
-        </div>
-    `,
-    mixins: [viewsMixin],
-    data: function () {
-        return {
-            posts: [],
-        }
-    },
-    methods: {
-        refreshView: function(query) {
-            const url = this.all ? '/posts/all': '/posts/home';
-            axios.get(url, {
-                params: {
-                    json: true,
-                    after: 0,
-                    count: 20,
-                },
-            }).then(response => {
-                console.log(response)
-                this.posts = response.data.posts;
-            })
-        },
-    },
-};
 
 const userPostView = {
     props: ['posts', 'username', 'id'],
@@ -361,20 +330,13 @@ const userPostsView = {
 
 const profileView = {
     props: ['username', 'post_id'],
-    template: `
-        <div>
-            <user-profile v-bind:user="user"></user-profile>
-            <router-view v-bind:posts="posts" :username="username" :id="post_id" name="post"></router-view>
-            <router-view v-bind:posts="posts" v-on:edit-ok="updatePost($event)" v-on:delete-ok="deletePost($event)" name="posts"></router-view>
-        </div>
-    `,
-    mixins: [viewsMixin],
     data: function () {
         return {
             user: {},
             posts: [],
         }
     },
+    mixins: [viewsMixin],
     methods: {
         refreshView: function(query) {
             axios.get(`/users/${this.username}`, {
@@ -390,6 +352,45 @@ const profileView = {
             })
         },
     },
+    template: `
+        <div>
+            <user-profile v-bind:user="user"></user-profile>
+            <router-view v-bind:posts="posts" :username="username" :id="post_id" name="post"></router-view>
+            <router-view v-bind:posts="posts" v-on:edit-ok="updatePost($event)" v-on:delete-ok="deletePost($event)" name="posts"></router-view>
+        </div>
+    `,
+};
+
+
+const postsView = {
+    props: ['all'],
+    data: function () {
+        return {
+            posts: [],
+        }
+    },
+    mixins: [viewsMixin],
+    methods: {
+        refreshView: function(query) {
+            const url = this.all ? '/posts/all': '/posts/home';
+            axios.get(url, {
+                params: {
+                    json: true,
+                    after: 0,
+                    count: 20,
+                },
+            }).then(response => {
+                console.log(response)
+                this.posts = response.data.posts;
+            })
+        },
+    },
+    template: `
+        <div>
+        <post-feed v-bind:posts="posts" v-on:edit-ok="updatePost($event)" v-on:delete-ok="deletePost($event)">
+        </post-feed>
+        </div>
+    `,
 };
 
 

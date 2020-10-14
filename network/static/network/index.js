@@ -49,7 +49,7 @@ Vue.component("post-feed", {
             <post-card
                 v-for="(post, index) in posts"
                 v-bind:key="post.id" v-bind:post="post"
-                v-on="$listeners">
+                v-on="$listeners" v-on:edit-ok="$emit('edit!')">
             </post-card>
         </transition-group>
     </div>
@@ -75,9 +75,12 @@ Vue.component('post-card', {
                     'X-CSRFTOKEN': token,
                 },
             }).then(response => {
-                this.post.like_count = this.post.liked ? this.post.like_count - 1 : this.post.like_count + 1;
-                this.post.liked = !this.post.liked;
-                this.$emit("edit-ok", this.post);
+                const post = {
+                    ...this.post,
+                    like_count: this.post.liked ? this.post.like_count - 1 : this.post.like_count + 1,
+                    liked: !this.post.liked,
+                }
+                this.$emit("edit-ok", post);
             }, printError)
         },
         onEdit: function(postText) {
@@ -90,8 +93,11 @@ Vue.component('post-card', {
                     'X-CSRFTOKEN': token,
                 },
             }).then(response => {
-                this.post.text = postText;
-                this.$emit("edit-ok", this.post);
+                const post = {
+                    ...this.post,
+                    text: postText,
+                }
+                this.$emit("edit-ok", post);
                 this.editMode = false;
             }, printError)
         },
@@ -225,9 +231,12 @@ Vue.component("user-profile", {
                     'X-CSRFTOKEN': token,
                 },
             }).then(response => {
-                this.user.follower_count = this.user.following ? this.user.follower_count - 1 : this.user.follower_count + 1;
-                this.user.following = !this.user.following;
-                this.$emit("user-ok", this.user);
+                const user = {
+                    ...this.user,
+                    follower_count: this.user.following ? this.user.follower_count - 1 : this.user.follower_count + 1,
+                    following: !this.user.following,
+                }
+                this.$emit("user-ok", user);
             }, printError)
         }
     },
@@ -257,20 +266,14 @@ Vue.component("user-profile", {
 const viewsMixin = {
     methods: {
         updatePost: function(editedPost) {
-            for (var i=0; i<this.posts.length; i++) {
-                if (this.posts[i].id == editedPost.id) {
-                    this.posts[i] = editedPost;
-                }
-            }
+            this.posts = this.posts.map(p => p.id === editedPost.id ? editedPost : p);
         },
         deletePost: function(deleteID) {
-            for (var i=0; i<this.posts.length; i++) {
-                if (this.posts[i].id == deleteID) {
-                    this.posts.splice(i, 1);
-                    break;
-                }
-            }
+            this.posts = this.posts.filter(p => p.id !== deleteID);
         },
+        updateUser: function(editedUser) {
+            this.user = editedUser;
+        }
     },
     created: function () {
         this.refreshView('');
@@ -354,7 +357,7 @@ const profileView = {
     },
     template: `
         <div>
-            <user-profile v-bind:user="user"></user-profile>
+            <user-profile v-bind:user="user" @user-ok="updateUser($event)"></user-profile>
             <router-view v-bind:posts="posts" :username="username" :id="post_id" name="post"></router-view>
             <router-view v-bind:posts="posts" v-on:edit-ok="updatePost($event)" v-on:delete-ok="deletePost($event)" name="posts"></router-view>
         </div>

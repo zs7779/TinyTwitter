@@ -144,7 +144,7 @@ def post_write(request, post_id, username=None):
 @require_http_methods(["POST", "PUT"])
 def profile_write(request, username):
     try:
-        user = User.objects.get(id=username)
+        user = User.objects.get(username=username)
     except User.DoesNotExist:
         return JsonResponse({"error": "User does not exist"}, status=404)
 

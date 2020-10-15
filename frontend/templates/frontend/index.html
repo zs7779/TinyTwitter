@@ -1,9 +1,9 @@
-{% extends "network/layout.html" %}
+{% extends "frontend/layout.html" %}
 {% load static %}
 
 {% block body %}
 <div id="app">
-    {% include "network/navbar.html" %}
+    {% include "frontend/navbar.html" %}
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-6 main-content">
@@ -20,6 +20,6 @@
 {% endblock %}
 
 {% block javascript %}
-    <script type="text/javascript" src="{% static 'network/index.js' %}"></script>
+    <script type="text/javascript" src="{% static 'frontend/main.js' %}"></script>
 
 {% endblock %}

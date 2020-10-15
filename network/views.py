@@ -1,8 +1,6 @@
 import json
-from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_GET, require_POST
-from django.db import IntegrityError
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, QueryDict
 from django.shortcuts import render, redirect
@@ -12,7 +10,7 @@ from .models import User, Post, Follow, Comment, Like, HashTag, Mention
 
 
 def index(request, path=''):
-    return render(request, "network/index.html")
+    return render(request, "frontend/index.html")
 
 
 @require_GET
@@ -26,7 +24,7 @@ def current_user(request):
 @require_GET
 def posts_read(request, path=""):
     if not request.GET.get("json"):
-        return render(request, "network/index.html")
+        return render(request, "frontend/index.html")
 
     data = request.GET
     if data.get("count") is not None and data.get("after") is not None:
@@ -57,7 +55,7 @@ def posts_read(request, path=""):
 @require_GET
 def post_read(request, post_id, username=None):
     if not request.GET.get("json"):
-        return render(request, "network/index.html")
+        return render(request, "frontend/index.html")
 
     try:
         post = Post.objects.get(id=post_id)
@@ -69,7 +67,7 @@ def post_read(request, post_id, username=None):
 @require_GET
 def profile_read(request, username):
     if not request.GET.get("json"):
-        return render(request, "network/index.html")
+        return render(request, "frontend/index.html")
 
     try:
         user = User.objects.get(username=username)
@@ -194,55 +192,3 @@ def profile_view(request, username):
         return profile_read(request, username)
     else:
         return profile_write(request, username)
-
-
-def login_view(request):
-    if request.method == "POST":
-
-        # Attempt to sign user in
-        username = request.POST["username"]
-        password = request.POST["password"]
-        user = authenticate(request, username=username, password=password)
-
-        # Check if authentication successful
-        if user is not None:
-            login(request, user)
-            return redirect("/")
-        else:
-            return render(request, "network/login.html", {
-                "message": "Invalid username and/or password."
-            })
-    else:
-        return render(request, "network/login.html")
-
-
-def logout_view(request):
-    logout(request)
-    return redirect("/")
-
-
-def register(request):
-    if request.method == "POST":
-        username = request.POST["username"]
-        email = request.POST["email"]
-
-        # Ensure password matches confirmation
-        password = request.POST["password"]
-        confirmation = request.POST["confirmation"]
-        if password != confirmation:
-            return render(request, "network/register.html", {
-                "message": "Passwords must match."
-            })
-
-        # Attempt to create new user
-        try:
-            user = User.objects.create_user(username, email, password)
-            user.save()
-        except IntegrityError:
-            return render(request, "network/register.html", {
-                "message": "Username already taken."
-            })
-        login(request, user)
-        return redirect("/")
-    else:
-        return render(request, "network/register.html")

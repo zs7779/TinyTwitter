@@ -3,6 +3,25 @@ const URLs = {
     users: "/users/",
 };
 
+const SIGNALs = {
+    updatePost: 'edit-ok',
+    deletePost: 'delete-ok',
+    fetchPosts: 'post-ok',
+    updateUser: 'user-ok',
+};
+
+const PLACEHOLDERs = {
+    user: {},
+    post: {
+        author: {id: -1, username: 'username'},
+        id: -1,
+        text: "",
+        create_time: null,
+        like_count: null,
+    },
+    posts: [],
+}
+
 function printError(error) {
     if (error.response) {
       console.log(error.response.data);
@@ -24,17 +43,52 @@ function getToken() {
 }
 
 
-const viewsMixin = {
+const postsViewsMixin = {
     methods: {
         updatePost: function(editedPost) {
+            console.log(editedPost)
             this.posts = this.posts.map(p => p.id === editedPost.id ? editedPost : p);
         },
         deletePost: function(deleteID) {
             this.posts = this.posts.filter(p => p.id !== deleteID);
         },
-        updateUser: function(editedUser) {
-            this.user = editedUser;
-        }
+        doLike: function(post) {
+            const token = getToken();
+            if (!token) return;
+            axios.put(`${URLs.posts}${post.id}`, {
+                like: post.liked,
+            }, {
+                headers: {
+                    'X-CSRFTOKEN': token,
+                },
+            }).then(response => {
+                this.updatePost(post);
+            })
+        },
+        doEdit: function(post) {
+            const token = getToken();
+            if (!token) return;
+            axios.put(`${URLs.posts}${post.id}`, {
+                postText: post.text,
+            }, {
+                headers: {
+                    'X-CSRFTOKEN': token,
+                },
+            }).then(response => {
+                this.updatePost(post);
+            })
+        },
+        doDelete: function(id) {
+            const token = getToken();
+            if (!token) return;
+            axios.delete(`${URLs.posts}${id}`, {
+                headers: {
+                    'X-CSRFTOKEN': token,
+                },
+            }).then(response => {
+                this.deletePost(id);
+            })
+        },
     },
     created: function () {
         this.refreshView('');
@@ -46,9 +100,20 @@ const viewsMixin = {
     },
 };
 
+const userViewsMixin = {
+    methods: {
+        updateUser: function(editedUser) {
+            this.user = editedUser;
+        },
+    },
+};
+
 export {
     URLs,
+    SIGNALs,
+    PLACEHOLDERs,
     printError,
     getToken,
-    viewsMixin,
+    postsViewsMixin,
+    userViewsMixin,
 }

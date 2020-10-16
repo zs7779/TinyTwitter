@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import { URLs, getToken, viewsMixin } from './utils'
+import { URLs, getToken } from './utils'
 
 export default{
     name: "new-post",

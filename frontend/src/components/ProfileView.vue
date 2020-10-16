@@ -1,27 +1,28 @@
 <template>
     <div>
-        <user-profile :user="user" @user-ok="updateUser($event)"></user-profile>
-        <router-view :posts="posts" :username="username" :id="post_id" @edit-ok="updatePost($event)" @delete-ok="deletePost($event)" name="post"></router-view>
-        <router-view :posts="posts" @edit-ok="updatePost($event)" @delete-ok="deletePost($event)" name="posts"></router-view>
+        <user-profile :user="user" @action-follow="doFollow()"></user-profile>
+        <router-view :post="post" @action-like="doLike($event)" @action-edit="doEdit($event)" @action-delete="doDelete($event)" name="post" />
+        <router-view :posts="posts" @action-like="doLike($event)" @action-edit="doEdit($event)" @action-delete="doDelete($event)" name="posts" />
     </div>
 </template>
 
 <script>
 import UserProfile from './UserProfile.vue'
-import { URLs, viewsMixin } from './utils'
+import { URLs, PLACEHOLDERs, getToken, postsViewsMixin, userViewsMixin } from './utils'
 
 export default{
     name: "profile-view",
-    props: ['username', 'post_id'],
+    props: ['username', 'postID'],
     data: function () {
         return {
-            user: {},
-            posts: [],
+            user: PLACEHOLDERs.user,
+            posts: PLACEHOLDERs.posts,
+            post: PLACEHOLDERs.post,
         }
     },
-    mixins: [viewsMixin],
+    mixins: [postsViewsMixin, userViewsMixin],
     methods: {
-        refreshView: function(query) {
+        refreshView: function(query='') {
             axios.get(`${URLs.users}${this.username}`, {
                 params: {
                     json: true,
@@ -34,6 +35,59 @@ export default{
                 this.posts = response.data.posts;
             })
         },
+        doFollow: function() {
+            const token = getToken();
+            if (!token) return;
+            axios.post(`${URLs.users}${this.user.username}`, {
+                follow: !this.user.following,
+            }, {
+                headers: {
+                    'X-CSRFTOKEN': token,
+                },
+            }).then(response => {
+                const user = {
+                    ...this.user,
+                    follower_count: this.user.following ? this.user.follower_count - 1 : this.user.follower_count + 1,
+                    following: !this.user.following,
+                }
+                this.updateUser(user);
+            })
+        },
+        getPost: function(id) {
+            const posts = this.posts.filter(p => p.id == id);
+            if (posts.length !== 1) {
+                axios.get(`${URLs.users}${this.username}/${id}`, {
+                    params: {
+                        json: true,
+                    },
+                }).then(response => {
+                    console.log(response)
+                    this.post = response.data;
+                })
+            } else {
+                this.post = posts[0];
+            }
+        }
+    },
+    watch: {
+        username: function() {
+            this.refreshView();
+        },
+        postID: function() {
+            if (this.postID) {
+                this.getPost(this.postID);
+            }
+        },
+        posts: function() {
+            if (this.postID) {
+                this.getPost(this.postID);
+            }
+        }
+    },
+    mounted: function() {
+        if (this.postID) {
+            this.getPost(this.postID);
+        }
     },
     components: {
         UserProfile        

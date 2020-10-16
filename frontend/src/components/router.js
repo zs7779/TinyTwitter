@@ -11,7 +11,7 @@ const routes = [
             {path:'', components: {
                 posts: UserPostsView,
             }, name: 'user'},
-            {path:':post_id', components: {
+            {path:':postID', components: {
                 post: UserPostView,
             }, props:true, name: 'post'},
         ]

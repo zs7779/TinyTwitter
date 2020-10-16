@@ -1,25 +1,25 @@
 <template>
     <div>
-        <post-feed v-bind:posts="posts" v-on:edit-ok="updatePost($event)" v-on:delete-ok="deletePost($event)">
+        <post-feed v-bind:posts="posts" @action-like="doLike($event)" @action-edit="doEdit($event)" @action-delete="doDelete($event)">
         </post-feed>
     </div>
 </template>
 
 <script>
 import PostFeed from './PostFeed.vue'
-import { URLs, getToken, viewsMixin } from './utils'
+import { URLs, PLACEHOLDERs, getToken, postsViewsMixin } from './utils'
 
 export default{
     name: "posts-view",
     props: ['all'],
     data: function () {
         return {
-            posts: [],
+            posts: PLACEHOLDERs.posts,
         }
     },
-    mixins: [viewsMixin],
+    mixins: [postsViewsMixin],
     methods: {
-        refreshView: function(query) {
+        refreshView: function(query='') {
             const url = this.all ? `${URLs.posts}all`: `${URLs.posts}home`;
             axios.get(url, {
                 params: {

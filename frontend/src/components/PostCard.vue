@@ -3,7 +3,7 @@
         <new-post v-if="editMode" v-bind:oldPost="post" v-bind:noPost="true" v-on:post-ok="onEdit($event)">
             <button type="button" class="btn btn-outline-secondary rounded-pill py-0" v-on:click.prevent="editMode=false">Cancel</button>
         </new-post>
-        <router-link :to='{name: "post", params: {username: post.author.username, post_id: post.id}}' tag='div' class="card-text card-view" v-else>
+        <router-link :to='{name: "post", params: {username: post.author.username, postID: post.id}}' tag='div' class="card-text card-view" v-else>
             <h6 class="card-title mb-1">
                 <router-link :to="{ name: 'user', params: {username: post.author.username} }">{{ post.author.username }}</router-link>
                 <span class="small text-muted">at {{ post.create_time }} said:</span>
@@ -37,14 +37,10 @@
 
 <script>
 import NewPost from './NewPost.vue'
-import { URLs, getToken, viewsMixin } from './utils'
-
 
 export default{
     name: "post-card",
-    props: {
-        post: Object,
-    },
+    props: ['post'],
     data() {
         return {
             editMode: false,
@@ -52,52 +48,28 @@ export default{
     },
     methods: {
         onLike: function(event) {
-            const token = getToken();
-            if (!token) {return;}
-            axios.put(`${URLs.posts}${this.post.id}`, {
-                like: !this.post.liked,
-            }, {
-                headers: {
-                    'X-CSRFTOKEN': token,
-                },
-            }).then(response => {
-                const post = {
-                    ...this.post,
-                    like_count: this.post.liked ? this.post.like_count - 1 : this.post.like_count + 1,
-                    liked: !this.post.liked,
-                }
-                this.$emit("edit-ok", post);
-            })
+            const post = {
+                ...this.post,
+                like_count: this.post.liked ? this.post.like_count - 1 : this.post.like_count + 1,
+                liked: !this.post.liked,
+            }
+            this.$emit("action-like", post);
         },
         onEdit: function(postText) {
-            const token = getToken();
-            if (!token) {return;}
-            axios.put(`${URLs.posts}${this.post.id}`, {
-                postText: postText,
-            }, {
-                headers: {
-                    'X-CSRFTOKEN': token,
-                },
-            }).then(response => {
-                const post = {
-                    ...this.post,
-                    text: postText,
-                }
-                this.$emit("edit-ok", post);
-                this.editMode = false;
-            })
+            const post = {
+                ...this.post,
+                text: postText,
+            }
+            this.$emit("action-edit", post);
         },
         onDelete: function(event) {
-            const token = getToken();
-            if (!token) {return;}
-            axios.delete(`${URLs.posts}${this.post.id}`, {
-                headers: {
-                    'X-CSRFTOKEN': token,
-                },
-            }).then(response => {
-                this.$emit("delete-ok", this.post.id);
-            })
+            this.$emit("action-delete", this.post.id);
         },
+    },
+    watch: {
+        post: function() {
+            this.editMode = false;
+        }
     },
     components: {
         NewPost

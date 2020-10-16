@@ -20,29 +20,14 @@
 </template>
 
 <script>
-import { URLs, getToken } from './utils'
 
 export default{
     name: "user-profile",
     props: ["user"],
     methods: {
         onFollow: function() {
-            const token = getToken();
-            if (!token) return;
-            axios.post(`${URLs.users}${this.user.username}`, {
-                follow: !this.user.following,
-            }, {
-                headers: {
-                    'X-CSRFTOKEN': token,
-                },
-            }).then(response => {
-                const user = {
-                    ...this.user,
-                    follower_count: this.user.following ? this.user.follower_count - 1 : this.user.follower_count + 1,
-                    following: !this.user.following,
-                }
-                this.$emit("user-ok", user);
-            })
+            // can be argued weither to emit user object
+            this.$emit("action-follow");
         }
     },
 }

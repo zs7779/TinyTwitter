@@ -4,7 +4,7 @@
         <transition-group name="list">
             <post-card
                 v-for="post in posts"
-                v-bind:key="post.id" v-bind:post="post"
+                :key="post.id" :post="post"
                 v-on="$listeners">
             </post-card>
         </transition-group>

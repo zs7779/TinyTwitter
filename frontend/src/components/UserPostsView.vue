@@ -1,13 +1,11 @@
 <template>
     <div>
-        <post-feed v-bind:posts="posts" v-on="$listeners">
-        </post-feed>
+        <post-feed :posts="posts" v-on="$listeners"></post-feed>
     </div>
 </template>
 
 <script>
 import PostFeed from './PostFeed.vue'
-
 
 export default{
     name: "user-profile-view",

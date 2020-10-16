@@ -4,7 +4,7 @@
             <textarea rows=4 class="form-control border-0" v-model="postText" placeholder="Say something..."></textarea>
             <div class="d-flex justify-content-end mt-2">
                 <span class="mx-1">{{ charRemaining }}</span>
-                <button type="submit" class="btn btn-primary rounded-pill py-0">Post</button>
+                <button type="submit" class="btn btn-primary rounded-pill py-0" :disabled="!postIsValid">Post</button>
                 <slot></slot>
             </div>
         </form>
@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import { printError, getToken, viewsMixin } from './utils'
+import { URLs, getToken, viewsMixin } from './utils'
 
 export default{
     name: "new-post",
@@ -35,7 +35,6 @@ export default{
     },
     data: function() {
         return {
-            postID: this.oldPost.id,
             postText: this.oldPost.text,
         };
     },
@@ -44,6 +43,9 @@ export default{
             this.postText = this.postText.substr(0, 140);
             return `${this.postText.length}/140`;
         },
+        postIsValid: function() {
+            return (this.postText.length > 0) && (this.postText.length <= 140);
+        }
     },
     methods: {
         onSubmitPost: function (event) {
@@ -53,7 +55,7 @@ export default{
             if (this.noPost) {
                 this.$emit("post-ok", this.postText);
             } else {
-                axios.post(`/posts/`, {
+                axios.post(`${URLs.posts}`, {
                     postText: this.postText,
                 }, {
                     headers: {
@@ -62,7 +64,7 @@ export default{
                 }).then(response => {
                     this.postText = "";
                     this.$emit("post-ok");
-                }, printError)
+                })
             }
         },
     },

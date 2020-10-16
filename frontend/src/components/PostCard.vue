@@ -37,7 +37,7 @@
 
 <script>
 import NewPost from './NewPost.vue'
-import { printError, getToken, viewsMixin } from './utils'
+import { URLs, getToken, viewsMixin } from './utils'
 
 
 export default{
@@ -54,7 +54,7 @@ export default{
         onLike: function(event) {
             const token = getToken();
             if (!token) {return;}
-            axios.put(`/posts/${this.post.id}`, {
+            axios.put(`${URLs.posts}${this.post.id}`, {
                 like: !this.post.liked,
             }, {
                 headers: {
@@ -67,12 +67,12 @@ export default{
                     liked: !this.post.liked,
                 }
                 this.$emit("edit-ok", post);
-            }, printError)
+            })
         },
         onEdit: function(postText) {
             const token = getToken();
             if (!token) {return;}
-            axios.put(`/posts/${this.post.id}`, {
+            axios.put(`${URLs.posts}${this.post.id}`, {
                 postText: postText,
             }, {
                 headers: {
@@ -85,18 +85,18 @@ export default{
                 }
                 this.$emit("edit-ok", post);
                 this.editMode = false;
-            }, printError)
+            })
         },
         onDelete: function(event) {
             const token = getToken();
             if (!token) {return;}
-            axios.delete(`/posts/${this.post.id}`, {
+            axios.delete(`${URLs.posts}${this.post.id}`, {
                 headers: {
                     'X-CSRFTOKEN': token,
                 },
             }).then(response => {
                 this.$emit("delete-ok", this.post.id);
-            }, printError)
+            })
         },
     },
     components: {

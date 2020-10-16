@@ -1,10 +1,6 @@
 const URLs = {
-    read_posts: "/posts/",
-    read_post: "/posts/",
-    read_user: "/users/",
-    write_posts: "/posts/",
-    write_post: "/posts/",
-    write_user: "/users/",
+    posts: "/posts/",
+    users: "/users/",
 };
 
 function printError(error) {
@@ -31,7 +27,6 @@ function getToken() {
 const viewsMixin = {
     methods: {
         updatePost: function(editedPost) {
-            console.log(editedPost)
             this.posts = this.posts.map(p => p.id === editedPost.id ? editedPost : p);
         },
         deletePost: function(deleteID) {

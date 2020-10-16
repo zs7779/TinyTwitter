@@ -6,6 +6,7 @@
 
 <script>
 import PostCard from './PostCard.vue'
+import { URLs } from './utils'
 
 export default{
     name: "user-post-view",
@@ -25,7 +26,7 @@ export default{
         posts: function(posts) {
             posts = posts.filter(p => p.id == this.id);
             if (posts.length !== 1) {
-                axios.get(`/users/${this.username}/${this.id}`, {
+                axios.get(`${URLs.users}${this.username}/${this.id}`, {
                     params: {
                         json: true,
                     },

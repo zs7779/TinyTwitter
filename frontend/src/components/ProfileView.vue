@@ -8,7 +8,7 @@
 
 <script>
 import UserProfile from './UserProfile.vue'
-import { printError, getToken, viewsMixin } from './utils'
+import { URLs, viewsMixin } from './utils'
 
 export default{
     name: "profile-view",
@@ -22,7 +22,7 @@ export default{
     mixins: [viewsMixin],
     methods: {
         refreshView: function(query) {
-            axios.get(`/users/${this.username}`, {
+            axios.get(`${URLs.users}${this.username}`, {
                 params: {
                     json: true,
                     after: 0,

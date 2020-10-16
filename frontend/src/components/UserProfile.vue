@@ -20,8 +20,7 @@
 </template>
 
 <script>
-import { URLs, printError, getToken, viewsMixin } from './utils'
-
+import { URLs, getToken } from './utils'
 
 export default{
     name: "user-profile",
@@ -30,7 +29,7 @@ export default{
         onFollow: function() {
             const token = getToken();
             if (!token) return;
-            axios.post(`${URLs.write_user}${this.user.username}`, {
+            axios.post(`${URLs.users}${this.user.username}`, {
                 follow: !this.user.following,
             }, {
                 headers: {
@@ -43,7 +42,7 @@ export default{
                     following: !this.user.following,
                 }
                 this.$emit("user-ok", user);
-            }, printError)
+            })
         }
     },
 }

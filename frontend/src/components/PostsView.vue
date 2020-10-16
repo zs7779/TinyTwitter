@@ -7,7 +7,7 @@
 
 <script>
 import PostFeed from './PostFeed.vue'
-import { printError, getToken, viewsMixin } from './utils'
+import { URLs, getToken, viewsMixin } from './utils'
 
 export default{
     name: "posts-view",
@@ -20,7 +20,7 @@ export default{
     mixins: [viewsMixin],
     methods: {
         refreshView: function(query) {
-            const url = this.all ? '/posts/all': '/posts/home';
+            const url = this.all ? `${URLs.posts}all`: `${URLs.posts}home`;
             axios.get(url, {
                 params: {
                     json: true,

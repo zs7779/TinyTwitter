@@ -55,7 +55,7 @@ export default{
             if (this.noPost) {
                 this.$emit("post-ok", this.postText);
             } else {
-                axios.post(`${URLs.posts}`, {
+                axios.post(`${URLs.posts()}`, {
                     postText: this.postText,
                 }, {
                     headers: {

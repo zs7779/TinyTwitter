@@ -1,6 +1,7 @@
 const URLs = {
-    posts: "/posts/",
-    users: "/users/",
+    posts: (postID='') => `/api/posts/${postID}`,
+    users: (userID='') => `/api/users/${userID}`,
+    usersPosts: (userID='', postID='') => `/api/users/${userID}/posts/${postID}`,
 };
 
 const SIGNALs = {
@@ -46,16 +47,23 @@ function getToken() {
 const postsViewsMixin = {
     methods: {
         updatePost: function(editedPost) {
-            console.log(editedPost)
-            this.posts = this.posts.map(p => p.id === editedPost.id ? editedPost : p);
+            if (this.post && this.post.id === editedPost.id) {
+                this.post = editedPost;
+            } else {
+                this.posts = this.posts.map(p => p.id === editedPost.id ? editedPost : p);
+            }
         },
         deletePost: function(deleteID) {
-            this.posts = this.posts.filter(p => p.id !== deleteID);
+            if (this.post && this.post.id === deleteID) {
+                this.post = PLACEHOLDERs.post;
+            } else {
+                this.posts = this.posts.filter(p => p.id !== deleteID);
+            }
         },
         doLike: function(post) {
             const token = getToken();
             if (!token) return;
-            axios.put(`${URLs.posts}${post.id}`, {
+            axios.put(`${URLs.posts(post.id)}`, {
                 like: post.liked,
             }, {
                 headers: {
@@ -68,7 +76,7 @@ const postsViewsMixin = {
         doEdit: function(post) {
             const token = getToken();
             if (!token) return;
-            axios.put(`${URLs.posts}${post.id}`, {
+            axios.put(`${URLs.posts(post.id)}`, {
                 postText: post.text,
             }, {
                 headers: {
@@ -81,7 +89,7 @@ const postsViewsMixin = {
         doDelete: function(id) {
             const token = getToken();
             if (!token) return;
-            axios.delete(`${URLs.posts}${id}`, {
+            axios.delete(`${URLs.posts(id)}`, {
                 headers: {
                     'X-CSRFTOKEN': token,
                 },
@@ -90,20 +98,30 @@ const postsViewsMixin = {
             })
         },
     },
-    created: function () {
-        this.refreshView('');
-    },
-    watch: {
-        $route(to, from) {
-            this.refreshView('');
-        }
-    },
 };
 
 const userViewsMixin = {
     methods: {
         updateUser: function(editedUser) {
             this.user = editedUser;
+        },
+        doFollow: function() {
+            const token = getToken();
+            if (!token) return;
+            axios.post(`${URLs.users(this.user.username)}`, {
+                follow: !this.user.following,
+            }, {
+                headers: {
+                    'X-CSRFTOKEN': token,
+                },
+            }).then(response => {
+                const user = {
+                    ...this.user,
+                    follower_count: this.user.following ? this.user.follower_count - 1 : this.user.follower_count + 1,
+                    following: !this.user.following,
+                }
+                this.updateUser(user);
+            })
         },
     },
 };

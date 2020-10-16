@@ -9,7 +9,7 @@ from django.urls import reverse
 from .models import User, Post, Follow, Comment, Like, HashTag, Mention
 
 
-def index(request, path=''):
+def index(request, path=None):
     return render(request, "frontend/index.html")
 
 
@@ -22,61 +22,65 @@ def current_user(request):
 
 
 @require_GET
-def posts_read(request, path=""):
-    if not request.GET.get("json"):
-        return render(request, "frontend/index.html")
-
+def posts_read(request, path=None, username=None):
     data = request.GET
     if data.get("count") is not None and data.get("after") is not None:
         # todo: pages
         pass
 
-    if path == "all" or path == "home" and not request.user.is_authenticated:
+    if username is not None:
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return JsonResponse({"error": "User does not exist"}, status=404)
+        posts = Post.objects.filter(author=user).order_by("-create_time")
+        return JsonResponse({
+            "user": user.serialize(request.user),
+            "posts": [post.serialize(request.user) for post in posts],
+        }, safe=False)
+    elif path is None:
         posts = Post.objects.all().order_by("-create_time")
         return JsonResponse({
             "user": {},
             "posts": [post.serialize(request.user) for post in posts],
         }, safe=False)
-    elif path == "home" and request.user.is_authenticated:
+    elif path == 'home' and request.user.is_authenticated:
         posts = Post.objects.filter(Q(author__followers__follower=request.user) | Q(author=request.user)).order_by("-create_time")
         return JsonResponse({
             "user": {},
             "posts": [post.serialize(request.user) for post in posts],
         }, safe=False)
     else:
-        # todo: query for username, but lookout for conflict with keywords
-        posts = Post.objects.all().order_by("-create_time")
-        return JsonResponse({
-            "user": {},
-            "posts": [post.serialize(request.user) for post in posts],
-        }, safe=False)
+        return JsonResponse({"error": "Page does not exist"}, status=404)
 
 
 @require_GET
 def post_read(request, post_id, username=None):
-    if not request.GET.get("json"):
-        return render(request, "frontend/index.html")
-
     try:
         post = Post.objects.get(id=post_id)
     except Post.DoesNotExist:
         return JsonResponse({"error": "Post does not exist"}, status=404)
-    return JsonResponse(post.serialize(request.user))
+    user = {}
+    if username:
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return JsonResponse({"error": "User does not exist"}, status=404)
+        user = user.serialize(request.user)
+    return JsonResponse({
+        "user": user,
+        "post": post.serialize(request.user),
+    }, safe=False)
 
 
 @require_GET
 def profile_read(request, username):
-    if not request.GET.get("json"):
-        return render(request, "frontend/index.html")
-
     try:
         user = User.objects.get(username=username)
     except User.DoesNotExist:
         return JsonResponse({"error": "User does not exist"}, status=404)
-    posts = Post.objects.filter(author=user).order_by("-create_time")
     return JsonResponse({
         "user": user.serialize(request.user),
-        "posts": [post.serialize(request.user) for post in posts],
     })
 
 
@@ -98,7 +102,7 @@ def posts_write(request):
 
 @login_required
 @require_http_methods(["PUT", "DELETE"])
-def post_write(request, post_id, username=None):
+def post_write(request, post_id):
     try:
         post = Post.objects.get(id=post_id)
     except Post.DoesNotExist:
@@ -173,9 +177,9 @@ def profile_write(request, username):
     }, status=400)
 
 
-def posts_view(request, path=''):
+def posts_view(request, path=None, username=None):
     if request.method == "GET":
-        return posts_read(request, path)
+        return posts_read(request, path, username)
     else:
         return posts_write(request)
 
@@ -184,7 +188,7 @@ def post_view(request, post_id, username=None):
     if request.method == "GET":
         return post_read(request, post_id, username)
     else:
-        return post_write(request, post_id, username)
+        return post_write(request, post_id)
 
 
 def profile_view(request, username):

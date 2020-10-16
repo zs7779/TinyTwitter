@@ -20,7 +20,7 @@ export default{
     mixins: [postsViewsMixin],
     methods: {
         refreshView: function(query='') {
-            const url = this.all ? `${URLs.posts}all`: `${URLs.posts}home`;
+            const url = this.all ? `${URLs.posts()}`: `${URLs.posts('home')}`;
             axios.get(url, {
                 params: {
                     json: true,
@@ -28,13 +28,16 @@ export default{
                     count: 20,
                 },
             }).then(response => {
-                console.log(response)
+                console.log('posts',response)
                 this.posts = response.data.posts;
             })
         },
     },
+    mounted: function () {
+        this.refreshView('');
+    },
     components: {
-        PostFeed        
+        PostFeed
     },
 }
 </script>

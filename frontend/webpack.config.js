@@ -5,6 +5,11 @@ const nodeExternals = require('webpack-node-externals');
 const config = {
   mode: 'development',
   entry: './src/main.js',
+  resolve: {
+    alias: {
+      'vue$': 'vue/dist/vue.esm.js' // 'vue/dist/vue.common.js' for webpack 1
+    }
+  },
   output: {
     path: path.resolve(__dirname, 'static/frontend'),
     filename: 'main.js'
@@ -14,25 +19,23 @@ const config = {
       // ... other rules
       {
         test: /\.vue$/,
-		exclude: /node_modules/,
         loader: 'vue-loader'
       },
 	  {
         test: /\.js$/,
-		exclude: /node_modules/,
+		    exclude: /node_modules/,
         loader: 'babel-loader'
       },
 	  {
         test: /\.css$/,
-		exclude: /node_modules/,
-        use: [
+		    use: [
           'vue-style-loader',
+          'style-loader',
           'css-loader'
         ]
       },
 	  {
         test: /\.(png|jpe?g|gif)$/i,
-		exclude: /node_modules/,
         use: [
           {
             loader: 'file-loader',

@@ -11,8 +11,9 @@
                 <new-post class="mb-2" v-if="pathname==='/'"></new-post>
                 {% csrf_token %}
                 {% endif %}
-
-                <router-view></router-view>
+                <keep-alive :max=2>
+                    <router-view></router-view>
+                </keep-alive>
             </div>
         </div>
     </div>

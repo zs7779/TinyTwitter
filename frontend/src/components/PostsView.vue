@@ -19,11 +19,10 @@ export default{
     },
     mixins: [postsViewsMixin],
     methods: {
-        refreshView: function(query='') {
-            const url = this.all ? `${URLs.posts()}`: `${URLs.posts('home')}`;
+        getPosts: function(query='') {
+            const url = this.all ? `${URLs.posts()}` : `${URLs.posts('home')}`;
             axios.get(url, {
                 params: {
-                    json: true,
                     after: 0,
                     count: 20,
                 },
@@ -33,8 +32,13 @@ export default{
             })
         },
     },
-    mounted: function () {
-        this.refreshView('');
+    created: function () {
+        this.getPosts('');
+    },
+    watch: {
+        all() {
+            this.getPosts();
+        }
     },
     components: {
         PostFeed

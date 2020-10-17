@@ -22,10 +22,9 @@ export default{
     },
     mixins: [postsViewsMixin, userViewsMixin],
     methods: {
-        refreshView: function(query='') {
+        getUserPosts: function(query='') {
             axios.get(`${URLs.usersPosts(this.username)}`, {
                 params: {
-                    json: true,
                     after: 0,
                     count: 20,
                 },
@@ -35,12 +34,11 @@ export default{
                 this.posts = response.data.posts;
             })
         },
-        getPost: function(id) {
+        getUserPost: function(id) {
             const posts = this.posts.filter(p => p.id == id);
             if (posts.length !== 1) {
                 axios.get(`${URLs.usersPosts(this.username, id)}`, {
                     params: {
-                        json: true,
                     },
                 }).then(response => {
                     console.log('getPost',response)
@@ -55,15 +53,18 @@ export default{
     watch: {
         postID: function() {
             if (this.postID) {
-                this.getPost(this.postID);
+                if (this.postID !== this.post.id) this.getUserPost(this.postID);
             }
         },
+        username: function() {
+            if (this.username !== this.user.username) this.getUserPosts('');
+        }
     },
-    mounted: function() {
+    created: function() {
         if (this.postID) {
-            this.getPost(this.postID);
+            this.getUserPost(this.postID);
         } else {
-            this.refreshView('');
+            this.getUserPosts('');
         }
     },
     components: {

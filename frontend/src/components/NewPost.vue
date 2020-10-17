@@ -1,6 +1,6 @@
 <template>
     <div class="card p-3">
-        <form v-on:submit.prevent="onSubmitPost">
+        <form @submit.prevent="onSubmitPost">
             <textarea rows=4 class="form-control border-0" v-model="postText" placeholder="Say something..."></textarea>
             <div class="d-flex justify-content-end mt-2">
                 <span class="mx-1">{{ charRemaining }}</span>

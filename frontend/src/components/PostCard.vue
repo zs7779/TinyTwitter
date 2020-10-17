@@ -1,7 +1,7 @@
 <template>
     <div class="card p-3">
-        <new-post v-if="editMode" v-bind:oldPost="post" v-bind:noPost="true" v-on:post-ok="onEdit($event)">
-            <button type="button" class="btn btn-outline-secondary rounded-pill py-0" v-on:click.prevent="editMode=false">Cancel</button>
+        <new-post v-if="editMode" :oldPost="post" :noPost="true" @post-ok="onEdit($event)">
+            <button type="button" class="btn btn-outline-secondary rounded-pill py-0" @click.prevent="editMode=false">Cancel</button>
         </new-post>
         <router-link :to='{name: "post", params: {username: post.author.username, postID: post.id}}' tag='div' class="card-text card-view" v-else>
             <h6 class="card-title mb-1">
@@ -21,13 +21,13 @@
                 <button type="button" class="btn btn-transparent px-1 py-0" title="Repost">
                     <b-icon icon="arrow-repeat" class="card-button"></b-icon>
                 </button>
-                <button type="button" class="btn btn-transparent px-1 py-0" title="Like" v-on:click="onLike">
-                    <b-icon icon="heart" v-bind:class="[post.liked ? 'card-button-active' : 'card-button', '']"></b-icon> {{ post.like_count }}
+                <button type="button" class="btn btn-transparent px-1 py-0" title="Like" @click="onLike">
+                    <b-icon icon="heart" :class="[post.liked ? 'card-button-active' : 'card-button', '']"></b-icon> {{ post.like_count }}
                 </button>
                 <b-dropdown id="dropdown-dropup" dropup variant="btn btn-transparent px-1 py-0" no-caret title="Options">
                     <template v-slot:button-content><b-icon icon="chevron-up" class="card-button"></b-icon></template>
-                    <b-dropdown-item v-if="post.owner" v-on:click="onDelete"><b-icon icon="x" class="card-button"></b-icon> Delete</b-dropdown-item>
-                    <b-dropdown-item v-if="post.owner" v-on:click="editMode=true"><b-icon icon="pencil" class="card-button"></b-icon> Edit</b-dropdown-item>
+                    <b-dropdown-item v-if="post.owner" @click="onDelete"><b-icon icon="x" class="card-button"></b-icon> Delete</b-dropdown-item>
+                    <b-dropdown-item v-if="post.owner" @click="editMode=true"><b-icon icon="pencil" class="card-button"></b-icon> Edit</b-dropdown-item>
                     <b-dropdown-item><b-icon icon="share" class="card-button"></b-icon> Share</b-dropdown-item>
                 </b-dropdown>
             </div>

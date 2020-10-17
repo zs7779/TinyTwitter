@@ -6,8 +6,8 @@
                 <span class="small text-muted">@{{ user.id }}</span>
             </div>
             <div v-if="user.owner===false">
-                <button type="button" v-if="user.following" class="btn btn-primary rounded-pill" v-on:click="onFollow">Following</button>
-                <button type="button" v-else class="btn btn-outline-primary rounded-pill" v-on:click="onFollow">Follow</button>
+                <button type="button" v-if="user.following" class="btn btn-primary rounded-pill" @click="onFollow">Following</button>
+                <button type="button" v-else class="btn btn-outline-primary rounded-pill" @click="onFollow">Follow</button>
             </div>
         </div>
 

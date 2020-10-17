@@ -1,6 +1,6 @@
 <template>
     <div>
-        <post-feed v-bind:posts="posts" @action-like="doLike($event)" @action-edit="doEdit($event)" @action-delete="doDelete($event)">
+        <post-feed :posts="posts" @action-like="doLike($event)" @action-edit="doEdit($event)" @action-delete="doDelete($event)">
         </post-feed>
     </div>
 </template>

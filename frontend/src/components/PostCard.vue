@@ -1,9 +1,9 @@
 <template>
-    <div class="card p-3">
+    <div :class="[hovering ? 'hover':'', 'card p-3']" @mouseover='hovering=true' @mouseout='hovering=false'>
         <new-post v-if="editMode" :oldPost="post" :noPost="true" @post-ok="onEdit($event)">
             <button type="button" class="btn btn-outline-secondary rounded-pill py-0" @click.prevent="editMode=false">Cancel</button>
         </new-post>
-        <router-link :to='{name: "post", params: {username: post.author.username, postID: post.id}}' tag='div' class="card-text card-view" v-else>
+        <router-link v-else :to='{name: "post", params: {username: post.author.username, postID: post.id}}' tag='div' class="card-text card-view">
             <h6 class="card-title mb-1">
                 <router-link :to="{ name: 'user', params: {username: post.author.username} }">{{ post.author.username }}</router-link>
                 <span class="small text-muted">at {{ post.create_time }} said:</span>
@@ -44,6 +44,7 @@ export default{
     data() {
         return {
             editMode: false,
+            hovering: false,
         }
     },
     methods: {
@@ -78,4 +79,7 @@ export default{
 </script>
 
 <style scoped>
+.hover {
+    background-color: #f9f9f9;
+}
 </style>

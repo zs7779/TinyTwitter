@@ -13,7 +13,7 @@ import { URLs, PLACEHOLDERs, getToken, postsViewsMixin, userViewsMixin } from '.
 export default{
     name: "profile-view",
     props: ['username', 'postID'],
-    data: function () {
+    data() {
         return {
             user: PLACEHOLDERs.user,
             posts: PLACEHOLDERs.posts,
@@ -22,7 +22,7 @@ export default{
     },
     mixins: [postsViewsMixin, userViewsMixin],
     methods: {
-        getUserPosts: function(query='') {
+        getUserPosts(query='') {
             axios.get(`${URLs.usersPosts(this.username)}`, {
                 params: {
                     after: 0,
@@ -34,7 +34,7 @@ export default{
                 this.posts = response.data.posts;
             })
         },
-        getUserPost: function(id) {
+        getUserPost(id) {
             const posts = this.posts.filter(p => p.id == id);
             if (posts.length !== 1) {
                 axios.get(`${URLs.usersPosts(this.username, id)}`, {
@@ -51,16 +51,16 @@ export default{
         }
     },
     watch: {
-        postID: function() {
+        postID() {
             if (this.postID) {
                 if (this.postID !== this.post.id) this.getUserPost(this.postID);
             }
         },
-        username: function() {
+        username() {
             if (this.username !== this.user.username) this.getUserPosts('');
         }
     },
-    created: function() {
+    created() {
         if (this.postID) {
             this.getUserPost(this.postID);
         } else {

@@ -33,37 +33,37 @@ export default{
             },
         },
     },
-    data: function() {
+    data() {
         return {
             postText: this.oldPost.text,
         };
     },
     computed: {
-        charRemaining: function() {
+        charRemaining() {
             this.postText = this.postText.substr(0, 140);
             return `${this.postText.length}/140`;
         },
-        postIsValid: function() {
+        postIsValid() {
             return (this.postText.length > 0) && (this.postText.length <= 140);
         }
     },
     methods: {
-        onSubmitPost: function (event) {
+        onSubmitPost(event) {
             if (this.postText.length == 0) return;
             const token = getToken();
             if (!token) return;
             if (this.noPost) {
-                this.$emit("post-ok", this.postText);
+                this.$emit("action-post", this.postText);
             } else {
                 axios.post(`${URLs.posts()}`, {
-                    postText: this.postText,
+                    text: this.postText,
                 }, {
                     headers: {
                         'X-CSRFTOKEN': token,
                     },
                 }).then(response => {
                     this.postText = "";
-                    this.$emit("post-ok");
+                    this.$emit("action-post");
                 })
             }
         },

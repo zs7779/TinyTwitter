@@ -1,6 +1,6 @@
 <template>
     <div :class="[hovering ? 'hover':'', 'card p-3']" @mouseover='hovering=true' @mouseout='hovering=false'>
-        <new-post v-if="editMode" :oldPost="post" :noPost="true" @post-ok="onEdit($event)">
+        <new-post v-if="editMode" :oldPost="post" :noPost="true" @action-post="onEdit($event)">
             <button type="button" class="btn btn-outline-secondary rounded-pill py-0" @click.prevent="editMode=false">Cancel</button>
         </new-post>
         <router-link v-else :to='{name: "post", params: {username: post.author.username, postID: post.id}}' tag='div' class="card-text card-view">
@@ -48,7 +48,7 @@ export default{
         }
     },
     methods: {
-        onLike: function(event) {
+        onLike(event) {
             const post = {
                 ...this.post,
                 like_count: this.post.liked ? this.post.like_count - 1 : this.post.like_count + 1,
@@ -56,19 +56,19 @@ export default{
             }
             this.$emit("action-like", post);
         },
-        onEdit: function(postText) {
+        onEdit(postText) {
             const post = {
                 ...this.post,
                 text: postText,
             }
             this.$emit("action-edit", post);
         },
-        onDelete: function(event) {
+        onDelete(event) {
             this.$emit("action-delete", this.post.id);
         },
     },
     watch: {
-        post: function() {
+        post() {
             this.editMode = false;
         }
     },

@@ -12,14 +12,14 @@ import { URLs, PLACEHOLDERs, getToken, postsViewsMixin } from './utils'
 export default{
     name: "posts-view",
     props: ['all'],
-    data: function () {
+    data () {
         return {
             posts: PLACEHOLDERs.posts,
         }
     },
     mixins: [postsViewsMixin],
     methods: {
-        getPosts: function(query='') {
+        getPosts(query='') {
             const url = this.all ? `${URLs.posts()}` : `${URLs.posts('home')}`;
             axios.get(url, {
                 params: {

@@ -25,7 +25,7 @@ export default{
     name: "user-profile",
     props: ["user"],
     methods: {
-        onFollow: function() {
+        onFollow() {
             // can be argued weither to emit user object
             this.$emit("action-follow");
         }

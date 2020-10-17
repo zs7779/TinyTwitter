@@ -88,12 +88,8 @@ def profile_read(request, username):
 @require_POST
 def posts_write(request):
     data = json.loads(request.body)
-    if data.get('isComment') is True:
-        # todo: comment
-        pass
-
-    if data.get('postText') is not None:
-        post = Post(author=request.user, text=data['postText'])
+    if data.get('text') is not None:
+        post = Post(author=request.user, text=data['text'])
         if post.is_valid():
             post.save()
             return JsonResponse({"message": "Post successful"}, status=201)
@@ -101,15 +97,22 @@ def posts_write(request):
 
 
 @login_required
-@require_http_methods(["PUT", "DELETE"])
+@require_http_methods(["POST", "PUT", "DELETE"])
 def post_write(request, post_id):
     try:
         post = Post.objects.get(id=post_id)
     except Post.DoesNotExist:
         return JsonResponse({"message": "Post does not exist"}, status=404)
 
-    if request.method == "PUT":
-        data = json.loads(request.body)
+    if request.method == "DELETE":
+        if post.author != request.user:
+            return JsonResponse({"message": "Forbidden"}, status=403)
+        post.delete()
+        return JsonResponse({"message": "Delete succesful"}, status=200)
+
+    data = json.loads(request.body)
+
+    if request.method == "POST":
         if data.get('like') is not None:
             if data['like']:
                 try:
@@ -124,18 +127,13 @@ def post_write(request, post_id):
             post.update_counts().save()
             return JsonResponse({"message": "Like succesful"}, status=200)
 
-        if data.get('postText') is not None:
-            if post.author == request.user and data.get('postText') is not None:
-                post.text = data['postText']
+    if request.method == "PUT":
+        if data.get('text') is not None:
+            if post.author == request.user and data.get('text') is not None:
+                post.text = data['text']
                 post.save()
                 return JsonResponse({"message": "Like succesful"}, status=200)
             return JsonResponse({"message": "Forbidden"}, status=403)
-
-    if request.method == "DELETE":
-        if post.author != request.user:
-            return JsonResponse({"message": "Forbidden"}, status=403)
-        post.delete()
-        return JsonResponse({"message": "Delete succesful"}, status=200)
 
     return JsonResponse({
         "error": "Bad request"

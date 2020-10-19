@@ -1,21 +1,30 @@
+import ProfileView from './ProfileView.vue'
 import PostsView from './PostsView.vue'
-import UserProfileView from './UserProfileView.vue'
-import UserPostsView from './UserPostsView.vue'
-import UserPostView from './UserPostView.vue'
+import PostView from './PostView.vue'
 
 const routes = [
-    {path: '/', component: PostsView, name: "home"},
-    {path: '/all', component: PostsView, props: {all: true}, name: "all"},
-    {path: '/:username', component: UserProfileView, props: true,
-        children: [
-            {path:'', components: {
-                posts: UserPostsView,
-            }, name: 'user'},
-            {path:':postID', components: {
-                post: UserPostView,
-            }, props:true, name: 'post'},
-        ]
-    },
+    {path: '/', components: {
+        posts: PostsView,
+    }, name: "home"},
+    {path: '/all', components: {
+        posts: PostsView,
+    }, props: {
+        posts: {all: true},
+    }, name: 'all'},
+    {path: '/:username', components: {
+        profile: ProfileView,
+        posts: PostsView,
+    }, props: {
+        profile: true,
+        posts: true
+    }, name: 'user'},
+    {path: '/:username/:postID', components: {
+        profile: ProfileView,
+        post: PostView,
+    }, props: {
+        profile: true,
+        post: true
+    }, name: 'post'},
 ]
 
 export default routes;

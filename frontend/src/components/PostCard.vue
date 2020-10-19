@@ -1,9 +1,6 @@
 <template>
     <div :class="[hovering ? 'hover':'', 'card p-3']" @mouseover='hovering=true' @mouseout='hovering=false'>
-        <new-post v-if="editMode" :oldPost="post" :noPost="true" @action-post="onEdit($event)">
-            <button type="button" class="btn btn-outline-secondary rounded-pill py-0" @click.prevent="editMode=false">Cancel</button>
-        </new-post>
-        <router-link v-else :to='{name: "post", params: {username: post.author.username, postID: post.id}}' tag='div' class="card-text card-view">
+        <router-link :to='{name: "post", params: {username: post.author.username, postID: post.id}}' tag='div' class="card-text card-view">
             <h6 class="card-title mb-1">
                 <router-link :to="{ name: 'user', params: {username: post.author.username} }">{{ post.author.username }}</router-link>
                 <span class="small text-muted">at {{ post.create_time }} said:</span>
@@ -27,7 +24,7 @@
                 <b-dropdown id="dropdown-dropup" dropup variant="btn btn-transparent px-1 py-0" no-caret title="Options">
                     <template v-slot:button-content><b-icon icon="chevron-up" class="card-button"></b-icon></template>
                     <b-dropdown-item v-if="post.owner" @click="onDelete"><b-icon icon="x" class="card-button"></b-icon> Delete</b-dropdown-item>
-                    <b-dropdown-item v-if="post.owner" @click="editMode=true"><b-icon icon="pencil" class="card-button"></b-icon> Edit</b-dropdown-item>
+                    <b-dropdown-item v-b-modal.new-post v-if="post.owner" @click="onEdit"><b-icon icon="pencil" class="card-button"></b-icon> Edit</b-dropdown-item>
                     <b-dropdown-item><b-icon icon="share" class="card-button"></b-icon> Share</b-dropdown-item>
                 </b-dropdown>
             </div>
@@ -36,44 +33,67 @@
 </template>
 
 <script>
-import NewPost from './NewPost.vue'
+import { URLs, getToken } from './utils'
 
 export default{
     name: "post-card",
     props: ['post'],
     data() {
         return {
-            editMode: false,
             hovering: false,
         }
     },
     methods: {
-        onLike(event) {
-            const post = {
-                ...this.post,
-                like_count: this.post.liked ? this.post.like_count - 1 : this.post.like_count + 1,
-                liked: !this.post.liked,
-            }
-            this.$emit("action-like", post);
+        onComment(event) {
+            const postParams = {
+                parentPost: null,
+                parentComment: null,
+            };
         },
-        onEdit(postText) {
-            const post = {
-                ...this.post,
-                text: postText,
-            }
-            this.$emit("action-edit", post);
+        onRepost(event) {
+            const postParams = {
+                parentPost: null,
+                parentComment: null,
+            };
+        },
+        onEdit(event) {
+            const postParams = {
+                oldPost: this.post,
+            };
+            this.$emit("action-edit", postParams);
+        },
+        onLike(event) {
+            const token = getToken();
+            if (!token) return;
+            axios.post(`${URLs.posts(this.post.id)}`, {
+                like: !this.post.liked,
+            }, {
+                headers: {
+                    'X-CSRFTOKEN': token,
+                },
+            }).then(response => {
+                const post = {
+                    ...this.post,
+                    like_count: this.post.liked ? this.post.like_count - 1 : this.post.like_count + 1,
+                    liked: !this.post.liked,
+                };
+                this.$emit("like-ok", post);
+            })
         },
         onDelete(event) {
-            this.$emit("action-delete", this.post.id);
+            const token = getToken();
+            if (!token) return;
+            axios.delete(`${URLs.posts(this.post.id)}`, {
+                headers: {
+                    'X-CSRFTOKEN': token,
+                },
+            }).then(response => {
+                this.$emit("delete-ok", this.post.id);
+            })
         },
     },
-    watch: {
-        post() {
-            this.editMode = false;
-        }
-    },
     components: {
-        NewPost
+        
     }
 }
 </script>

@@ -5,6 +5,8 @@ from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, QueryDict
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.core.exceptions import ValidationError
+from django.views.decorators.cache import cache_control
 
 from .models import User, Post, Follow, Comment, Like, HashTag, Mention
 
@@ -35,19 +37,16 @@ def posts_read(request, path=None, username=None):
             return JsonResponse({"error": "User does not exist"}, status=404)
         posts = Post.objects.filter(author=user).order_by("-create_time")
         return JsonResponse({
-            "user": user.serialize(request.user),
             "posts": [post.serialize(request.user) for post in posts],
         }, safe=False)
     elif path is None:
         posts = Post.objects.all().order_by("-create_time")
         return JsonResponse({
-            "user": {},
             "posts": [post.serialize(request.user) for post in posts],
         }, safe=False)
     elif path == 'home' and request.user.is_authenticated:
         posts = Post.objects.filter(Q(author__followers__follower=request.user) | Q(author=request.user)).order_by("-create_time")
         return JsonResponse({
-            "user": {},
             "posts": [post.serialize(request.user) for post in posts],
         }, safe=False)
     else:
@@ -68,7 +67,6 @@ def post_read(request, post_id, username=None):
             return JsonResponse({"error": "User does not exist"}, status=404)
         user = user.serialize(request.user)
     return JsonResponse({
-        "user": user,
         "post": post.serialize(request.user),
     }, safe=False)
 
@@ -90,14 +88,23 @@ def posts_write(request):
     data = json.loads(request.body)
     if data.get('text') is not None:
         post = Post(author=request.user, text=data['text'])
-        if post.is_valid():
-            post.save()
-            return JsonResponse({"message": "Post successful"}, status=201)
-    return JsonResponse({"message": "Post body is illegal"}, status=400)
+        try:
+            post.full_clean()
+        except ValidationError as e:
+            print(e)
+            return JsonResponse({"message": "Post body is illegal"}, status=400, safe=False)
+        post.save()
+        return JsonResponse({
+            "message": "Post successful",
+            "post": post.serialize(request.user),
+        }, status=201)
+    return JsonResponse({
+        "error": "Bad request"
+    }, status=400)
 
 
 @login_required
-@require_http_methods(["POST", "PUT", "DELETE"])
+@require_http_methods(["POST", "PATCH", "DELETE"])
 def post_write(request, post_id):
     try:
         post = Post.objects.get(id=post_id)
@@ -126,11 +133,29 @@ def post_write(request, post_id):
                     like.delete()
             post.update_counts().save()
             return JsonResponse({"message": "Like succesful"}, status=200)
+        
+        if data.get('comment') is not None:
+            comment = Comment(author=request.user, text=data['comment'], parent=post)
+            try:
+                comment.full_clean()
+            except ValidationError as e:
+                print(e)
+                return JsonResponse({"message": "Post body is illegal"}, status=400, safe=False)
+            comment.save()
+            return JsonResponse({
+                "message": "Comment succesful",
+                "comment": comment.serialize(request.user),
+            }, status=201)
 
-    if request.method == "PUT":
+    if request.method == "PATCH":
         if data.get('text') is not None:
             if post.author == request.user and data.get('text') is not None:
                 post.text = data['text']
+                try:
+                    post.full_clean()
+                except ValidationError as e:
+                    print(e)
+                    return JsonResponse({"message": "Post body is illegal"}, status=400, safe=False)
                 post.save()
                 return JsonResponse({"message": "Like succesful"}, status=200)
             return JsonResponse({"message": "Forbidden"}, status=403)
@@ -141,7 +166,7 @@ def post_write(request, post_id):
 
 
 @login_required
-@require_http_methods(["POST", "PUT"])
+@require_http_methods(["POST", "PATCH"])
 def profile_write(request, username):
     try:
         user = User.objects.get(username=username)
@@ -165,7 +190,7 @@ def profile_write(request, username):
             user.update_counts().save()
             return JsonResponse({"message": "Follow succesful"}, status=200)
 
-    if request.method == "PUT":
+    if request.method == "PATCH":
         # todo: edit pofile
         if request.user == user:
             pass

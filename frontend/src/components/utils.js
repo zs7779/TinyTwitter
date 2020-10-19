@@ -14,7 +14,7 @@ const SIGNALs = {
 
 
 const PLACEHOLDERs = {
-    user: {},
+    user: {id: -1, username: 'username'},
     post: {
         author: {id: -1, username: 'username'},
         id: -1,
@@ -23,6 +23,12 @@ const PLACEHOLDERs = {
         like_count: null,
     },
     posts: [],
+    postParams: {
+        isComment: false,
+        oldPost: null,
+        parentPost: null,
+        parentComment: null,
+    },
 }
 
 
@@ -40,96 +46,13 @@ function printError(error) {
 
 
 function getToken() {
-    if (document.getElementsByName('csrfmiddlewaretoken').length > 0) {
-        return document.getElementsByName('csrfmiddlewaretoken')[0].value;
+    const csrftoken = Cookies.get('csrftoken');
+    if (csrftoken) {
+        return csrftoken;
     }
     window.location.href = "/login/";
     return false;
 }
-
-
-const postsViewsMixin = {
-    methods: {
-        updatePost(editedPost) {
-            if (this.post && this.post.id === editedPost.id) {
-                this.post = editedPost;
-            } else {
-                this.posts = this.posts.map(p => p.id === editedPost.id ? editedPost : p);
-            }
-        },
-        deletePost(deleteID) {
-            if (this.post && this.post.id === deleteID) {
-                this.post = PLACEHOLDERs.post;
-            } else {
-                this.posts = this.posts.filter(p => p.id !== deleteID);
-            }
-        },
-        doLike(post) {
-            const token = getToken();
-            if (!token) return;
-            axios.post(`${URLs.posts(post.id)}`, {
-                like: post.liked,
-            }, {
-                headers: {
-                    'X-CSRFTOKEN': token,
-                },
-            }).then(response => {
-                this.updatePost(post);
-            })
-        },
-        doEdit(post) {
-            const token = getToken();
-            if (!token) return;
-            axios.put(`${URLs.posts(post.id)}`, {
-                text: post.text,
-            }, {
-                headers: {
-                    'X-CSRFTOKEN': token,
-                },
-            }).then(response => {
-                this.updatePost(post);
-            })
-        },
-        doDelete(id) {
-            const token = getToken();
-            if (!token) return;
-            axios.delete(`${URLs.posts(id)}`, {
-                headers: {
-                    'X-CSRFTOKEN': token,
-                },
-            }).then(response => {
-                this.deletePost(id);
-            })
-        },
-    },
-};
-
-
-const userViewsMixin = {
-    methods: {
-        updateUser(editedUser) {
-            this.user = editedUser;
-        },
-        doFollow() {
-            const token = getToken();
-            if (!token) return;
-            axios.post(`${URLs.users(this.user.username)}`, {
-                follow: !this.user.following,
-            }, {
-                headers: {
-                    'X-CSRFTOKEN': token,
-                },
-            }).then(response => {
-                const user = {
-                    ...this.user,
-                    follower_count: this.user.following ? this.user.follower_count - 1 : this.user.follower_count + 1,
-                    following: !this.user.following,
-                }
-                this.updateUser(user);
-            })
-        },
-    },
-};
 
 
 export {
@@ -138,6 +61,4 @@ export {
     PLACEHOLDERs,
     printError,
     getToken,
-    postsViewsMixin,
-    userViewsMixin,
 }

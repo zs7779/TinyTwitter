@@ -6,14 +6,13 @@
     {% include "frontend/navbar.html" %}
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-6 main-content">
-                {% if request.user.is_authenticated %}
-                <new-post class="mb-2" v-if="pathname==='/'"></new-post>
-                {% csrf_token %}
-                {% endif %}
-                <keep-alive :max=2>
-                    <router-view></router-view>
-                </keep-alive>
+            <div class="col-6 main-content">                
+                <!-- <keep-alive :max=2> -->
+                    <new-post :post-params='postParams' @edit-ok='updateContent($event)' @post-ok='addContent($event)'></new-post>
+                    <router-view ref="profile" name="profile" :key='$route.path'></router-view>
+                    <router-view ref="posts" name="posts" @action-edit='postParams=$event'></router-view>
+                    <router-view ref="post" name="post" @action-edit='postParams=$event'></router-view>
+                <!-- </keep-alive> -->
             </div>
         </div>
     </div>

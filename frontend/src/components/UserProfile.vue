@@ -20,10 +20,14 @@
 </template>
 
 <script>
+import { PLACEHOLDERs } from './utils'
 
 export default{
     name: "user-profile",
-    props: ["user"],
+    props: {user: {
+        type: Object,
+        default(){return PLACEHOLDERs.user;},
+    }},
     methods: {
         onFollow() {
             // can be argued weither to emit user object

@@ -51,7 +51,7 @@ class Post(models.Model):
     MAX_LENGTH = 140
     author = models.ForeignKey("User", on_delete=models.CASCADE, related_name="posts")
     text = models.CharField(max_length=MAX_LENGTH)
-    parent = models.ForeignKey("Post", on_delete=models.DO_NOTHING, null=True, related_name="reposts")
+    parent = models.ForeignKey("Post", on_delete=models.DO_NOTHING, null=True, blank=True, related_name="reposts")
     create_time = models.DateTimeField(auto_now_add=True)
     comment_count = models.PositiveIntegerField(default=0)
     repost_count = models.PositiveIntegerField(default=0)
@@ -84,7 +84,8 @@ class Comment(models.Model):
     MAX_LENGTH = 140
     author = models.ForeignKey("User", on_delete=models.CASCADE, related_name="comments")
     text = models.CharField(max_length=MAX_LENGTH)
-    parent = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="comments")
+    parent_post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="comments")
+    parent_comment = models.ForeignKey("Comment", on_delete=models.CASCADE, related_name="comments")
     create_time = models.DateTimeField(auto_now_add=True)
 
     def serialize(self, user):

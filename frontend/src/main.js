@@ -3,6 +3,7 @@
 
 import routes from './components/router'
 import NewPost from './components/NewPost.vue'
+import { PLACEHOLDERs } from './components/utils'
 
 Vue.config.productionTip = false
 // Vue.use(VueRouter)
@@ -19,11 +20,27 @@ var vm = new Vue({
   router,
   data: {
       pathname: window.location.pathname,
+      postParams: PLACEHOLDERs.postParams,
   },
   computed: {
-      updatePath: function() {
-          this.pathname = window.location.pathname;
-      }
+    updatePath() {
+        this.pathname = window.location.pathname;
+    },
+  },
+  methods: {
+    log(e){console.log(e)},
+    clearPost() {
+      this.postParams = PLACEHOLDERs.postParams;
+    },
+    updateContent(post) {
+      if (this.$refs.posts) this.$refs.posts.updatePosts(post.id, post);
+      if (this.$refs.post) this.$refs.post.updatePost(post.id, post);
+      this.clearPost();
+    },
+    addContent(post) {
+      if (this.$refs.posts) this.$refs.posts.prependPosts([post]);
+      this.clearPost();
+    }
   },
   components: {
     NewPost,

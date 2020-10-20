@@ -24,10 +24,10 @@ const PLACEHOLDERs = {
     },
     posts: [],
     postParams: {
-        isComment: false,
         oldPost: null,
         parentPost: null,
-        parentComment: null,
+        isComment: false,
+        rootPost: null,
     },
 }
 

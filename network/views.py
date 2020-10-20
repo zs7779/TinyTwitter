@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.views.decorators.cache import cache_control
 
-from .models import User, Post, Follow, Comment, Like, HashTag, Mention
+from .models import User, Post, Follow, Like, HashTag, Mention
 
 
 def index(request, path=None):
@@ -18,7 +18,7 @@ def index(request, path=None):
 @require_GET
 def current_user(request):
     if request.user.is_authenticated:
-        return JsonResponse({"user": request.user.snippet()})
+        return JsonResponse({"user": request.user.serialize()})
     else:
         return JsonResponse({"user": {}})
 
@@ -55,10 +55,6 @@ def posts_read(request, path=None, username=None):
 
 @require_GET
 def post_read(request, post_id, username=None):
-    try:
-        post = Post.objects.get(id=post_id)
-    except Post.DoesNotExist:
-        return JsonResponse({"error": "Post does not exist"}, status=404)
     user = {}
     if username:
         try:
@@ -66,8 +62,14 @@ def post_read(request, post_id, username=None):
         except User.DoesNotExist:
             return JsonResponse({"error": "User does not exist"}, status=404)
         user = user.serialize(request.user)
+    try:
+        post = Post.objects.get(id=post_id)
+    except Post.DoesNotExist:
+        return JsonResponse({"error": "Post does not exist"}, status=404)
+    comments = [comment.serialize(user=request.user) for comment in post.comments.all()]
     return JsonResponse({
         "post": post.serialize(request.user),
+        "comments": comments,
     }, safe=False)
 
 
@@ -134,13 +136,17 @@ def post_write(request, post_id):
             post.update_counts().save()
             return JsonResponse({"message": "Like succesful"}, status=200)
         
-        if data.get('comment') is not None:
-            comment = Comment(author=request.user, text=data['comment'], parent=post)
+        if data.get('text') is not None:
+            try:
+                parent = Post.objects.get(id=data.get('parent_id'))
+            except Post.DoesNotExist:
+                return JsonResponse({"message": "Post does not exist"}, status=404)
+            comment = Post(author=request.user, text=data['text'], parent=parent, is_comment=True, root_post=post)
             try:
                 comment.full_clean()
             except ValidationError as e:
                 print(e)
-                return JsonResponse({"message": "Post body is illegal"}, status=400, safe=False)
+                return JsonResponse({"message": "Comment body is illegal"}, status=400, safe=False)
             comment.save()
             return JsonResponse({
                 "message": "Comment succesful",

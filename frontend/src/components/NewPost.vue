@@ -1,7 +1,7 @@
 <template>
     <div>
         <slot></slot>
-        <b-modal id='new-post' title='' @ok="doSubmitPost">
+        <b-modal id='new-post' title='' @ok="doSubmitPost" @hidden="doClear">
             <textarea autofocus rows=4 class="form-control border-0" v-model="postText" placeholder="Say something..."></textarea>
             <template v-slot:modal-footer="{ ok }">
                 <span class="mx-1">{{ charRemaining }}</span>
@@ -38,7 +38,7 @@ export default{
         },
         postURL() {
             if (this.postParams.oldPost) return `${URLs.usersPosts(this.postParams.oldPost.author.username, this.postParams.oldPost.id)}`;
-            if (this.postParams.isComment) return `${URLs.usersPosts(this.postParams.parentPost.author.username, this.postParams.parentPost.id)}`;
+            if (this.postParams.isComment) return `${URLs.usersPosts(this.postParams.rootPost.author.username, this.postParams.rootPost.id)}`;
             return `${URLs.posts()}`;
         },
     },
@@ -49,8 +49,7 @@ export default{
             if (!token) return;
             this.postMethod(this.postURL, {
                 text: this.postText,
-                parentPost: this.postParams.parentPost ? this.postParams.parentPost.id : null,
-                parentComment: this.postParams.parentComment ? this.postParams.parentComment.id : null,
+                parent_id: this.postParams.parentPost ? this.postParams.parentPost.id : null,
             }, {
                 headers: {
                     'X-CSRFTOKEN': token,
@@ -64,6 +63,10 @@ export default{
                 this.postText = "";
             })
         },
+        doClear() {
+            this.postText = "";
+            this.$emit('action-clear');
+        }
     },
     watch: {
         postParams() {

@@ -1,18 +1,12 @@
 <template>
     <div :class="[hovering ? 'hover':'', 'card p-3']" @mouseover='hovering=true' @mouseout='hovering=false'>
-        <router-link :to='{name: "post", params: {username: post.author.username, postID: post.id}}' tag='div' class="card-text card-view">
-            <h6 class="card-title mb-1">
-                <router-link :to="{ name: 'user', params: {username: post.author.username} }">{{ post.author.username }}</router-link>
-                <span class="small text-muted">at {{ post.create_time }} said:</span>
-            </h6>
-            <p>{{ post.text }}</p>
-        </router-link>
+        <post-body :post='post'><post-body v-if='post.parent' :post='post.parent' class='card p-3' /></post-body>
         <div class="card-footer bg-transparent p-0">
             {{ post.like_count }} likes
         </div>
         <div class="card-footer bg-transparent p-0">
             <div class="d-flex justify-content-around">
-                <button type="button" class="btn btn-transparent px-1 py-0" title="Comment">
+                <button type="button" v-b-modal.new-post class="btn btn-transparent px-1 py-0" title="Comment" @click="onComment">
                     <b-icon icon="chat" class="card-button"></b-icon>
                 </button>
                 <button type="button" class="btn btn-transparent px-1 py-0" title="Repost">
@@ -33,6 +27,7 @@
 </template>
 
 <script>
+import PostBody from './PostBody.vue'
 import { URLs, getToken } from './utils'
 
 export default{
@@ -46,21 +41,23 @@ export default{
     methods: {
         onComment(event) {
             const postParams = {
-                parentPost: null,
-                parentComment: null,
+                isComment: true,
+                parentPost: this.post,
+                rootPost: this.post.is_comment ? this.post.root_post : this.post,
             };
+            this.$emit("action-post", postParams);
         },
         onRepost(event) {
             const postParams = {
-                parentPost: null,
-                parentComment: null,
+                parentPost: this.post,
             };
+            this.$emit("action-post", postParams);
         },
         onEdit(event) {
             const postParams = {
                 oldPost: this.post,
             };
-            this.$emit("action-edit", postParams);
+            this.$emit("action-post", postParams);
         },
         onLike(event) {
             const token = getToken();
@@ -93,7 +90,7 @@ export default{
         },
     },
     components: {
-        
+        PostBody
     }
 }
 </script>

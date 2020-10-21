@@ -41,27 +41,30 @@ export default{
                 this.posts.push(p);
             })
         },
-        updatePosts(editID, editedPost, addBefore=true) {
-            this.posts = this.posts.map(p => p.id === editID ? editedPost : p);
+        updatePosts(editID, post, addBefore=true) {
+            this.posts = this.posts.map(p => p.id === editID ? post : p);
         },
-        deletePost(deleteID) {
-            this.posts = this.posts.filter(p => p.id !== deleteID);
+        addPost(post) {
+            this.prependPosts([post]);
+            if (post.parent) {
+                this.addRepost(post.parent.id);
+            }
+        },
+        deletePost(post) {
+            this.posts = this.posts.filter(p => p.id !== post.id);
+            if (post.parent) {
+                this.deleteRepost(post.parent.id);
+            }
         },
         addComment(id) {
-            this.posts = this.posts.map(p => p.id === id ? {
-                ...p,
-                comment_count: p.comment_count+1,
-                commented: true,
-            } : p);
+            this.posts = this.posts.map(p => p.id === id ? {...p, comment_count: p.comment_count+1, commented: p.commented+1} : p);
         },
-        deleteComment(id) {
-            this.posts = this.posts.map(p => p.id === id ? {...p, comment_count: p.comment_count-1} : p);
-        },
+        //delete comment not possible in this view,
         addRepost(id) {
-            this.posts = this.posts.map(p => p.id === id ? {...p, repost_count: p.repost_count+1} : p);
+            this.posts = this.posts.map(p => p.id === id ? {...p, repost_count: p.repost_count+1, reposted: p.reposted+1} : p);
         },
         deleteRepost(id) {
-            this.posts = this.posts.map(p => p.id === id ? {...p, repost_count: p.repost_count+1} : p);
+            this.posts = this.posts.map(p => p.id === id ? {...p, repost_count: p.repost_count-1, reposted: p.reposted-1} : p);
         },
     },
     created: function () {

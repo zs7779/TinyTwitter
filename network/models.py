@@ -49,7 +49,7 @@ class Post(models.Model):
     parent = models.ForeignKey("Post", on_delete=models.SET_NULL, null=True, blank=True, related_name="children")
     create_time = models.DateTimeField(auto_now_add=True)
     is_comment = models.BooleanField(default=False)
-    root_post = models.ForeignKey("Post", on_delete=models.SET_NULL, null=True, blank=True, related_name="comments")
+    root_post = models.ForeignKey("Post", on_delete=models.CASCADE, null=True, blank=True, related_name="comments")
 
     def serialize(self, user=None, detail=DETAIL_FULL):
         if detail == DETAIL_SHORT:

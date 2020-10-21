@@ -20,13 +20,13 @@
         <div v-if=buttons class="card-footer bg-transparent p-0">
             <div class="d-flex justify-content-around">
                 <button type="button" v-b-modal.new-post class="btn btn-transparent px-1 py-0" title="Comment" @click="$emit('action-comment')">
-                    <b-icon icon="chat" :class="[post.commented ? 'card-button-active' : 'card-button']"></b-icon> {{ post.comment_count }}
+                    <b-icon icon="chat" :class="[post.commented ? 'card-button-comment' : 'card-button']"></b-icon> {{ post.comment_count }}
                 </button>
-                <button type="button" class="btn btn-transparent px-1 py-0" title="Repost">
-                    <b-icon icon="arrow-repeat" :class="[post.reposted ? 'card-button-active' : 'card-button']"></b-icon> {{ post.repost_count }}
+                <button type="button" v-b-modal.new-post class="btn btn-transparent px-1 py-0" title="Repost" @click="$emit('action-repost')">
+                    <b-icon icon="arrow-repeat" :class="[post.reposted ? 'card-button-repost' : 'card-button']"></b-icon> {{ post.repost_count }}
                 </button>
                 <button type="button" class="btn btn-transparent px-1 py-0" title="Like" @click="$emit('action-like')">
-                    <b-icon icon="heart" :class="[post.liked ? 'card-button-active' : 'card-button']"></b-icon> {{ post.like_count }}
+                    <b-icon icon="heart" :class="[post.liked ? 'card-button-like' : 'card-button']"></b-icon> {{ post.like_count }}
                 </button>
                 <b-dropdown id="dropdown-dropup" dropup variant="btn btn-transparent px-1 py-0" no-caret title="Options">
                     <template v-slot:button-content><b-icon icon="chevron-up" class="card-button"></b-icon></template>
@@ -72,5 +72,18 @@ export default{
 <style scoped>
 .hover {
     background-color: #f9f9f9;
+}
+.card-button {
+    color: #909090;
+}
+
+.card-button-comment {
+    color: darkturquoise;
+}
+.card-button-repost {
+    color: limegreen;
+}
+.card-button-like {
+    color: red;
 }
 </style>

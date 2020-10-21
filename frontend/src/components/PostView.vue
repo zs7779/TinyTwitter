@@ -29,14 +29,14 @@ export default{
                 }
             })
         },
-        updatePost(editID, editedPost) {
+        updatePost(editID, post) {
             if (this.post.id === editID) {
-                this.post = editedPost;
-            } else this.updateComments(editID, editedPost);
+                this.post = post;
+            } else this.updateComments(editID, post);
         },
-        deletePost(deleteID) {
-            if (this.post.id === deleteID) this.$router.push({name: 'home'});
-            else this.deleteComment(deleteID);
+        deletePost(post) {
+            if (this.post.id === post.id) this.$router.push({name: 'home'});
+            else this.deleteComment(post);
         },
         prependComments(editID, comments) {
             if (this.post.id === editID) {
@@ -57,24 +57,26 @@ export default{
                 ...p,
                 comment_count: p.comment_count + 1,
                 commented: p.commented + 1,
-            } : p)
+            } : p);
         },
-        deleteComment(deleteID) {
-            const comments = this.post.comments.filter(p => p.id === deleteID);
-            this.post.comments = this.post.comments.filter(p => p.id !== deleteID);
+        deleteComment(comment) {
+            this.post.comments = this.post.comments.filter(p => p.id !== comment.id);
             this.post.comment_count = this.post.comments.length;
             this.post.commented = this.post.comments.filter(p => p.owner).length;
-            console.log(this.post.comments);
-            if (comments.length == 1) {
-                const comment = comments[0];
-                console.log(comment)
-                this.post.comments = this.post.comments.map(p => p.id === comment.parent.id ? {
-                    ...p,
-                    comment_count: p.comment_count - 1,
-                    commented: p.commented - 1,
-                } : p)
+            
+            this.post.comments = this.post.comments.map(p => p.id === comment.parent.id ? {
+                ...p,
+                comment_count: p.comment_count - 1,
+                commented: p.commented - 1,
+            } : p);
+        },
+        addRepost(post) {
+            if (post.parent && post.parent.id == this.post.id) {
+                this.post.repost_count++;
+                this.post.posted++;
             }
         },
+        // delete repost not possible in this view,
     },
     watch: {
         username() {

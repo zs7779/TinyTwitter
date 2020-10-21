@@ -2,7 +2,8 @@
     <div class="card p-1">
         <post-body
             :post='post' :buttons='true' :verbose='verbose'
-            @action-comment="onComment(post)" @action-like="onLike(post)" @action-delete="onDelete(post)" @action-edit="onEdit(post)"
+            @action-comment="onComment(post)" @action-repost="onRepost(post)" @action-like="onLike(post)"
+            @action-delete="onDelete(post)" @action-edit="onEdit(post)"
         >
             <post-body v-if='post.parent' :post='post.parent' :buttons='false' class='card p-3' />
             <div v-if='verbose' class="card-footer bg-transparent p-0 ">
@@ -12,7 +13,8 @@
         <div v-if='verbose' class="list-group list-group-flush border-top">
             <post-body 
                 v-for='comment in post.comments' :key='comment.id' :post='comment' :buttons='true'
-                @action-comment="onComment(comment)" @action-like="onLike(comment)" @action-delete="onDelete(comment)" @action-edit="onEdit(comment)"
+                @action-comment="onComment(comment)" @action-repost="onRepost(post)" @action-like="onLike(comment)"
+                @action-delete="onDelete(comment)" @action-edit="onEdit(comment)"
                 class="list-group-item" 
             />
         </div>
@@ -72,7 +74,7 @@ export default{
                     'X-CSRFTOKEN': token,
                 },
             }).then(response => {
-                this.$emit("delete-ok", post.id);
+                this.$emit("delete-ok", post);
             })
         },
     },

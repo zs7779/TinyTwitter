@@ -38,12 +38,14 @@ var vm = new Vue({
       this.clearPost();
     },
     addContent(post) {
-      if (this.$refs.posts) this.$refs.posts.prependPosts([post]);
+      if (this.$refs.post) this.$refs.post.addRepost(post);
+      if (this.$refs.posts) this.$refs.posts.addPost(post);
       this.clearPost();
     },
     addComment(post) {
       if (this.$refs.post) this.$refs.post.addComment(post);
       if (this.$refs.posts) this.$refs.posts.addComment(post.root_post.id, post);
+      this.clearPost(); // not nessessary leave here so I don't dig it up
     },
   },
   components: {

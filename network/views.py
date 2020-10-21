@@ -94,7 +94,13 @@ def profile_read(request, username):
 def posts_write(request):
     data = json.loads(request.body)
     if data.get('text') is not None:
-        post = Post(author=request.user, text=data['text'])
+        parent_post = None
+        if data.get('parent_id') is not None:
+            try:
+                parent_post = Post.objects.get(id=data.get('parent_id'))
+            except Post.DoesNotExist:
+                return JsonResponse({"message": "Parent post does not exist"}, status=404)      
+        post = Post(author=request.user, text=data['text'], parent=parent_post)
         try:
             post.full_clean()
         except ValidationError as e:
@@ -142,10 +148,10 @@ def post_write(request, post_id):
         
         if data.get('text') is not None:
             try:
-                parent = Post.objects.get(id=data.get('parent_id'))
+                parent_post = Post.objects.get(id=data.get('parent_id'))
             except Post.DoesNotExist:
                 return JsonResponse({"message": "Post does not exist"}, status=404)
-            comment = Post(author=request.user, text=data['text'], parent=parent, is_comment=True, root_post=post)
+            comment = Post(author=request.user, text=data['text'], parent=parent_post, is_comment=True, root_post=post)
             try:
                 comment.full_clean()
             except ValidationError as e:

@@ -26,13 +26,6 @@
     border-color: #fff;
 }
 
-.card-button {
-    color: #909090;
-}
-
-.card-button-active {
-    color: red;
-}
 
 .list-enter-active {
     animation: list-appear 0.5s;

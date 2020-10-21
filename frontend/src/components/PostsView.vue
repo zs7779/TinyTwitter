@@ -31,25 +31,37 @@ export default{
                 this.posts = response.data.posts;
             })
         },
-        updatePosts(editID, editedPost, addBefore=true) {
-            this.posts = this.posts.map(p => p.id === editID ? editedPost : p);
-        },
         prependPosts(posts) {
             posts.forEach(p => {
                 if (!this.username || this.username == p.author.username) this.posts.unshift(p);
-            })
+            });
         },
         appendPosts(posts) {
             posts.forEach(p => {
                 this.posts.push(p);
             })
         },
+        updatePosts(editID, editedPost, addBefore=true) {
+            this.posts = this.posts.map(p => p.id === editID ? editedPost : p);
+        },
         deletePost(deleteID) {
-            if (this.post && this.post.id === deleteID) {
-                this.post = PLACEHOLDERs.post;
-            } else {
-                this.posts = this.posts.filter(p => p.id !== deleteID);
-            }
+            this.posts = this.posts.filter(p => p.id !== deleteID);
+        },
+        addComment(id) {
+            this.posts = this.posts.map(p => p.id === id ? {
+                ...p,
+                comment_count: p.comment_count+1,
+                commented: true,
+            } : p);
+        },
+        deleteComment(id) {
+            this.posts = this.posts.map(p => p.id === id ? {...p, comment_count: p.comment_count-1} : p);
+        },
+        addRepost(id) {
+            this.posts = this.posts.map(p => p.id === id ? {...p, repost_count: p.repost_count+1} : p);
+        },
+        deleteRepost(id) {
+            this.posts = this.posts.map(p => p.id === id ? {...p, repost_count: p.repost_count+1} : p);
         },
     },
     created: function () {

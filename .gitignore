@@ -1,0 +1,7 @@
+data.json
+db.sqlite3
+.idea/*
+*.pyc
+.vscode/settings.json
+quotes.txt
+frontend/package-lock.json

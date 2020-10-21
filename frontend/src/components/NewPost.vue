@@ -1,7 +1,7 @@
 <template>
     <div>
         <slot></slot>
-        <b-modal id='new-post' title='' @ok="doSubmitPost" @hidden="doClear">
+        <b-modal id='new-post' title='' @ok.prevent="doSubmitPost" @hidden="doClear">
             <textarea autofocus rows=4 class="form-control border-0" v-model="postText" placeholder="Say something..."></textarea>
             <template v-slot:modal-footer="{ ok }">
                 <span class="mx-1">{{ charRemaining }}</span>
@@ -55,17 +55,21 @@ export default{
                     'X-CSRFTOKEN': token,
                 },
             }).then(response => {
-                if (this.postParams.oldPost) this.$emit('edit-ok', {
-                    ...this.postParams.oldPost,
-                    text: this.postText,
-                });
+                if (this.postParams.isComment) {
+                    this.$emit('comment-ok', response.data.comment);
+                } else if (this.postParams.oldPost) {
+                    this.$emit('edit-ok', {
+                        ...this.postParams.oldPost,
+                        text: this.postText,
+                    });
+                }
                 else this.$emit('post-ok', response.data.post);
-                this.postText = "";
+                this.$bvModal.hide('new-post')
             })
         },
         doClear() {
-            this.postText = "";
             this.$emit('action-clear');
+            this.postText = "";
         }
     },
     watch: {

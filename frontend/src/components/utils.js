@@ -20,7 +20,13 @@ const PLACEHOLDERs = {
         id: -1,
         text: "",
         create_time: null,
+        comment_count: null,
+        repost_count: null,
         like_count: null,
+        commented: 0,
+        reposted: 0,
+        liked: 0,
+        comments: [],
     },
     posts: [],
     postParams: {

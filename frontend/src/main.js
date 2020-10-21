@@ -33,14 +33,18 @@ var vm = new Vue({
       this.postParams = PLACEHOLDERs.postParams;
     },
     updateContent(post) {
-      if (this.$refs.posts) this.$refs.posts.updatePosts(post.id, post);
       if (this.$refs.post) this.$refs.post.updatePost(post.id, post);
+      if (this.$refs.posts) this.$refs.posts.updatePosts(post.id, post);
       this.clearPost();
     },
     addContent(post) {
       if (this.$refs.posts) this.$refs.posts.prependPosts([post]);
       this.clearPost();
-    }
+    },
+    addComment(post) {
+      if (this.$refs.post) this.$refs.post.addComment(post);
+      if (this.$refs.posts) this.$refs.posts.addComment(post.root_post.id, post);
+    },
   },
   components: {
     NewPost,

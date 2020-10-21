@@ -35,17 +35,17 @@ def posts_read(request, path=None, username=None):
             user = User.objects.get(username=username)
         except User.DoesNotExist:
             return JsonResponse({"error": "User does not exist"}, status=404)
-        posts = Post.objects.filter(author=user).order_by("-create_time")
+        posts = Post.objects.filter(author=user, is_comment=False).order_by("-create_time")
         return JsonResponse({
             "posts": [post.serialize(request.user) for post in posts],
         }, safe=False)
     elif path is None:
-        posts = Post.objects.all().order_by("-create_time")
+        posts = Post.objects.filter(is_comment=False).order_by("-create_time")
         return JsonResponse({
             "posts": [post.serialize(request.user) for post in posts],
         }, safe=False)
     elif path == 'home' and request.user.is_authenticated:
-        posts = Post.objects.filter(Q(author__followers__follower=request.user) | Q(author=request.user)).order_by("-create_time")
+        posts = Post.objects.filter(Q(author__followers__follower=request.user) | Q(author=request.user), is_comment=False).order_by("-create_time")
         return JsonResponse({
             "posts": [post.serialize(request.user) for post in posts],
         }, safe=False)
@@ -66,11 +66,16 @@ def post_read(request, post_id, username=None):
         post = Post.objects.get(id=post_id)
     except Post.DoesNotExist:
         return JsonResponse({"error": "Post does not exist"}, status=404)
-    comments = [comment.serialize(user=request.user) for comment in post.comments.all()]
+    comments = [comment.serialize(user=request.user) for comment in post.comments.all().order_by("-create_time")]
     return JsonResponse({
         "post": post.serialize(request.user),
         "comments": comments,
     }, safe=False)
+
+
+@require_GET
+def comment_read(request, comment_id, post_id=None, username=None):
+    pass
 
 
 @require_GET
@@ -133,7 +138,6 @@ def post_write(request, post_id):
                 likes = Like.objects.filter(user=request.user, post=post)
                 for like in likes:
                     like.delete()
-            post.update_counts().save()
             return JsonResponse({"message": "Like succesful"}, status=200)
         
         if data.get('text') is not None:
@@ -172,6 +176,12 @@ def post_write(request, post_id):
 
 
 @login_required
+@require_http_methods(["POST", "PATCH", "DELETE"])
+def comment_write(request, comment_id):
+    pass
+
+
+@login_required
 @require_http_methods(["POST", "PATCH"])
 def profile_write(request, username):
     try:
@@ -192,8 +202,6 @@ def profile_write(request, username):
                 follows = Follow.objects.filter(user=user, follower=request.user)
                 for follow in follows:
                     follow.delete()
-            request.user.update_counts().save()
-            user.update_counts().save()
             return JsonResponse({"message": "Follow succesful"}, status=200)
 
     if request.method == "PATCH":

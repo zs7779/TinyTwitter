@@ -1,14 +1,56 @@
-#project4 {
-
+.grid-container {
+    display: grid;
+    grid-template-columns: 20% 15% 30% 15% 20%;
+    background-color: rgb(240, 240, 240);
+    min-height: 100vh;
 }
 
-.navbar {
-    height: 5vh;
+.navpanel {
+    position: fixed;
+    width: 15%;
+    height: 100vh;
+    background-color: white;
+    flex-direction: column;
+}
+.navpanel-top {
+    flex-direction: inherit;
 }
 
-.container {
-    background-color: #f4f6f6;
-    min-height: 95vh;
+.navpanel a {
+    font-size: 1.1em;
+    color: black;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    font-weight: 600;
+}
+.navbar-nav {
+    margin: 4em auto 0 15%;
+}
+.navbar-nav li {
+    margin: 0.5em 0;
+}
+
+@media (max-width: 991.98px) {
+    .grid-container {
+        grid-template-columns: 5% 22% 45% 22%;
+    }
+    .navpanel {
+        width: 22%;
+    }
+    .navbar-nav {
+        margin: 3em auto 0 5%;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .grid-container {
+        grid-template-columns: 0% 20% 80%;
+    }
+    .navpanel {
+        width: 20%;
+    }
+    .navbar-nav {
+        margin: 2em auto 0 3%;
+    }
 }
 
 .card-view {

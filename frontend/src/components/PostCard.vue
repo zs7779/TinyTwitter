@@ -1,5 +1,5 @@
 <template>
-    <div class="card p-1">
+    <div class="card p-1 rounded-0">
         <post-body
             :post='post' :buttons='true' :verbose='verbose'
             @action-comment="onComment(post)" @action-repost="onRepost(post)" @action-like="onLike(post)"

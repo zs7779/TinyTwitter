@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PostCard render Render default 1`] = `
+"<div class=\\"card p-1 rounded-0\\">
+  <post-body-stub buttons=\\"true\\" post=\\"[object Object]\\">
+    <!---->
+    <!---->
+  </post-body-stub>
+  <!---->
+</div>"
+`;
+
+exports[`PostCard render Render repost 1`] = `
+"<div class=\\"card p-1 rounded-0\\">
+  <post-body-stub buttons=\\"true\\" post=\\"[object Object]\\">
+    <post-body-stub post=\\"[object Object]\\" class=\\"card p-3\\"></post-body-stub>
+    <!---->
+  </post-body-stub>
+  <!---->
+</div>"
+`;
+
+exports[`PostCard render Render verbose 1`] = `
+"<div class=\\"card p-1 rounded-0\\">
+  <post-body-stub buttons=\\"true\\" post=\\"[object Object]\\">
+    <!---->
+    <!---->
+  </post-body-stub>
+  <!---->
+</div>"
+`;

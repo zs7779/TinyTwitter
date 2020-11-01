@@ -5,7 +5,7 @@
                 <router-link :to="{ name: 'user', params: {username: post.author.username} }">{{ post.author.username }}</router-link>
                 <span class="small text-muted">at {{ post.create_time }}:</span>
             </h6>
-            <div v-if='post.is_comment'>
+            <div v-if='post.is_comment' class="post-mentions">
                 <span class="small text-muted">Reply to</span>
                 <span class="small text-muted" v-for='m in mentions' :key="m.id">
                     <router-link :to="{ name: 'user', params: {username: m.username} }">@{{ m.username }}</router-link>

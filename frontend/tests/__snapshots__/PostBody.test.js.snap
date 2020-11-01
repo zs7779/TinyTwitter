@@ -1,0 +1,108 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PostBody render Render buttons 1`] = `
+"<div class=\\"p-3\\">
+  <router-link-stub to=\\"[object Object]\\" tag=\\"div\\" class=\\"card-text\\">
+    <h6 class=\\"card-title mb-1\\">
+      <router-link-stub to=\\"[object Object]\\">user0</router-link-stub> <span class=\\"small text-muted\\">at :</span>
+    </h6>
+    <!---->
+    <div>
+      <p>post0</p>
+    </div>
+  </router-link-stub>
+  <div class=\\"card-footer bg-transparent p-0\\">
+    <div class=\\"d-flex justify-content-around\\"><button type=\\"button\\" title=\\"Comment\\" class=\\"btn btn-transparent px-1 py-0\\">
+        <b-icon-stub icon=\\"chat\\" class=\\"card-button\\"></b-icon-stub> 0
+      </button> <button type=\\"button\\" title=\\"Repost\\" class=\\"btn btn-transparent px-1 py-0\\">
+        <b-icon-stub icon=\\"arrow-repeat\\" class=\\"card-button\\"></b-icon-stub> 0
+      </button> <button type=\\"button\\" title=\\"Like\\" class=\\"btn btn-transparent px-1 py-0\\">
+        <b-icon-stub icon=\\"heart\\" class=\\"card-button\\"></b-icon-stub> 0
+      </button>
+      <b-dropdown-stub id=\\"dropdown-dropup\\" dropup=\\"\\" variant=\\"btn btn-transparent px-1 py-0\\" no-caret=\\"\\" title=\\"Options\\">
+        <!---->
+        <!---->
+        <b-dropdown-item-stub>
+          <b-icon-stub icon=\\"share\\" class=\\"card-button\\"></b-icon-stub> Share
+        </b-dropdown-item-stub>
+      </b-dropdown-stub>
+    </div>
+  </div>
+</div>"
+`;
+
+exports[`PostBody render Render comment 1`] = `
+"<div class=\\"p-3\\">
+  <router-link-stub to=\\"[object Object]\\" tag=\\"div\\" class=\\"card-text\\">
+    <h6 class=\\"card-title mb-1\\">
+      <router-link-stub to=\\"[object Object]\\">user0</router-link-stub> <span class=\\"small text-muted\\">at :</span>
+    </h6>
+    <div class=\\"post-mentions\\"><span class=\\"small text-muted\\">Reply to</span> <span class=\\"small text-muted\\"><router-link-stub to=\\"[object Object]\\">@user0</router-link-stub> <span></span></span></div>
+    <div>
+      <p>post0</p>
+    </div>
+  </router-link-stub>
+  <!---->
+</div>"
+`;
+
+exports[`PostBody render Render default 1`] = `
+"<div class=\\"p-3\\">
+  <router-link-stub to=\\"[object Object]\\" tag=\\"div\\" class=\\"card-text\\">
+    <h6 class=\\"card-title mb-1\\">
+      <router-link-stub to=\\"[object Object]\\">user0</router-link-stub> <span class=\\"small text-muted\\">at :</span>
+    </h6>
+    <!---->
+    <div>
+      <p>post0</p>
+    </div>
+  </router-link-stub>
+  <!---->
+</div>"
+`;
+
+exports[`PostBody render Render repost 1`] = `
+"<div class=\\"p-3\\">
+  <router-link-stub to=\\"[object Object]\\" tag=\\"div\\" class=\\"card-text\\">
+    <h6 class=\\"card-title mb-1\\">
+      <router-link-stub to=\\"[object Object]\\">user0</router-link-stub> <span class=\\"small text-muted\\">at :</span>
+    </h6>
+    <!---->
+    <div>
+      <p>post0</p>
+    </div>
+  </router-link-stub>
+  <!---->
+</div>"
+`;
+
+exports[`PostBody render Render verbose 1`] = `
+"<div class=\\"p-3\\">
+  <router-link-stub to=\\"[object Object]\\" tag=\\"div\\" class=\\"card-text\\">
+    <h6 class=\\"card-title mb-1\\">
+      <router-link-stub to=\\"[object Object]\\">user0</router-link-stub> <span class=\\"small text-muted\\">at :</span>
+    </h6>
+    <!---->
+    <div>
+      <p>post0</p>
+    </div>
+  </router-link-stub>
+  <div class=\\"card-footer bg-transparent p-0\\">
+    <div class=\\"d-flex justify-content-around\\"><button type=\\"button\\" title=\\"Comment\\" class=\\"btn btn-transparent px-1 py-0\\">
+        <b-icon-stub icon=\\"chat\\" class=\\"card-button\\"></b-icon-stub> 0
+      </button> <button type=\\"button\\" title=\\"Repost\\" class=\\"btn btn-transparent px-1 py-0\\">
+        <b-icon-stub icon=\\"arrow-repeat\\" class=\\"card-button\\"></b-icon-stub> 0
+      </button> <button type=\\"button\\" title=\\"Like\\" class=\\"btn btn-transparent px-1 py-0\\">
+        <b-icon-stub icon=\\"heart\\" class=\\"card-button\\"></b-icon-stub> 0
+      </button>
+      <b-dropdown-stub id=\\"dropdown-dropup\\" dropup=\\"\\" variant=\\"btn btn-transparent px-1 py-0\\" no-caret=\\"\\" title=\\"Options\\">
+        <!---->
+        <!---->
+        <b-dropdown-item-stub>
+          <b-icon-stub icon=\\"share\\" class=\\"card-button\\"></b-icon-stub> Share
+        </b-dropdown-item-stub>
+      </b-dropdown-stub>
+    </div>
+  </div>
+</div>"
+`;

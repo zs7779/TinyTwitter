@@ -5,3 +5,4 @@ db.sqlite3
 .vscode/settings.json
 quotes.txt
 frontend/package-lock.json
+frontend/coverage/

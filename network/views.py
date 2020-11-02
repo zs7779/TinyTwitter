@@ -1,7 +1,6 @@
 import json
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_GET, require_POST
-from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse, QueryDict
 from django.shortcuts import render, redirect
 from django.urls import reverse
@@ -17,6 +16,7 @@ def index(request, path=None):
 
 @require_GET
 def current_user(request):
+    # Get current user for frontend app
     if request.user.is_authenticated:
         return JsonResponse({"user": request.user.serialize()})
     else:
@@ -31,62 +31,37 @@ def posts_read(request, path=None, username=None):
         pass
 
     if username is not None:
-        try:
-            user = User.objects.get(username=username)
-        except User.DoesNotExist:
-            return JsonResponse({"error": "User does not exist"}, status=404)
-        posts = Post.objects.filter(author=user, is_comment=False).order_by("-create_time")
-        return JsonResponse({
-            "posts": [post.serialize(request.user) for post in posts],
-        }, safe=False)
-    elif path is None:
-        posts = Post.objects.filter(is_comment=False).order_by("-create_time")
-        return JsonResponse({
-            "posts": [post.serialize(request.user) for post in posts],
-        }, safe=False)
+        # Get posts of one user
+        return Post.get_posts_by_user(username=username, requestor=request.user)
     elif path == 'home' and request.user.is_authenticated:
-        posts = Post.objects.filter(Q(author__followers__follower=request.user) | Q(author=request.user), is_comment=False).order_by("-create_time")
-        return JsonResponse({
-            "posts": [post.serialize(request.user) for post in posts],
-        }, safe=False)
+        # Get home page of logged-in user (posts of followees)
+        return Post.get_posts(path='home', requestor=request.user)
     else:
-        return JsonResponse({"error": "Page does not exist"}, status=404)
+        # Get all posts, also is home page of unlogged-in user
+        return Post.get_posts(path='all', requestor=request.user)
 
 
 @require_GET
 def post_read(request, post_id, username=None):
-    user = {}
     if username:
         try:
             user = User.objects.get(username=username)
         except User.DoesNotExist:
             return JsonResponse({"error": "User does not exist"}, status=404)
-        user = user.serialize(request.user)
-    try:
-        post = Post.objects.get(id=post_id)
-    except Post.DoesNotExist:
-        return JsonResponse({"error": "Post does not exist"}, status=404)
-    comments = [comment.serialize(user=request.user) for comment in post.comments.all().order_by("-create_time")]
-    return JsonResponse({
-        "post": post.serialize(request.user),
-        "comments": comments,
-    }, safe=False)
+    # Get one post
+    return Post.get_post_by_id(post_id=post_id, requestor=request.user)
 
 
 @require_GET
 def comment_read(request, comment_id, post_id=None, username=None):
+    # May be needed by API
     pass
 
 
 @require_GET
 def profile_read(request, username):
-    try:
-        user = User.objects.get(username=username)
-    except User.DoesNotExist:
-        return JsonResponse({"error": "User does not exist"}, status=404)
-    return JsonResponse({
-        "user": user.serialize(request.user),
-    })
+    # Get user by username
+    return User.get_user_by_username(username=username, requestor=request.user)
 
 
 @login_required
@@ -94,23 +69,9 @@ def profile_read(request, username):
 def posts_write(request):
     data = json.loads(request.body)
     if data.get('text') is not None:
-        parent_post = None
-        if data.get('parent_id') is not None:
-            try:
-                parent_post = Post.objects.get(id=data.get('parent_id'))
-            except Post.DoesNotExist:
-                return JsonResponse({"message": "Parent post does not exist"}, status=404)      
-        post = Post(author=request.user, text=data['text'], parent=parent_post)
-        try:
-            post.full_clean()
-        except ValidationError as e:
-            # print(e)
-            return JsonResponse({"message": "Post body is illegal"}, status=400, safe=False)
-        post.save()
-        return JsonResponse({
-            "message": "Post successful",
-            "post": post.serialize(request.user),
-        }, status=201)
+        # Handle new post
+        return Post.create_post(text=data.get('text'), parent_id=data.get('parent_id'),
+                                requestor=request.user)
     return JsonResponse({
         "error": "Bad request"
     }, status=400)
@@ -125,6 +86,7 @@ def post_write(request, post_id):
         return JsonResponse({"message": "Post does not exist"}, status=404)
 
     if request.method == "DELETE":
+        # Delete post by authorized user, may need to be changed to access group related logic
         if post.author != request.user:
             return JsonResponse({"message": "Forbidden"}, status=403)
         post.delete()
@@ -134,46 +96,19 @@ def post_write(request, post_id):
 
     if request.method == "POST":
         if data.get('like') is not None:
-            if data['like']:
-                try:
-                    like = Like.objects.get(user=request.user, post=post)
-                except Like.DoesNotExist:
-                    like = Like(user=request.user, post=post)
-                    like.save()
-            else:
-                likes = Like.objects.filter(user=request.user, post=post)
-                for like in likes:
-                    like.delete()
-            return JsonResponse({"message": "Like succesful"}, status=200)
+            # Handles like/unlike
+            return Like.create_like(like=data.get('like'), post=post, requestor=request.user)
         
         if data.get('text') is not None:
-            try:
-                parent_post = Post.objects.get(id=data.get('parent_id'))
-            except Post.DoesNotExist:
-                return JsonResponse({"message": "Post does not exist"}, status=404)
-            comment = Post(author=request.user, text=data['text'], parent=parent_post, is_comment=True, root_post=post)
-            try:
-                comment.full_clean()
-            except ValidationError as e:
-                # print(e)
-                return JsonResponse({"message": "Comment body is illegal"}, status=400, safe=False)
-            comment.save()
-            return JsonResponse({
-                "message": "Comment succesful",
-                "comment": comment.serialize(request.user),
-            }, status=201)
+            # Handles new comments, which compare to normal posts, have root_post
+            return Post.create_post(text=data.get('text'), parent_id=data.get('parent_id'),
+                                    root_post=post, is_comment=True, requestor=request.user)
 
     if request.method == "PATCH":
         if data.get('text') is not None:
-            if post.author == request.user and data.get('text') is not None:
-                post.text = data['text']
-                try:
-                    post.full_clean()
-                except ValidationError as e:
-                    # print(e)
-                    return JsonResponse({"message": "Post body is illegal"}, status=400, safe=False)
-                post.save()
-                return JsonResponse({"message": "Like succesful"}, status=200)
+            # Handles editing post by authorized user
+            if post.author == request.user:
+                return Post.modify_post(text=data.get('text'), post=post)
             return JsonResponse({"message": "Forbidden"}, status=403)
 
     return JsonResponse({
@@ -184,6 +119,7 @@ def post_write(request, post_id):
 @login_required
 @require_http_methods(["POST", "PATCH", "DELETE"])
 def comment_write(request, comment_id):
+    # May be needed by API
     pass
 
 
@@ -198,19 +134,10 @@ def profile_write(request, username):
     if request.method == "POST":
         data = json.loads(request.body)
         if data.get('follow') is not None:
+            # Handles follow/unfollow by authorized user
             if request.user == user:
-                return JsonResponse({"error": "User cannot self follow"}, status=403)
-            if data['follow']:
-                try:
-                    follow = Follow.objects.get(user=user, follower=request.user)
-                except Follow.DoesNotExist:
-                    follow = Follow(user=user, follower=request.user)
-                    follow.save()
-            else:
-                follows = Follow.objects.filter(user=user, follower=request.user)
-                for follow in follows:
-                    follow.delete()
-            return JsonResponse({"message": "Follow succesful"}, status=200)
+                return JsonResponse({"error": "Unable to follow this user"}, status=403)
+            return Follow.create_follow(follow=data.get('follow'), followee=user, requestor=request.user)
 
     if request.method == "PATCH":
         # todo: edit pofile

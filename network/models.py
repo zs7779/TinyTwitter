@@ -1,5 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models import Q
+from django.http import JsonResponse
+from django.core.exceptions import ValidationError
 
 
 MAX_LENGTH = 140
@@ -29,6 +32,25 @@ class User(AbstractUser):
                 "owner": self == user,
             }
 
+    def get_user_by_username(username, requestor):
+        """
+        Returns response of GET user request
+
+        Parameters:
+        username (str): username of requested user
+        requestor (User): User instance of requestor
+
+        Returns:
+        response (JsonResponse): JsonResponse to the request, with serialized User object if successful
+        """
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return JsonResponse({"error": "User does not exist"}, status=404)
+        return JsonResponse({
+            "user": user.serialize(requestor),
+        })
+
 
 class Follow(models.Model):
     user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="followers")
@@ -40,6 +62,30 @@ class Follow(models.Model):
             "user": self.user.serialize(detail=DETAIL_SHORT),
             "follower": self.follower.serialize(detail=DETAIL_SHORT),
         }
+
+    def create_follow(follow, followee, requestor):
+        """
+        Returns response of POST follow request
+
+        Parameters:
+        follow (bool): True for follow, False for unfollow
+        followee (User): User instance of the user being followed
+        requestor (User): User instance of the user requesting to follow
+
+        Returns:
+        response (JsonResponse): JsonResponse with success message 
+        """
+        if follow:
+            try:
+                follow_obj = Follow.objects.get(user=followee, follower=requestor)
+            except Follow.DoesNotExist:
+                follow_obj = Follow(user=followee, follower=requestor)
+                follow_obj.save()
+        else:
+            follows = Follow.objects.filter(user=followee, follower=requestor)
+            for follow_obj in follows:
+                follow_obj.delete()
+        return JsonResponse({"message": "Follow succesful"}, status=200)
 
 
 class Post(models.Model):
@@ -85,11 +131,166 @@ class Post(models.Model):
                 "owner": self.author == user,
             }
 
+    def get_posts_by_user(username, requestor, count=20, after=0, order_by="-create_time"):
+        """
+        Returns response of GET posts of user request
+
+        Parameters:
+        username (str): username of requested user
+        requestor (User): User instance of the user requesting
+        count (int): number of posts requested, default 20
+        after (int): starting index of posts requested, default 0
+        order_by (str): parameter to django ORM function order_by, default '-create_time'
+
+        Returns:
+        response (JsonResponse): JsonResponse to the get request, with serialized Post objects if succesful
+        """
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return JsonResponse({"error": "User does not exist"}, status=404)
+        posts = Post.objects.filter(author=user, is_comment=False).order_by(order_by)
+        return JsonResponse({
+            "posts": [post.serialize(requestor) for post in posts],
+        }, safe=False)
+
+    def get_posts(path, requestor, count=20, after=0, order_by="-create_time"):
+        """
+        Returns response of GET posts request, used to get posts for home page
+
+        Parameters:
+        path (str): path to get posts, implemented options are 'home' and 'all'
+        requestor (User): User instance of the user requesting
+        count (int): number of posts requested, default 20
+        after (int): starting index of posts requested, default 0
+        order_by (str): parameter to django ORM function order_by, default '-create_time'
+
+        Returns:
+        response (JsonResponse): JsonResponse to the get request, with serialized Post objects if succesful
+        """
+        if path == "home":
+            posts = Post.objects.filter(Q(author__followers__follower=requestor) | Q(author=requestor), is_comment=False).order_by(order_by)
+            return JsonResponse({
+                "posts": [post.serialize(requestor) for post in posts],
+            }, safe=False)
+        else:
+            posts = Post.objects.filter(is_comment=False).order_by(order_by)
+            return JsonResponse({
+                "posts": [post.serialize(requestor) for post in posts],
+            }, safe=False)
+
+    def get_post_by_id(post_id, requestor, count=20, after=0, order_by="-create_time"):
+        """
+        Returns response of GET post request
+
+        Parameters:
+        post_id (id): id of requested post
+        requestor (User): User instance of the user requesting
+        count (int): number of comments requested, default 20
+        after (int): starting index of comments requested, default 0
+        order_by (str): parameter to django ORM function order_by, default '-create_time'
+
+        Returns:
+        response (JsonResponse): JsonResponse to the get request, with serialized post and its comments if succesful
+        """
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return JsonResponse({"error": "Post does not exist"}, status=404)
+        comments = [comment.serialize(user=requestor) for comment in post.comments.all().order_by(order_by)]
+        return JsonResponse({
+            "post": post.serialize(requestor),
+            "comments": comments,
+        }, safe=False)
+
+    def create_post(text, parent_id, requestor, root_post=None, is_comment=False):
+        """
+        Returns response of POST new post request, used to create new post or comment
+
+        Parameters:
+        text (str): text content of the new post
+        parent_id (id): id of parent post, None if the post has no parent
+        requestor (User): User instance of the user requesting
+        root_post (Post): Post instance of the root post in case of a comment, default None
+        is_comment (bool): True for comment, False for regular post, default False
+
+        Returns:
+        response (JsonResponse): JsonResponse to the post request, with serialized Post object if succesful
+        """
+        parent_post = None
+        if parent_id is not None:
+            try:
+                parent_post = Post.objects.get(id=parent_id)
+            except Post.DoesNotExist:
+                return JsonResponse({"error": "Parent post does not exist"}, status=404)      
+        else:
+            parent_post = None
+        post = Post(author=requestor, text=text, parent=parent_post,
+                    root_post=root_post, is_comment=is_comment)
+        try:
+            post.full_clean()
+        except ValidationError as e:
+            # print(e)
+            return JsonResponse({"error": "Post body is illegal"}, status=400, safe=False)
+        post.save()
+        json_message = {
+            "message": "Post successful",
+        }
+        if is_comment:
+            json_message["comment"] = post.serialize(requestor)
+        else:
+            json_message["post"] = post.serialize(requestor)
+        return JsonResponse(json_message, status=201)
+
+    def modify_post(text, post):
+        """
+        Returns response of PATCH post request, used to modify an existing post
+
+        Parameters:
+        text (str): text content of the new post
+        post (Post): Post instance of post being modified
+
+        Returns:
+        response (JsonResponse): JsonResponse with status message
+        """
+        post.text = text
+        try:
+            post.full_clean()
+        except ValidationError as e:
+            # print(e)
+            return JsonResponse({"error": "Post body is illegal"}, status=400, safe=False)
+        post.save()
+        return JsonResponse({"message": "Like succesful"}, status=200)
+
 
 class Like(models.Model):
     user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="likes")
     post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="likes")
     create_time = models.DateTimeField(auto_now_add=True)
+
+    def create_like(like, post, requestor):
+        """
+        Returns response of POST like request, used to like or unlike a post
+
+        Parameters:
+        like (bool): True to like, False to unlike
+        post (Post): Post instance of post being liked
+        requestor (User): User instance of the user requesting like
+
+        Returns:
+        response (JsonResponse): JsonResponse with success message
+        """
+        if like:
+            try:
+                like = Like.objects.get(user=requestor, post=post)
+            except Like.DoesNotExist:
+                like = Like(user=requestor, post=post)
+                like.save()
+        else:
+            likes = Like.objects.filter(user=requestor, post=post)
+            for like in likes:
+                like.delete()
+        return JsonResponse({"message": "Like succesful"}, status=200)
 
 
 class HashTag(models.Model):

@@ -104,7 +104,7 @@ def posts_write(request):
         try:
             post.full_clean()
         except ValidationError as e:
-            print(e)
+            # print(e)
             return JsonResponse({"message": "Post body is illegal"}, status=400, safe=False)
         post.save()
         return JsonResponse({
@@ -155,7 +155,7 @@ def post_write(request, post_id):
             try:
                 comment.full_clean()
             except ValidationError as e:
-                print(e)
+                # print(e)
                 return JsonResponse({"message": "Comment body is illegal"}, status=400, safe=False)
             comment.save()
             return JsonResponse({
@@ -170,7 +170,7 @@ def post_write(request, post_id):
                 try:
                     post.full_clean()
                 except ValidationError as e:
-                    print(e)
+                    # print(e)
                     return JsonResponse({"message": "Post body is illegal"}, status=400, safe=False)
                 post.save()
                 return JsonResponse({"message": "Like succesful"}, status=200)
@@ -198,7 +198,9 @@ def profile_write(request, username):
     if request.method == "POST":
         data = json.loads(request.body)
         if data.get('follow') is not None:
-            if data['follow'] and request.user != user:
+            if request.user == user:
+                return JsonResponse({"error": "User cannot self follow"}, status=403)
+            if data['follow']:
                 try:
                     follow = Follow.objects.get(user=user, follower=request.user)
                 except Follow.DoesNotExist:

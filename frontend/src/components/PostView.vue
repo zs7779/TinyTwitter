@@ -78,7 +78,7 @@ export default{
             if (post.parent) {
                 if (post.parent.id == this.post.id) {
                     this.post.repost_count++;
-                    this.post.posted++;
+                    this.post.reposted++;
                 } else {
                     this.post.comments = this.post.comments.map(p => p.id === post.parent.id ? {
                         ...p,

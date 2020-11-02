@@ -7,6 +7,66 @@ users = json.load(open('network/testdata/users.json'))
 posts = json.load(open('network/testdata/posts.json'))
 
 
+class ReadTestCase(TestCase):
+    def test_posts_visitor(self):
+        c = Client()
+        response = c.get('/api/posts/')
+        self.assertEqual(response.status_code, 200)
+        response = c.get('/api/posts/home')
+        self.assertEqual(response.status_code, 200)
+        user1 = User.objects.all()[0]
+        response = c.get(f'/api/users/{user1.username}/posts/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_post_visitor(self):
+        c = Client()
+        post1 = Post.objects.all()[0]
+        response = c.get(f'/api/posts/{post1.id}')
+        self.assertEqual(response.status_code, 200)
+        user1 = User.objects.all()[0]
+        response = c.get(f'/api/users/{user1.username}/posts/{post1.id}')
+        self.assertEqual(response.status_code, 200)
+    
+    def test_user_visitor(self):
+        c = Client()
+        user1 = User.objects.all()[0]
+        response = c.get(f'/api/users/{user1.username}')
+        self.assertEqual(response.status_code, 200)
+
+    def test_posts_user(self):
+        user1 = users[0]
+        c = Client()
+        c.login(username=user1['username'], password=user1['password'])
+        
+        response = c.get('/api/posts/')
+        self.assertEqual(response.status_code, 200)
+        response = c.get('/api/posts/home')
+        self.assertEqual(response.status_code, 200)
+        user1 = User.objects.all()[0]
+        response = c.get(f'/api/users/{user1.username}/posts/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_post_user(self):
+        user1 = users[0]
+        c = Client()
+        c.login(username=user1['username'], password=user1['password'])
+
+        post1 = Post.objects.all()[0]
+        response = c.get(f'/api/posts/{post1.id}')
+        self.assertEqual(response.status_code, 200)
+        user1 = User.objects.all()[0]
+        response = c.get(f'/api/users/{user1.username}/posts/{post1.id}')
+        self.assertEqual(response.status_code, 200)
+    
+    def test_user_user(self):
+        user1 = users[0]
+        c = Client()
+        c.login(username=user1['username'], password=user1['password'])
+
+        user1 = User.objects.all()[0]
+        response = c.get(f'/api/users/{user1.username}')
+        self.assertEqual(response.status_code, 200)
+
 class PostsWriteTestCase(TestCase):
     def test_new_post_good(self):
         user1 = users[0]

@@ -22,7 +22,6 @@ describe('PostView render', () => {
     });
     it('Render default', () => {
         wrapper = factory();
-        console.log(wrapper.vm.$data);
         // wrapper.setData({post: mockData.posts[0]});
         expect(wrapper.html()).toMatchSnapshot();
     });

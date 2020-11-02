@@ -184,13 +184,13 @@ class PostWriteTestCase(TestCase):
         old_count = Post.objects.count()
         post1 = User.objects.get(username=user1['username']).posts.all()[0]
         response = c.patch(f'/api/posts/{post1.id}',
-                          data={'text': 'tespoirakjdgkqjhebnzcjzxiojhwe'},
+                          data={'text': 'tespoirakjdgkqjheb'},
                           content_type="application/json")
         self.assertEqual(response.status_code, 200)
         new_count = Post.objects.count()
         self.assertEqual(old_count, new_count)
-        post1 = User.objects.all()[0].posts.all()[0]
-        self.assertEqual(post1.text, 'tespoirakjdgkqjhebnzcjzxiojhwe')
+        post1 = Post.objects.get(id=post1.id)
+        self.assertEqual(post1.text, 'tespoirakjdgkqjheb')
 
     def test_edit_post_bad_authorization(self):
         user1 = users[0]

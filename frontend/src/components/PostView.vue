@@ -7,6 +7,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 import PostCard from './PostCard.vue'
 import { URLs, PLACEHOLDERs } from './utils'
 

@@ -13,7 +13,7 @@
         <div v-if='verbose' class="list-group list-group-flush border-top">
             <post-body 
                 v-for='comment in post.comments' :key='comment.id' :post='comment' :buttons='true'
-                @action-comment="onComment(comment)" @action-repost="onRepost(post)" @action-like="onLike(comment)"
+                @action-comment="onComment(comment)" @action-repost="onRepost(comment)" @action-like="onLike(comment)"
                 @action-delete="onDelete(comment)" @action-edit="onEdit(comment)"
                 class="list-group-item" 
             />
@@ -53,7 +53,7 @@ export default{
             const token = getToken();
             if (!token) return;
             axios.post(`${URLs.posts(post.id)}`, {
-                like: !this.post.liked,
+                like: !post.liked,
             }, {
                 headers: {
                     'X-CSRFTOKEN': token,

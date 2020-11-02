@@ -1,6 +1,8 @@
 <template>
     <div>
-        <post-card :post="post" :verbose=true @like-ok="updatePost($event.id, $event)" @delete-ok="deletePost($event)" v-on="$listeners"></post-card>
+        <post-card :post="post" :verbose=true
+            @like-ok="updatePost($event.id, $event)"
+            @delete-ok="deletePost($event)" v-on="$listeners"></post-card>
     </div>
 </template>
 
@@ -48,11 +50,12 @@ export default{
         },
         appendComments() {},
         updateComments(editID, comment) {
+            console.log(editID, comment);
             this.post.comments = this.post.comments.map(p => p.id === editID ? comment : p);    
         },
         addComment(comment) {
             this.prependComments(comment.root_post.id, [comment]);
-            this.post.commented = true;
+            this.post.commented = this.post.commented + 1;
             this.post.comments = this.post.comments.map(p => p.id === comment.parent.id ? {
                 ...p,
                 comment_count: p.comment_count + 1,
@@ -71,9 +74,17 @@ export default{
             } : p);
         },
         addRepost(post) {
-            if (post.parent && post.parent.id == this.post.id) {
-                this.post.repost_count++;
-                this.post.posted++;
+            if (post.parent) {
+                if (post.parent.id == this.post.id) {
+                    this.post.repost_count++;
+                    this.post.posted++;
+                } else {
+                    this.post.comments = this.post.comments.map(p => p.id === post.parent.id ? {
+                        ...p,
+                        repost_count: p.repost_count + 1,
+                        reposted: p.reposted + 1,
+                    } : p);
+                }
             }
         },
         // delete repost not possible in this view,

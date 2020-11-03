@@ -55,9 +55,9 @@ def load_testdata(apps, schema_editor):
 
         post_text = p['text']
         if mentions[i] >= 0:
-            post_text += f'@{users[mentions[i]]["username"]}'
+            post_text += f' @{users[mentions[i]]["username"]}'
         if tags[i] >= 0:
-            post_text += f'#{hashtags[tags[i]]}'
+            post_text += f' #{hashtags[tags[i]]}'
         post = Post(author=user, text=post_text,
                     parent=parent_post,
                     is_comment=is_comment,

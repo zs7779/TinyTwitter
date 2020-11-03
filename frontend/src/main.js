@@ -1,13 +1,8 @@
-// import Vue from 'vue'
-// import VueRouter from 'vue-router'
-
 import routes from './components/router'
 import NewPost from './components/NewPost.vue'
 import { PLACEHOLDERs } from './components/utils'
 
 Vue.config.productionTip = false
-// Vue.use(VueRouter)
-
 
 const router = new VueRouter({
   mode: 'history',
@@ -21,6 +16,7 @@ var vm = new Vue({
   data: {
       pathname: window.location.pathname,
       postParams: PLACEHOLDERs.postParams,
+      userAuth: document.getElementById('userauth') ? true : false,
   },
   computed: {
     updatePath() {

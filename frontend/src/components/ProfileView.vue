@@ -33,7 +33,7 @@ export default{
             this.user = editedUser;
         },
         doFollow() {
-            const token = getToken();
+            const token = getToken(this.$root.userAuth);
             if (!token) return;
             axios.post(`${URLs.users(this.user.username)}`, {
                 follow: !this.user.following,

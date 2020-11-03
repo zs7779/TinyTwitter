@@ -1,7 +1,11 @@
 <template>
     <div>
         <slot></slot>
-        <b-modal id='new-post' title='' @ok.prevent="doSubmitPost" @hidden="doClear">
+        <b-modal id='new-post' title=''
+            @ok.prevent="doSubmitPost"
+            @show="checkToken"
+            @hidden="doClear"
+        >
             <textarea autofocus rows=4 class="form-control border-0" v-model="postText" placeholder="Say something..."></textarea>
             <template v-slot:modal-footer="{ ok }">
                 <span class="mx-1">{{ charRemaining }}</span>
@@ -14,7 +18,7 @@
 </template>
 
 <script>
-import { URLs, getToken } from './utils'
+import { URLs } from './utils'
 
 export default{
     name: "new-post",
@@ -45,14 +49,12 @@ export default{
     methods: {
         doSubmitPost(event) {
             if (this.postText.length == 0 || this.postText.length >= 140) return;
-            const token = getToken();
-            if (!token) return;
             this.postMethod(this.postURL, {
                 text: this.postText,
                 parent_id: this.postParams.parentPost ? this.postParams.parentPost.id : null,
             }, {
                 headers: {
-                    'X-CSRFTOKEN': token,
+                    'X-CSRFTOKEN': this.postParams.token,
                 },
             }).then(response => {
                 if (this.postParams.isComment) {
@@ -70,6 +72,11 @@ export default{
         doClear() {
             this.$emit('action-clear');
             this.postText = "";
+        },
+        checkToken(event) {
+            if (!this.postParams.token) {
+                event.preventDefault();
+            }
         }
     },
     watch: {

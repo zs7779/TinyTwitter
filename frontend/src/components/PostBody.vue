@@ -13,7 +13,6 @@
                 </span>
             </div>
             <div>
-                <p>{{ post.text }}</p>
                 <p><span v-for="(part, index) in post.text.split(/([@#]\w+)/g)" :key=index>
                     <router-link v-if="part[0] == '@'" :to="`/${part.slice(1)}`">{{part}}</router-link>
                     <router-link v-else-if="part[0] == '#'" :to="`/hashtags/${part.slice(1)}`">{{part}}</router-link>

@@ -2,8 +2,8 @@
     <div class="card p-1 rounded-0">
         <post-body
             :post='post' :buttons='true' :verbose='verbose'
-            @action-comment="onComment(post)" @action-repost="onRepost(post)" @action-like="onLike(post)"
-            @action-delete="onDelete(post)" @action-edit="onEdit(post)"
+            @action-comment="onComment(post)" @action-repost="onRepost(post)"
+            @action-like="onLike(post)" @action-delete="onDelete(post)"
         >
             <post-body v-if='post.parent' :post='post.parent' :buttons='false' class='card p-3' />
             <div v-if='verbose' class="card-footer bg-transparent p-0 ">
@@ -13,8 +13,8 @@
         <div v-if='verbose' class="list-group list-group-flush border-top">
             <post-body 
                 v-for='comment in post.comments' :key='comment.id' :post='comment' :buttons='true'
-                @action-comment="onComment(comment)" @action-repost="onRepost(comment)" @action-like="onLike(comment)"
-                @action-delete="onDelete(comment)" @action-edit="onEdit(comment)"
+                @action-comment="onComment(comment)" @action-repost="onRepost(comment)"
+                @action-like="onLike(comment)" @action-delete="onDelete(comment)"
                 class="list-group-item" 
             />
         </div>
@@ -30,27 +30,25 @@ export default{
     props: ['post', 'verbose'],
     methods: {
         onComment(post) {
+            const token = getToken(this.$root.userAuth);
             const postParams = {
                 isComment: true,
                 parentPost: post,
                 rootPost: this.post.is_comment ? this.post.root_post : this.post,
+                token: token,
             };
             this.$emit("action-post", postParams);
         },
         onRepost(post) {
+            const token = getToken(this.$root.userAuth);
             const postParams = {
                 parentPost: post,
-            };
-            this.$emit("action-post", postParams);
-        },
-        onEdit(post) {
-            const postParams = {
-                oldPost: post,
+                token: token,
             };
             this.$emit("action-post", postParams);
         },
         onLike(post) {
-            const token = getToken();
+            const token = getToken(this.$root.userAuth);
             if (!token) return;
             axios.post(`${URLs.posts(post.id)}`, {
                 like: !post.liked,
@@ -67,7 +65,7 @@ export default{
             })
         },
         onDelete(post) {
-            const token = getToken();
+            const token = getToken(this.$root.userAuth);
             if (!token) return;
             axios.delete(`${URLs.posts(post.id)}`, {
                 headers: {

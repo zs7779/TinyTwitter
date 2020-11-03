@@ -10,17 +10,20 @@
         </div>
         <!-- Content -->
         <div class='mid-panel'>         
+            {% if user.is_authenticated %}
+                <div id='userauth' style='display: None;'></div>
+            {% endif %}
             <!-- <keep-alive :max=2> -->
-                <new-post
-                    :post-params='postParams'
-                    @edit-ok='updateContent($event)'
-                    @post-ok='addContent($event)' 
-                    @comment-ok='addComment($event)'
-                    @action-clear='clearPost()'
-                ></new-post>
-                <router-view ref="profile" name="profile" :key='$route.path'></router-view>
-                <router-view ref="posts" name="posts" @action-post='postParams=$event'></router-view>
-                <router-view ref="post" name="post" @action-post='postParams=$event'></router-view>
+            <new-post
+                :post-params='postParams'
+                @edit-ok='updateContent($event)'
+                @post-ok='addContent($event)' 
+                @comment-ok='addComment($event)'
+                @action-clear='clearPost()'
+            ></new-post>
+            <router-view ref="profile" name="profile" :key='$route.path'></router-view>
+            <router-view ref="posts" name="posts" @action-post='postParams=$event'></router-view>
+            <router-view ref="post" name="post" @action-post='postParams=$event'></router-view>
             <!-- </keep-alive> -->
         </div>
         <div class="right-panel">
@@ -30,6 +33,7 @@
 {% endblock %}
 
 {% block javascript %}
-    <script type="text/javascript" src="{% static 'tinytwitter.js' %}"></script>
+    <!-- <script type="text/javascript" src="{% static 'tinytwitter.js' %}"></script> -->
+    <script type="text/javascript" src="{% static 'frontend/tinytwitter.js' %}"></script>
 
 {% endblock %}

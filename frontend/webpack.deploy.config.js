@@ -2,7 +2,7 @@ const path = require('path')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 const config = {
-  mode: 'development',
+  mode: 'production',
   entry: './src/main.js',
   resolve: {
     alias: {

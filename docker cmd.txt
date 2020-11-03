@@ -1,6 +1,0 @@
-docker build -t tinytwitter .
-docker run -d -p 8000:8000 --name tinytwitter1 tinytwitter
-
-docker-compose up -d
-docker exec -it <container id> python manage.py makemigrations
-docker exec -it <container id> python manage.py migrate

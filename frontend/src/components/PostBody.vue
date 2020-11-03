@@ -14,6 +14,11 @@
             </div>
             <div>
                 <p>{{ post.text }}</p>
+                <p><span v-for="(part, index) in post.text.split(/([@#]\w+)/g)" :key=index>
+                    <router-link v-if="part[0] == '@'" :to="`/${part.slice(1)}`">{{part}}</router-link>
+                    <router-link v-else-if="part[0] == '#'" :to="`/hashtags/${part.slice(1)}`">{{part}}</router-link>
+                    <template v-else>{{part}}</template>
+                </span></p>
             </div>
             <slot></slot>
         </router-link>
@@ -31,7 +36,6 @@
                 <b-dropdown id="dropdown-dropup" dropup variant="btn btn-transparent px-1 py-0" no-caret title="Options">
                     <template v-slot:button-content><b-icon icon="chevron-up" class="card-button"></b-icon></template>
                     <b-dropdown-item v-if="post.owner" @click="$emit('action-delete')"><b-icon icon="x" class="card-button"></b-icon> Delete</b-dropdown-item>
-                    <b-dropdown-item v-b-modal.new-post v-if="post.owner" @click="$emit('action-edit')"><b-icon icon="pencil" class="card-button"></b-icon> Edit</b-dropdown-item>
                     <b-dropdown-item><b-icon icon="share" class="card-button"></b-icon> Share</b-dropdown-item>
                 </b-dropdown>
             </div>
@@ -40,6 +44,7 @@
 </template>
 
 <script>
+
 export default{
     props: ['post', 'buttons', 'verbose'],
     data() {
@@ -48,6 +53,7 @@ export default{
         }
     },
     computed: {
+        // Determine mentioned users
         mentions() {
             var receipants = {};
             if (this.post.root_post) {

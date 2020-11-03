@@ -104,12 +104,13 @@ def post_write(request, post_id):
             return Post.create_post(text=data.get('text'), parent_id=data.get('parent_id'),
                                     root_post=post, is_comment=True, requestor=request.user)
 
-    if request.method == "PATCH":
-        if data.get('text') is not None:
-            # Handles editing post by authorized user
-            if post.author == request.user:
-                return Post.modify_post(text=data.get('text'), post=post)
-            return JsonResponse({"message": "Forbidden"}, status=403)
+    # Post editing is no longer supported because it messes with the whole HashTag system
+    # if request.method == "PATCH":
+    #     if data.get('text') is not None:
+    #         # Handles editing post by authorized user
+    #         if post.author == request.user:
+    #             return Post.modify_post(text=data.get('text'), post=post)
+    #         return JsonResponse({"message": "Forbidden"}, status=403)
 
     return JsonResponse({
         "error": "Bad request"

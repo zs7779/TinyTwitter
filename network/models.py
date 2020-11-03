@@ -4,6 +4,8 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.core.exceptions import ValidationError
 
+from .utils import isHashTag, isMention
+
 
 MAX_LENGTH = 140
 DETAIL_SHORT = 0
@@ -227,12 +229,19 @@ class Post(models.Model):
             parent_post = None
         post = Post(author=requestor, text=text, parent=parent_post,
                     root_post=root_post, is_comment=is_comment)
+
         try:
             post.full_clean()
         except ValidationError as e:
             # print(e)
             return JsonResponse({"error": "Post body is illegal"}, status=400, safe=False)
         post.save()
+
+        # Process hashtags and mentions
+        words = text.split()
+        hashtags = PostTag.create_tags(set(filter(isHashTag, words)), post)
+        mentions = Mention.create_mentions(set(filter(isMention, words)), post)
+        
         json_message = {
             "message": "Post successful",
         }
@@ -242,25 +251,26 @@ class Post(models.Model):
             json_message["post"] = post.serialize(requestor)
         return JsonResponse(json_message, status=201)
 
-    def modify_post(text, post):
-        """
-        Returns response of PATCH post request, used to modify an existing post
+    # modify post is no longer supported because it messes with the whole HashTag system
+    # def modify_post(text, post):
+    #     """
+    #     Returns response of PATCH post request, used to modify an existing post
 
-        Parameters:
-        text (str): text content of the new post
-        post (Post): Post instance of post being modified
+    #     Parameters:
+    #     text (str): text content of the new post
+    #     post (Post): Post instance of post being modified
 
-        Returns:
-        response (JsonResponse): JsonResponse with status message
-        """
-        post.text = text
-        try:
-            post.full_clean()
-        except ValidationError as e:
-            # print(e)
-            return JsonResponse({"error": "Post body is illegal"}, status=400, safe=False)
-        post.save()
-        return JsonResponse({"message": "Like succesful"}, status=200)
+    #     Returns:
+    #     response (JsonResponse): JsonResponse with status message
+    #     """
+    #     post.text = text
+    #     try:
+    #         post.full_clean()
+    #     except ValidationError as e:
+    #         # print(e)
+    #         return JsonResponse({"error": "Post body is illegal"}, status=400, safe=False)
+    #     post.save()
+    #     return JsonResponse({"message": "Like succesful"}, status=200)
 
 
 class Like(models.Model):
@@ -294,14 +304,77 @@ class Like(models.Model):
 
 
 class HashTag(models.Model):
-    MAX_TAG_LENGTH = 20
-    user = models.ForeignKey("User", on_delete=models.SET_NULL, null=True, blank=True, related_name="hashtags")
-    post = models.ForeignKey("Post", on_delete=models.SET_NULL, null=True, blank=True, related_name="hashtags")
-    text = models.CharField(max_length=MAX_TAG_LENGTH)
+    text = models.CharField(max_length=MAX_LENGTH, unique=True)
     create_time = models.DateTimeField(auto_now_add=True)
+
+    def serialize(self):
+        return {
+            'text': self.text,
+        }
+
+class PostTag(models.Model):
+    tag = models.ForeignKey("HashTag", on_delete=models.RESTRICT, related_name="posts")
+    post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="hashtags")    
+
+    def serialize(self):
+        return {
+            'tag': self.tag.serialize(),
+            'post': self.post.serialize(detail=DETAIL_SHORT),
+        }
+
+    def create_tags(tags, post):
+        """
+        Create hashtags for posts
+
+        Parameters:
+        tags (Set[str]): set of strings to be created as hashtags
+        post (Post): post to be associated with the hashtags
+
+        Returns:
+        tags_array: created tags
+        """
+        tags_array = []
+        for t in tags:
+            try:
+                hashtag = HashTag.objects.get(text=t)
+            except HashTag.DoesNotExist:
+                hashtag = HashTag(text=t)
+                hashtag.save()
+            tag = PostTag(tag=hashtag, post=post)
+            tag.save()
+            tags_array.append(tag.serialize())
+        return tags_array
 
 
 class Mention(models.Model):
-    user = models.ForeignKey("User", on_delete=models.SET_NULL, null=True, blank=True, related_name="mentions")
+    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="mentions")
     post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="mentions")
     create_time = models.DateTimeField(auto_now_add=True)
+
+    def serialize(self):
+        return {
+            "user": self.user.serialize(detail=DETAIL_SHORT),
+            "post": self.post.serialize(detail=DETAIL_SHORT),
+        }
+
+    def create_mentions(mentions, post):
+        """
+        Create mentions for posts
+
+        Parameters:
+        mentions (Set[str]): set of strings to be created as mentions
+        post (Post): post to be associated with the mentions
+
+        Returns:
+        mentions_array: created mentions
+        """
+        mentions_array = []
+        for m in mentions:
+            try:
+                mentioned = User.objects.get(username=m[1:])
+            except User.DoesNotExist:
+                continue
+            mention = Mention(user=mentioned, post=post)
+            mention.save()
+            mentions_array.append(mention.serialize())
+        return mentions_array

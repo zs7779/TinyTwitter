@@ -7,3 +7,4 @@ frontend/coverage/
 docker cmd.txt
 .env
 lightsail_start.sh
+mount/

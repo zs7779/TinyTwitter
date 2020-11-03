@@ -7,9 +7,11 @@ services:
             - POSTGRES_DB=${DATABASE_NAME}
             - POSTGRES_USER=${DATABASE_USERNAME}
             - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+        volumes:
+            - ./mount:/var/lib/postgresql/data
     web:
         build: .
-        command: python manage.py runserver 0.0.0.0:8000
+        command: python manage.py runserver 0.0.0.0:${DJANGO_PORT}
         environment: 
             - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
             - DEBUG=${DEBUG}
@@ -24,6 +26,6 @@ services:
         volumes:
             - .:/usr/src/app
         ports:
-            - "8000:8000"
+            - "${DJANGO_PORT}:${DJANGO_PORT}"
         depends_on: 
             - db

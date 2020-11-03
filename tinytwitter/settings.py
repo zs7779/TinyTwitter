@@ -87,8 +87,7 @@ DATABASES = {
          'NAME': os.getenv('DATABASE_NAME', 'tinytwitter'),
          'USER': os.getenv('DATABASE_USERNAME', 'myprojectuser'),
          'PASSWORD': os.getenv('DATABASE_PASSWORD', 'password'),
-         'HOST': 'db',
-        #  'HOST': os.getenv('DATABASE_HOST', '127.0.0.1'),
+         'HOST': os.getenv('DATABASE_HOST', 'db'),
          'PORT': os.getenv('DATABASE_PORT', 5432),
          'OPTIONS': json.loads(
              os.getenv('DATABASE_OPTIONS', '{}')
@@ -166,5 +165,5 @@ logging.config.dictConfig({
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_URL = 'https://zhaosean.com/dist/'
+# STATIC_URL = 'https://zhaosean.com/dist/'
 LOGIN_URL = '/login/'

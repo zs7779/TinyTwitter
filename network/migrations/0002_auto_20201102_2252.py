@@ -13,8 +13,11 @@ def load_testdata(apps, schema_editor):
     # 1st post cannot repost
     post_rand[0] = 0
     # decide parent in case of repost/comment
-    parent = [random.randrange(0, i) if i > 0 else 0 for i in range(500)]
-    # print(parent)
+    parent = [random.randrange(i//2, i) if i > 0 else 0 for i in range(500)]
+    
+    mentions = [random.randrange(-10, 10) for _ in range(500)]
+    tags = [random.randrange(-5, 5) for _ in range(500)]
+
     # remember root as data populate
     root = []
     for i in range(500):
@@ -31,6 +34,7 @@ def load_testdata(apps, schema_editor):
     Post = apps.get_model('network', 'Post')
     users = json.load(open('network/testdata/users.json'))
     posts = json.load(open('network/testdata/posts.json'))
+    hashtags = ['HelloWorld', 'HolaMundo', 'BonjourLeMonde', 'KonnichiwaSekai', 'NihaoShijie']
 
     for u in users:
         User.objects.create(username=u['username'],
@@ -49,7 +53,12 @@ def load_testdata(apps, schema_editor):
             else:
                 root_post = Post.objects.get(id=parent[i]+1)
 
-        post = Post(author=user, text=p['text'],
+        post_text = p['text']
+        if mentions[i] >= 0:
+            post_text += f'@{users[mentions[i]]["username"]}'
+        if tags[i] >= 0:
+            post_text += f'#{hashtags[tags[i]]}'
+        post = Post(author=user, text=post_text,
                     parent=parent_post,
                     is_comment=is_comment,
                     root_post=root_post)

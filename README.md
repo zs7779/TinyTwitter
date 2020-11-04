@@ -11,27 +11,32 @@ Current functions:
 * Retweet a tweet/comment
 * Delete your own tweet/comment
 * Like/unlike a tweet/comment
+* Mentions
+* Infinite scroll
 
 
 Expected functions:
 * Hashtags
-* Mentions
 * Notifications
 * User avatar
 * Image upload with tweet
-* Infinite scroll
 * Mobile page
 
 
 Twitter functions I noticed but have no intention to try:
 * Video upload with tweet
 * Block user/tweet/comment
-* Events/Polls
+* Share
+* Events/Polls/Emojis
 * Live update
 * "#Explore" post/hashtag ranking
 * Analytics
 
 
+Known bugs:
+* Infinite scroll not working on super small screen
+* Scroll position not persisted when clicking on a post then go back
+
+
 Todos:
-* Module design
 * Architecture

@@ -45,9 +45,8 @@ export default{
         },
     },
     watch: {
-        username() {
-            if (this.username !== this.user.username)
-                this.getUserProfile();
+        $route() {
+            this.getUserProfile();
         },
     },
     created() {

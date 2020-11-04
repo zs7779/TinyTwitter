@@ -87,11 +87,7 @@ export default{
         },
     },
     watch: {
-        all() {
-            this.resetView();
-            this.getPosts();
-        },
-        username() {
+        $route() {
             this.resetView();
             this.getPosts();
         },

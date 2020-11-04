@@ -112,11 +112,7 @@ export default{
         },
     },
     watch: {
-        username() {
-            this.resetView()
-            this.getUserPost();
-        },
-        postID() {
+        $route() {
             this.resetView()
             this.getUserPost();
         },

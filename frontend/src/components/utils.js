@@ -14,26 +14,35 @@ const SIGNALs = {
 
 
 const PLACEHOLDERs = {
-    user: {id: -1, username: 'username'},
-    post: {
-        author: {id: -1, username: 'username'},
-        id: -1,
-        text: "",
-        create_time: null,
-        comment_count: null,
-        repost_count: null,
-        like_count: null,
-        commented: 0,
-        reposted: 0,
-        liked: 0,
-        comments: [],
+    user: () => { return {id: -1, username: 'username'}; },
+    post: () => {
+        return {
+            id: -1,
+            author: {id: -1, username: 'username'},
+            text: "",
+            media_url: "",
+            parent: null,
+            create_time: null,
+            is_comment: false,
+            root_post: null,
+            comment_count: null,
+            repost_count: null,
+            like_count: null,
+            commented: 0,
+            reposted: 0,
+            liked: 0,
+            owner: false,
+            comments: [],
+        };
     },
-    posts: [],
-    postParams: {
-        oldPost: null,
-        parentPost: null,
-        isComment: false,
-        rootPost: null,
+    posts: () => [],
+    postParams: () => {
+        return {
+            oldPost: null,
+            parentPost: null,
+            isComment: false,
+            rootPost: null,
+        };
     },
 }
 
@@ -51,9 +60,9 @@ function printError(error) {
 }
 
 
-function getToken() {
+function getToken(userAuth) {
     const csrftoken = Cookies.get('csrftoken');
-    if (csrftoken) {
+    if (userAuth && csrftoken) {
         return csrftoken;
     }
     window.location.href = "/login/";

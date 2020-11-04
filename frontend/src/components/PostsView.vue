@@ -14,21 +14,27 @@ export default{
     props: ['all', 'username'],
     data () {
         return {
-            posts: PLACEHOLDERs.posts,
+            posts: PLACEHOLDERs.posts(),
+            after: 0,
+            count: 20,
         }
     },
     methods: {
-        getPosts(query='') {
+        getPosts() {
+            if (this.after < this.posts.length) {
+                this.after = this.posts.length;
+                return;
+            }
             var url = this.all ? `${URLs.posts()}` : `${URLs.posts('home')}`;
             if (this.username) url = `${URLs.usersPosts(this.username)}`;
             axios.get(url, {
                 params: {
-                    after: 0,
-                    count: 20,
+                    after: this.after,
+                    count: this.count,
                 },
             }).then(response => {
-                console.log('posts',response)
-                this.posts = response.data.posts;
+                this.appendPosts(response.data.posts);
+                this.after += this.count;
             })
         },
         prependPosts(posts) {
@@ -66,17 +72,35 @@ export default{
         deleteRepost(id) {
             this.posts = this.posts.map(p => p.id === id ? {...p, repost_count: p.repost_count-1, reposted: p.reposted-1} : p);
         },
-    },
-    created: function () {
-        this.getPosts('');
+        scroll() {
+            window.onscroll = () => {
+                let bottomOfWindow = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;
+                if (this.posts.length > 0 && bottomOfWindow) {
+                    this.getPosts();
+                }
+            };
+        },
+        resetView() {
+            this.posts = PLACEHOLDERs.posts();
+            this.after = 0;
+            this.count = 20;
+        },
     },
     watch: {
         all() {
+            this.resetView();
             this.getPosts();
         },
         username() {
+            this.resetView();
             this.getPosts();
         },
+    },
+    created() {
+        this.getPosts();
+    },
+    mounted() {
+        this.scroll();
     },
     components: {
         PostFeed,

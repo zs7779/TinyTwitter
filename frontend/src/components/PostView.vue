@@ -16,20 +16,25 @@ export default{
     props: ['username', 'postID'],
     data() {
         return {
-            post: PLACEHOLDERs.post,
+            post: PLACEHOLDERs.post(),
+            after: 0,
+            count: 20,
         }
     },
     methods: {
         getUserPost() {
             axios.get(`${URLs.usersPosts(this.username, this.postID)}`, {
                 params: {
+                    after: this.after < this.post.comments.length ? 0 : this.after,
+                    count: this.after < this.post.comments.length ? 0 : this.count,
                 },
             }).then(response => {
-                console.log('getPost',response)
                 this.post = {
                     ...response.data.post,
-                    comments: response.data.comments,
+                    comments: this.post.comments,
                 }
+                this.appendComments(response.data.comments);
+                this.after += this.count;
             })
         },
         updatePost(editID, post) {
@@ -49,9 +54,12 @@ export default{
                 });
             }
         },
-        appendComments() {},
+        appendComments(comments) {
+            comments.forEach(c => {
+                this.post.comments.push(c);
+            })
+        },
         updateComments(editID, comment) {
-            console.log(editID, comment);
             this.post.comments = this.post.comments.map(p => p.id === editID ? comment : p);    
         },
         addComment(comment) {
@@ -89,17 +97,35 @@ export default{
             }
         },
         // delete repost not possible in this view,
+        scroll () {
+            window.onscroll = () => {
+                let bottomOfWindow = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;
+                if (this.post.comments.length > 0 && bottomOfWindow) {
+                    this.getUserPost();
+                }
+            };
+        },
+        resetView() {
+            this.post = PLACEHOLDERs.post();
+            this.after = 0;
+            this.count = 20;
+        },
     },
     watch: {
         username() {
+            this.resetView()
             this.getUserPost();
         },
         postID() {
+            this.resetView()
             this.getUserPost();
-        }
+        },
     },
     created() {
         this.getUserPost();
+    },
+    mounted() {
+        this.scroll();
     },
     components: {
         PostCard

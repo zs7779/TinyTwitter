@@ -26,7 +26,7 @@ export default{
     name: "user-profile",
     props: {user: {
         type: Object,
-        default(){return PLACEHOLDERs.user;},
+        default(){ return PLACEHOLDERs.user(); },
     }},
     methods: {
         onFollow() {

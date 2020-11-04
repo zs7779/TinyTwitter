@@ -151,7 +151,7 @@ class Post(models.Model):
             user = User.objects.get(username=username)
         except User.DoesNotExist:
             return JsonResponse({"error": "User does not exist"}, status=404)
-        posts = Post.objects.filter(author=user, is_comment=False).order_by(order_by)
+        posts = Post.objects.filter(author=user, is_comment=False).order_by(order_by)[after:after+count]
         return JsonResponse({
             "posts": [post.serialize(requestor) for post in posts],
         }, safe=False)
@@ -171,12 +171,12 @@ class Post(models.Model):
         response (JsonResponse): JsonResponse to the get request, with serialized Post objects if succesful
         """
         if path == "home":
-            posts = Post.objects.filter(Q(author__followers__follower=requestor) | Q(author=requestor), is_comment=False).order_by(order_by)
+            posts = Post.objects.filter(Q(author__followers__follower=requestor) | Q(author=requestor), is_comment=False).order_by(order_by)[after:after+count]
             return JsonResponse({
                 "posts": [post.serialize(requestor) for post in posts],
             }, safe=False)
         else:
-            posts = Post.objects.filter(is_comment=False).order_by(order_by)
+            posts = Post.objects.filter(is_comment=False).order_by(order_by)[after:after+count]
             return JsonResponse({
                 "posts": [post.serialize(requestor) for post in posts],
             }, safe=False)
@@ -199,7 +199,7 @@ class Post(models.Model):
             post = Post.objects.get(id=post_id)
         except Post.DoesNotExist:
             return JsonResponse({"error": "Post does not exist"}, status=404)
-        comments = [comment.serialize(user=requestor) for comment in post.comments.all().order_by(order_by)]
+        comments = [comment.serialize(user=requestor) for comment in post.comments.all().order_by(order_by)[after:after+count]]
         return JsonResponse({
             "post": post.serialize(requestor),
             "comments": comments,

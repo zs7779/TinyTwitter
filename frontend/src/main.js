@@ -13,7 +13,7 @@ const router = new VueRouter({
     } else {
       return { x: 0, y: 0 };
     }
-  }  
+  }
 })
 
 var vm = new Vue({
@@ -21,7 +21,7 @@ var vm = new Vue({
   router,
   data: {
       pathname: window.location.pathname,
-      postParams: PLACEHOLDERs.postParams,
+      postParams: PLACEHOLDERs.postParams(),
       userAuth: document.getElementById('userauth') ? true : false,
   },
   computed: {
@@ -30,9 +30,8 @@ var vm = new Vue({
     },
   },
   methods: {
-    log(e){console.log(e)},
     clearPost() {
-      this.postParams = PLACEHOLDERs.postParams;
+      this.postParams = PLACEHOLDERs.postParams();
     },
     updateContent(post) {
       if (this.$refs.post) this.$refs.post.updatePost(post.id, post);

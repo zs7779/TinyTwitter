@@ -26,19 +26,17 @@ def current_user(request):
 @require_GET
 def posts_read(request, path=None, username=None):
     data = request.GET
-    if data.get("count") is not None and data.get("after") is not None:
-        # todo: pages
-        pass
-
+    count = int(data.get("count", 20))
+    after = int(data.get("after", 0))
     if username is not None:
         # Get posts of one user
-        return Post.get_posts_by_user(username=username, requestor=request.user)
+        return Post.get_posts_by_user(username=username, requestor=request.user, count=count, after=after)
     elif path == 'home' and request.user.is_authenticated:
         # Get home page of logged-in user (posts of followees)
-        return Post.get_posts(path='home', requestor=request.user)
+        return Post.get_posts(path='home', requestor=request.user, count=count, after=after)
     else:
         # Get all posts, also is home page of unlogged-in user
-        return Post.get_posts(path='all', requestor=request.user)
+        return Post.get_posts(path='all', requestor=request.user, count=count, after=after)
 
 
 @require_GET
@@ -48,8 +46,11 @@ def post_read(request, post_id, username=None):
             user = User.objects.get(username=username)
         except User.DoesNotExist:
             return JsonResponse({"error": "User does not exist"}, status=404)
+    data = request.GET
+    count = int(data.get("count", 20))
+    after = int(data.get("after", 0))
     # Get one post
-    return Post.get_post_by_id(post_id=post_id, requestor=request.user)
+    return Post.get_post_by_id(post_id=post_id, requestor=request.user, count=count, after=after)
 
 
 @require_GET

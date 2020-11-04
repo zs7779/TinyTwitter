@@ -6,7 +6,6 @@
 
 <script>
 import UserProfile from './UserProfile.vue'
-import NewPost from './NewPost.vue'
 import { URLs, PLACEHOLDERs, getToken } from './utils'
 
 export default{
@@ -14,18 +13,12 @@ export default{
     props: ['username'],
     data() {
         return {
-            user: PLACEHOLDERs.user,
+            user: PLACEHOLDERs.user(),
         }
     },
     methods: {
-        getUserPosts(query='') {
-            axios.get(`${URLs.users(this.username)}`, {
-                params: {
-                    after: 0,
-                    count: 20,
-                },
-            }).then(response => {
-                console.log('profile',response)
+        getUserProfile() {
+            axios.get(`${URLs.users(this.username)}`).then(response => {
                 this.user = response.data.user;
             })
         },
@@ -53,16 +46,15 @@ export default{
     },
     watch: {
         username() {
-            if (this.username !== this.user.username) this.getUserPosts('');
-            
+            if (this.username !== this.user.username)
+                this.getUserProfile();
         },
     },
     created() {
-        this.getUserPosts('');
+        this.getUserProfile();
     },
     components: {
         UserProfile,
-        NewPost
     },
 }
 </script>

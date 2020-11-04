@@ -1,7 +1,7 @@
 # TinyTwitter
 
 
-This is a personal project to recreate a tiny twitter with Vue/Django/Postgres
+This is a personal project with Vue/Django/Postgres, trying to reacreate some of Twitter's interesting functions
 
 
 Current functions:
@@ -23,7 +23,7 @@ Expected functions:
 * Mobile page
 
 
-Twitter functions I noticed but have no intention to try:
+Twitter functions I noticed but currently have no intention to try:
 * Video upload with tweet
 * Block user/tweet/comment
 * Share

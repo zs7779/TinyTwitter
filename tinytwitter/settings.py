@@ -162,7 +162,7 @@ if not DEBUG:
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
-
+STATIC_ROOT = '../../homepage/dist/tinytwitter/'
 STATIC_URL = '/static/'
-# STATIC_URL = 'https://zhaosean.com/dist/'
+# STATIC_URL = 'https://zhaosean.com/dist/tinytwitter/'
 LOGIN_URL = '/login/'

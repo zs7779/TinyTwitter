@@ -251,27 +251,6 @@ class Post(models.Model):
             json_message["post"] = post.serialize(requestor)
         return JsonResponse(json_message, status=201)
 
-    # modify post is no longer supported because it messes with the whole HashTag system
-    # def modify_post(text, post):
-    #     """
-    #     Returns response of PATCH post request, used to modify an existing post
-
-    #     Parameters:
-    #     text (str): text content of the new post
-    #     post (Post): Post instance of post being modified
-
-    #     Returns:
-    #     response (JsonResponse): JsonResponse with status message
-    #     """
-    #     post.text = text
-    #     try:
-    #         post.full_clean()
-    #     except ValidationError as e:
-    #         # print(e)
-    #         return JsonResponse({"error": "Post body is illegal"}, status=400, safe=False)
-    #     post.save()
-    #     return JsonResponse({"message": "Like succesful"}, status=200)
-
 
 class Like(models.Model):
     user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="likes")
@@ -311,6 +290,16 @@ class HashTag(models.Model):
         return {
             'text': self.text,
         }
+
+    def get_hashtag_posts(hashtag, requestor, count=20, after=0):
+        try:
+            tag = HashTag.objects.get(text=hashtag)
+        except HashTag.DoesNotExist:
+            return JsonResponse({"error": "Hashtag does not exist"}, status=404)
+        return JsonResponse({
+            "posts": [post_tag.post.serialize(requestor) for post_tag in tag.posts.all()[after:after+count]],
+        }, safe=False)
+        
 
 class PostTag(models.Model):
     tag = models.ForeignKey("HashTag", on_delete=models.RESTRICT, related_name="posts")

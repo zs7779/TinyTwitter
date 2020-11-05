@@ -54,9 +54,11 @@ def post_read(request, post_id, username=None):
 
 
 @require_GET
-def comment_read(request, comment_id, post_id=None, username=None):
-    # May be needed by API
-    pass
+def hashtag_read(request, hashtag):
+    data = request.GET
+    count = int(data.get("count", 20))
+    after = int(data.get("after", 0))
+    return HashTag.get_hashtag_posts(hashtag=hashtag, requestor=request.user, count=count, after=after)
 
 
 @require_GET
@@ -105,24 +107,9 @@ def post_write(request, post_id):
             return Post.create_post(text=data.get('text'), parent_id=data.get('parent_id'),
                                     root_post=post, is_comment=True, requestor=request.user)
 
-    # Post editing is no longer supported because it messes with the whole HashTag system
-    # if request.method == "PATCH":
-    #     if data.get('text') is not None:
-    #         # Handles editing post by authorized user
-    #         if post.author == request.user:
-    #             return Post.modify_post(text=data.get('text'), post=post)
-    #         return JsonResponse({"message": "Forbidden"}, status=403)
-
     return JsonResponse({
         "error": "Bad request"
     }, status=400)
-
-
-@login_required
-@require_http_methods(["POST", "PATCH", "DELETE"])
-def comment_write(request, comment_id):
-    # May be needed by API
-    pass
 
 
 @login_required
@@ -163,6 +150,10 @@ def post_view(request, post_id, username=None):
         return post_read(request, post_id, username)
     else:
         return post_write(request, post_id)
+
+
+def hashtag_view(request, hashtag):
+    return hashtag_read(request, hashtag)
 
 
 def profile_view(request, username):

@@ -9,3 +9,4 @@ docker cmd.txt
 lightsail_start.sh
 mount/
 frontend/static/frontend/tinytwitter.js
+db.*

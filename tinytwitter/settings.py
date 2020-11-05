@@ -19,7 +19,6 @@ from django.urls import reverse
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
@@ -27,9 +26,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', False)
+DEBUG = os.getenv('DEBUG', "False") == "True"
 
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '127.0.0.1').split(',')
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', ['locaohost', '127.0.0.1']).split(',')
 
 
 # Application definition
@@ -84,7 +83,7 @@ DATABASES = {
          'ENGINE': 'django.db.backends.{}'.format(
              os.getenv('DATABASE_ENGINE', 'sqlite3')
          ),
-         'NAME': os.getenv('DATABASE_NAME', 'tinytwitter'),
+         'NAME': os.getenv('DATABASE_NAME', os.path.join(BASE_DIR, 'db.tinytwitter')),
          'USER': os.getenv('DATABASE_USERNAME', 'myprojectuser'),
          'PASSWORD': os.getenv('DATABASE_PASSWORD', 'password'),
          'HOST': os.getenv('DATABASE_HOST', 'db'),

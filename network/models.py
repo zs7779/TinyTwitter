@@ -15,6 +15,7 @@ DETAIL_FULL = 2
 
 class User(AbstractUser):
     bio = models.CharField(max_length=MAX_LENGTH, default="")
+    avatar_url = models.URLField(null=True, blank=True)
 
     def serialize(self, user=None, detail=DETAIL_FULL):
         if detail == DETAIL_SHORT:
@@ -26,6 +27,7 @@ class User(AbstractUser):
             return {
                 "id": self.id,
                 "username": self.username,
+                "avatar": self.avatar_url,
                 "bio": self.bio,
                 "following_count": self.following.all().count(),
                 "follower_count": self.followers.all().count(),

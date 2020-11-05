@@ -3,10 +3,10 @@ version: '3'
 services:
     web:
         build: .
-        command: gunicorn -b 0.0.0.0:${DJANGO_PORT} tinytwitter.wsgi
+        # command: gunicorn -b 0.0.0.0:${DJANGO_PORT} tinytwitter.wsgi
+        command: python manage.py runserver 0.0.0.0:${DJANGO_PORT} # gunicorn not good for development
         environment: 
             - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
-            - DEBUG=${DEBUG}
             - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
             - DATABASE_ENGINE=${DATABASE_ENGINE}
             - DATABASE_NAME=${DATABASE_NAME}
@@ -15,6 +15,7 @@ services:
             - DATABASE_HOST=${DATABASE_HOST}
             - DATABASE_PORT=${DATABASE_PORT}
             - DJANGO_LOGLEVEL=${DJANGO_LOGLEVEL}
+            - DEBUG=${DEBUG}
         volumes:
             - .:/usr/src/app
         ports:

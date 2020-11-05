@@ -38,8 +38,10 @@ def load_testdata(apps, schema_editor):
 
     for u in users:
         User.objects.create(username=u['username'],
-                            email=u['username']+'@test.com',
-                            password=make_password(u['password']))
+                            email=u['email'],
+                            password=make_password(u['password']),
+                            bio=u['bio'][:140],
+                            avatar_url=u['avatar'])
 
     for i, p in enumerate(posts):
         user = User.objects.get(id=int(p['author'])+1)
@@ -53,11 +55,14 @@ def load_testdata(apps, schema_editor):
             else:
                 root_post = Post.objects.get(id=parent[i]+1)
 
-        post_text = p['text']
-        if mentions[i] >= 0:
-            post_text += f' @{users[mentions[i]]["username"]}'
-        if tags[i] >= 0:
-            post_text += f' #{hashtags[tags[i]]}'
+        post_text = p['text'][:140]
+        if len(post_text) <= 120:
+            text_split = post_text.split(' ')
+            if mentions[i] >= 0:
+                text_split.insert(random.randrange(len(text_split)), f'@{users[mentions[i]]["username"]}')
+            if tags[i] >= 0:
+                text_split.insert(random.randrange(len(text_split)), f'#{hashtags[tags[i]]}')
+            post_text = ' '.join(text_split)
         post = Post(author=user, text=post_text,
                     parent=parent_post,
                     is_comment=is_comment,

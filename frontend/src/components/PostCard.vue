@@ -1,7 +1,10 @@
 <template>
     <div class="card p-1 rounded-0">
         <div v-if='verbose && post.is_comment' class="list-group list-group-flush">
-            <post-body v-if='post.root_post' :post='post.root_post' :buttons='true' class='list-group-item' />
+            <post-body v-if='post.root_post' :post='post.root_post' :buttons='true' class='list-group-item' 
+                @action-comment="onComment(post.root_post)" @action-repost="onRepost(post.root_post)"
+                @action-like="onLike(post.root_post)" @action-delete="onDelete(post.root_post)"
+            />
         </div>
         <post-body class="border-bottom"
             :post='post' :buttons='true' :verbose='verbose'
@@ -18,7 +21,7 @@
                 v-for='comment in post.comments' :key='comment.id' :post='comment' :buttons='true'
                 @action-comment="onComment(comment)" @action-repost="onRepost(comment)"
                 @action-like="onLike(comment)" @action-delete="onDelete(comment)"
-                class="list-group-item" 
+                class="list-group-item"
             />
         </div>
     </div>
@@ -59,7 +62,7 @@ export default{
                 this.$emit("like-ok", {
                     ...post,
                     like_count: post.liked ? post.like_count - 1 : post.like_count + 1,
-                    liked: 1 - post.liked,
+                    liked: post.liked ? post.liked - 1 : post.liked + 1,
                 });
             })
         },

@@ -131,13 +131,13 @@ class Post(models.Model):
             "commented": self.children.filter(is_comment=True, author__id=user.id).count() if self.is_comment else self.comments.filter(author__id=user.id).count(),
             "reposted": self.children.filter(is_comment=False, author__id=user.id).count(),
             "liked": self.likes.filter(user__id=user.id).count(),
+            "owner": self.author == user,
         })
         if detail == DETAIL_LONG:
             return result
         result.update({
             "parent": self.parent.serialize(detail=DETAIL_LONG, user=user) if self.parent is not None else None,
             "root_post": self.root_post.serialize(detail=DETAIL_LONG, user=user) if self.is_comment else None,
-            "owner": self.author == user,
         })
         if detail == DETAIL_FULL:  
             return result

@@ -1,5 +1,5 @@
 <template>
-    <div class="card p-3 mb-2">
+    <div class="card p-3 mb-1">
         <h5 class="card-title">{{ user.username }}</h5>
         <div class="row justify-content-between mx-1">
             <div>

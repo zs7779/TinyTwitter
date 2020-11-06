@@ -53,16 +53,6 @@
     }
 }
 
-.card-view {
-    white-space: pre-line;
-    max-height: 300px;
-    -webkit-line-clamp: 16;
-    overflow : hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-}
-
 .btn-transparent {
     background-color: Transparent;
     border-color: #fff;

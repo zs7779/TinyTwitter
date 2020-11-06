@@ -1,10 +1,13 @@
 <template>
     <div :class="[hovering ? 'hover':'', 'p-3']" @mouseover='hovering=true' @mouseout='hovering=false'>
-        <router-link :to='{name: "post", params: {username: post.author.username, postID: post.id}}' tag='div' :class="[verbose ? 'card-view':'', 'card-text']">
+        <router-link
+            tag='div'
+            :to='{name: "post", params: {username: post.author.username, postID: post.id}}'
+            :class="[verbose ? '':'card-view', 'card-text']"
+        >
             <h6 class="card-title mb-1">
                 <span><router-link :to="{ name: 'user', params: {username: post.author.username} }">
-                    <img :src='post.author.avatar' class='avatar'>
-                    {{ post.author.username }}
+                    <img :src='post.author.avatar' class='avatar'>{{ post.author.username }}
                 </router-link></span>
                 <span class="small text-muted"> {{ postTime }}:</span>
             </h6>
@@ -35,10 +38,11 @@
                 <button type="button" class="btn btn-transparent px-1 py-0" title="Like" @click="$emit('action-like')">
                     <b-icon icon="heart" :class="[post.liked ? 'card-button-like' : 'card-button']"></b-icon> {{ like_count }}
                 </button>
-                <b-dropdown id="dropdown-dropup" dropup variant="btn btn-transparent px-1 py-0" no-caret title="Options">
+                <b-dropdown v-if="post.owner" id="dropdown-dropup" dropup variant="btn btn-transparent px-1 py-0" no-caret title="Options">
                     <template v-slot:button-content><b-icon icon="chevron-up" class="card-button"></b-icon></template>
-                    <b-dropdown-item v-if="post.owner" @click="$emit('action-delete')"><b-icon icon="x" class="card-button"></b-icon> Delete</b-dropdown-item>
-                    <b-dropdown-item><b-icon icon="share" class="card-button"></b-icon> Share</b-dropdown-item>
+                    <b-dropdown-item @click="$emit('action-delete')" title="Delete">
+                        <b-icon icon="x" class="card-button"></b-icon> Delete
+                    </b-dropdown-item>
                 </b-dropdown>
             </div>
         </div>
@@ -104,6 +108,16 @@ export default{
 <style scoped>
 .hover {
     background-color: #f9f9f9;
+}
+.card-view {
+    -webkit-line-clamp: 16;
+    overflow : hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+}
+.card-text {
+    white-space: pre-line;
 }
 .avatar {
     width: 3em;

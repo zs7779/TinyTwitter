@@ -1,16 +1,19 @@
 <template>
     <div class="card p-1 rounded-0">
-        <post-body
+        <div v-if='verbose && post.is_comment' class="list-group list-group-flush">
+            <post-body v-if='post.root_post' :post='post.root_post' :buttons='true' class='list-group-item' />
+        </div>
+        <post-body class="border-bottom"
             :post='post' :buttons='true' :verbose='verbose'
             @action-comment="onComment(post)" @action-repost="onRepost(post)"
             @action-like="onLike(post)" @action-delete="onDelete(post)"
         >
-            <post-body v-if='post.parent' :post='post.parent' :buttons='false' class='card p-3' />
+            <post-body v-if='post.parent && !post.is_comment' :post='post.parent' :buttons='false' class='card p-3' />
             <div v-if='verbose' class="card-footer bg-transparent p-0 ">
                 <span>{{ post.repost_count }} Reposts</span> <span>{{ post.like_count }} Likes</span>
             </div>
         </post-body>
-        <div v-if='verbose' class="list-group list-group-flush border-top">
+        <div v-if='verbose' class="list-group list-group-flush">
             <post-body 
                 v-for='comment in post.comments' :key='comment.id' :post='comment' :buttons='true'
                 @action-comment="onComment(comment)" @action-repost="onRepost(comment)"
@@ -30,20 +33,16 @@ export default{
     props: ['post', 'verbose'],
     methods: {
         onComment(post) {
-            const token = getToken(this.$root.userAuth);
             const postParams = {
                 isComment: true,
                 parentPost: post,
                 rootPost: this.post.is_comment ? this.post.root_post : this.post,
-                token: token,
             };
             this.$emit("action-post", postParams);
         },
         onRepost(post) {
-            const token = getToken(this.$root.userAuth);
             const postParams = {
                 parentPost: post,
-                token: token,
             };
             this.$emit("action-post", postParams);
         },

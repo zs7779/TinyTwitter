@@ -19,7 +19,7 @@ const routes = [
         path: '/hashtags/:hashtag', components: {
             posts: PostsView,
         }, props: {
-            posts: {all: true},
+            posts: true,
         }, name: 'hashtag'
     },
     {

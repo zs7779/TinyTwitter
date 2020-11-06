@@ -7,7 +7,7 @@ User = apps.get_model('network', 'User')
 
 
 # Create your views here.
-def index(request, path='', username='', post_id=''):
+def index(request, path='', username='', post_id='', hashtag=''):
     return render(request, "frontend/index.html")
 
 

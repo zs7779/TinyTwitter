@@ -11,7 +11,7 @@ import { URLs, PLACEHOLDERs } from './utils'
 
 export default{
     name: "posts-view",
-    props: ['all', 'username'],
+    props: ['all', 'username', 'hashtag'],
     data () {
         return {
             posts: PLACEHOLDERs.posts(),
@@ -27,6 +27,7 @@ export default{
             }
             var url = this.all ? `${URLs.posts()}` : `${URLs.posts('home')}`;
             if (this.username) url = `${URLs.usersPosts(this.username)}`;
+            if (this.hashtag) url = `${URLs.hashtags(this.hashtag)}`;
             axios.get(url, {
                 params: {
                     after: this.after,

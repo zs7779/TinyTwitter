@@ -2,6 +2,7 @@ const URLs = {
     posts: (postID='') => `/api/posts/${postID}`,
     users: (userID='') => `/api/users/${userID}`,
     usersPosts: (userID='', postID='') => `/api/users/${userID}/posts/${postID}`,
+    hashtags: (hashtag='') => `/api/hashtags/${hashtag}`,
 };
 
 

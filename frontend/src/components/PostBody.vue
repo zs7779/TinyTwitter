@@ -55,12 +55,6 @@ export default{
         // Determine mentioned users
         mentions() {
             var receipants = {};
-            if (this.post.root_post) {
-                receipants[this.post.root_post.author.id] = this.post.root_post.author.username;
-            }
-            if (this.post.parent) {
-                receipants[this.post.parent.author.id] = this.post.parent.author.username;
-            }
             if (this.post.mentions) {
                 this.post.mentions.forEach(m => {
                     receipants[m.id] = m.username;
@@ -70,7 +64,7 @@ export default{
                 return { id: k, username: v, }
             });
         },
-    }
+    },
 }
 </script>
 

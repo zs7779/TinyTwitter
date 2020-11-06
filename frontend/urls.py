@@ -9,5 +9,6 @@ urlpatterns = [
     path("register/", views.register, name="register"),
     re_path(r"^(?P<username>\w{1,50})/$", views.index),
     re_path(r"^(?P<username>\w{1,50})/(?P<post_id>[0-9]{1,50})$", views.index),
+    re_path(r"^hashtags/(?P<hashtag>\w{1,50})/$", views.index),
     re_path(r"^(?P<path>\w*)$", views.index, name="index"),
 ]

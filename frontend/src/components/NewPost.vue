@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import { URLs } from './utils'
+import { URLs, getToken } from './utils'
 
 export default{
     name: "new-post",
@@ -26,6 +26,7 @@ export default{
     data() {
         return {
             postText: '',
+            token: null,
         };
     },
     computed: {
@@ -54,7 +55,7 @@ export default{
                 parent_id: this.postParams.parentPost ? this.postParams.parentPost.id : null,
             }, {
                 headers: {
-                    'X-CSRFTOKEN': this.postParams.token,
+                    'X-CSRFTOKEN': this.token,
                 },
             }).then(response => {
                 if (this.postParams.isComment) {
@@ -74,10 +75,10 @@ export default{
             this.postText = "";
         },
         checkToken(event) {
-            if (!this.postParams.token) {
-                event.preventDefault();
+            if (!this.token) {
+                this.token = getToken(this.$root.userAuth);
             }
-        }
+        },
     },
     watch: {
         postParams() {

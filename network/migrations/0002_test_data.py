@@ -5,6 +5,8 @@ from django.contrib.auth.hashers import make_password
 import json
 import random
 
+from ..utils import isHashTag, isMention
+
 
 def load_testdata(apps, schema_editor):
     random.seed(123)
@@ -32,6 +34,10 @@ def load_testdata(apps, schema_editor):
 
     User = apps.get_model('network', 'User')
     Post = apps.get_model('network', 'Post')
+    HashTag = apps.get_model('network', 'HashTag')
+    PostTag = apps.get_model('network', 'PostTag')
+    Mention = apps.get_model('network', 'Mention')
+    
     users = json.load(open('network/testdata/users.json'))
     posts = json.load(open('network/testdata/posts.json'))
     hashtags = ['HelloWorld', 'HolaMundo', 'BonjourLeMonde', 'KonnichiwaSekai', 'NihaoShijie']
@@ -69,6 +75,22 @@ def load_testdata(apps, schema_editor):
                     root_post=root_post)
         post.save()
 
+        words = post_text.split()
+        for t in set(filter(isHashTag, words)):
+            try:
+                hashtag = HashTag.objects.get(text=t[1:].lower())
+            except HashTag.DoesNotExist:
+                hashtag = HashTag(text=t[1:].lower())
+                hashtag.save()
+            tag = PostTag(tag=hashtag, post=post)
+            tag.save()
+        for m in set(filter(isMention, words)):
+            try:
+                mentioned = User.objects.get(username=m[1:])
+            except User.DoesNotExist:
+                continue
+            mention = Mention(user=mentioned, post=post)
+            mention.save()
 
 
 class Migration(migrations.Migration):

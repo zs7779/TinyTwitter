@@ -18,23 +18,23 @@ class User(AbstractUser):
     avatar_url = models.URLField(null=True, blank=True)
 
     def serialize(self, user=None, detail=DETAIL_FULL):
+        result = {
+            "id": self.id,
+            "username": self.username,
+            "avatar": self.avatar_url,
+        }
         if detail == DETAIL_SHORT:
-            return {
-                "id": self.id,
-                "username": self.username,
-            }
+            return result
+        result.update({
+            "bio": self.bio,
+            "following_count": self.following.all().count(),
+            "follower_count": self.followers.all().count(),
+            "following": self.followers.filter(user__id=self.id, follower__id=user.id).count() > 0,
+            "followed": self.followers.filter(user__id=user.id, follower__id=self.id).count() > 0,
+            "owner": self == user,
+        })
         if detail == DETAIL_FULL:
-            return {
-                "id": self.id,
-                "username": self.username,
-                "avatar": self.avatar_url,
-                "bio": self.bio,
-                "following_count": self.following.all().count(),
-                "follower_count": self.followers.all().count(),
-                "following": self.followers.filter(user__id=self.id, follower__id=user.id).count() > 0,
-                "followed": self.followers.filter(user__id=user.id, follower__id=self.id).count() > 0,
-                "owner": self == user,
-            }
+            return result
 
     def get_user_by_username(username, requestor):
         """
@@ -122,7 +122,7 @@ class Post(models.Model):
         result.update({
             "text": self.text,
             "media_url": self.media_url,
-            "create_time": self.create_time.strftime("%b %d %Y, %I:%M %p"),
+            "create_time": self.create_time.strftime("%I:%M %p %b %d %Y"),
             "is_comment": self.is_comment,
             "mentions": self.get_mentions(),
             "comment_count": self.children.filter(is_comment=True).count() if self.is_comment else self.comments.all().count(),

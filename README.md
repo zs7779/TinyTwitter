@@ -12,18 +12,18 @@ Current functions:
 * Delete your own tweet/comment
 * Like/unlike a tweet/comment
 * Mentions
+* Hashtags
 * Infinite scroll
 
 
 Expected functions:
-* Hashtags
 * Notifications
 * User avatar
 * Image upload with tweet
 * Mobile page
 
 
-Twitter functions I noticed but currently have no intention to try:
+Twitter functions not currently planned:
 * Video upload with tweet
 * Block user/tweet/comment
 * Share
@@ -34,7 +34,7 @@ Twitter functions I noticed but currently have no intention to try:
 
 
 Known bugs:
-* Infinite scroll not working on super small screen
+* Infinite scroll not working properly on super "short" screen
 * Scroll position not persisted when clicking on a post then go back
 
 

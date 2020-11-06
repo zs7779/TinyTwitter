@@ -2,10 +2,10 @@
     <div :class="[hovering ? 'hover':'', 'p-3']" @mouseover='hovering=true' @mouseout='hovering=false'>
         <router-link :to='{name: "post", params: {username: post.author.username, postID: post.id}}' tag='div' :class="[verbose ? 'card-view':'', 'card-text']">
             <h6 class="card-title mb-1">
-                <router-link :to="{ name: 'user', params: {username: post.author.username} }">
+                <span><router-link :to="{ name: 'user', params: {username: post.author.username} }">
                     <img :src='post.author.avatar' class='avatar'>
                     {{ post.author.username }}
-                </router-link>
+                </router-link></span>
                 <span class="small text-muted"> {{ postTime }}:</span>
             </h6>
             <div v-if='post.is_comment' class="post-mentions">
@@ -64,14 +64,13 @@ export default{
                 let days = Math.floor(diff / 864e5);
                 let hours = Math.floor(diff % 864e5 / 36e5);
                 let minutes = Math.floor(diff % 36e5 / 6e4);
-                let seconds = Math.floor(diff % 6e4 / 1e3);
                 if (days > 0) {
                     if (days > 180) return this.post.create_time;
                     else return formatTime[2] + ' ' + parseInt(formatTime[3]);
                 } else if (hours > 0) {
-                    return parseInt(formatTime[0].split(':')[0]) + 'h';
+                    return parseInt(hours) + 'h';
                 } else if (minutes > 0) {
-                    return parseInt(formatTime[0].split(':')[1]) + 'm';
+                    return parseInt(minutes) + 'm';
                 } else {
                     return "now";
                 }

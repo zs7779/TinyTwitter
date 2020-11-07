@@ -3,30 +3,38 @@
         <router-link
             tag='div'
             :to='{name: "post", params: {username: post.author.username, postID: post.id}}'
-            :class="[verbose ? '':'card-view', 'card-text']"
+            class="card-grid"
         >
-            <h6 class="card-title mb-1">
-                <span><router-link :to="{ name: 'user', params: {username: post.author.username} }">
-                    <img :src='post.author.avatar' class='avatar'>{{ post.author.username }}
-                </router-link></span>
-                <span class="small text-muted"> {{ postTime }}:</span>
-            </h6>
-            <div v-if='post.is_comment' class="post-mentions">
-                <span class="small text-muted">Reply to</span>
-                <span class="small text-muted" v-for='m in mentions' :key="m.id">
-                    <router-link :to="{ name: 'user', params: {username: m.username} }">@{{ m.username }}</router-link>
-                    <span> </span>
-                </span>
-            </div>
+            <router-link tag='div' :to="{ name: 'user', params: {username: post.author.username} }">
+                <img :src='post.author.avatar' class='avatar'>
+            </router-link>
             <div>
-                <p :class="[verbose ? 'post-content' : '']"><span v-for="(part, index) in post.text.split(/([@#]\w+)/g)" :key=index>
-                    <router-link v-if="part[0] == '@'" :to="`/${part.slice(1)}`">{{part}}</router-link>
-                    <router-link v-else-if="part[0] == '#'" :to="`/hashtags/${part.slice(1)}`">{{part}}</router-link>
-                    <template v-else>{{part}}</template>
-                </span></p>
+                <h6 class="card-title mb-1">
+                    <router-link :to="{ name: 'user', params: {username: post.author.username} }">
+                        {{ post.author.username }}
+                    </router-link>
+                    <span class="small text-muted"> {{ postTime }}:</span>
+                </h6>
+                <div v-if='post.is_comment' class="post-mentions">
+                    <span class="small text-muted">Reply to</span>
+                    <span class="small text-muted" v-for='m in mentions' :key="m.id">
+                        <router-link :to="{ name: 'user', params: {username: m.username} }">@{{ m.username }}</router-link>
+                        <span> </span>
+                    </span>
+                </div>
+                <div :class="[verbose ? 'card-text-primary':'card-text-secondary', 'card-text']">
+                    <p><span v-for="(part, index) in post.text.split(/([@#]\w+)/g)" :key=index>
+                        <router-link v-if="part[0] == '@'" :to="`/${part.slice(1)}`">{{part}}</router-link>
+                        <router-link v-else-if="part[0] == '#'" :to="`/hashtags/${part.slice(1)}`">{{part}}</router-link>
+                        <template v-else>{{part}}</template>
+                    </span></p>
+                </div>
+                <slot></slot>
             </div>
-            <slot></slot>
         </router-link>
+        <div v-if='verbose' class="card-footer bg-transparent p-0 ">
+            <span>{{ post.repost_count }} Reposts</span> <span>{{ post.like_count }} Likes</span>
+        </div>
         <div v-if=buttons class="card-footer bg-transparent p-0">
             <div class="d-flex justify-content-around">
                 <button type="button" v-b-modal.new-post class="btn btn-transparent px-1 py-0" title="Comment" @click="$emit('action-comment')">
@@ -41,7 +49,7 @@
                 <b-dropdown v-if="post.owner" id="dropdown-dropup" dropup variant="btn btn-transparent px-1 py-0" no-caret title="Options">
                     <template v-slot:button-content><b-icon icon="chevron-up" class="card-button"></b-icon></template>
                     <b-dropdown-item @click="$emit('action-delete')" title="Delete">
-                        <b-icon icon="x" class="card-button"></b-icon> Delete
+                        <b-icon icon="x" class="card-button"></b-icon>Delete
                     </b-dropdown-item>
                 </b-dropdown>
             </div>
@@ -69,8 +77,9 @@ export default{
                 let hours = Math.floor(diff % 864e5 / 36e5);
                 let minutes = Math.floor(diff % 36e5 / 6e4);
                 if (days > 0) {
-                    if (days > 180) return this.post.create_time;
-                    else return formatTime[2] + ' ' + parseInt(formatTime[3]);
+                    if (days <= 7) return parseInt(formatTime[3]) + 'd';
+                    else if (days <= 180) return formatTime[2] + ' ' + parseInt(formatTime[3]);
+                    else return this.post.create_time;
                 } else if (hours > 0) {
                     return parseInt(hours) + 'h';
                 } else if (minutes > 0) {
@@ -109,23 +118,27 @@ export default{
 .hover {
     background-color: #f9f9f9;
 }
-.card-view {
+.card-text {
+    white-space: pre-line;
+}
+.card-text-primary {
+    font-size: 1.5em;
+}
+.card-text-secondary {
     -webkit-line-clamp: 16;
     overflow : hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-box-orient: vertical;
 }
-.card-text {
-    white-space: pre-line;
+.card-grid {
+    display: grid;
+    grid-template-columns: 3em auto;
 }
 .avatar {
     width: 3em;
     height: 3em;
     border-radius: 50%;
-}
-.post-content {
-    font-size: 1.5em;
 }
 .card-button {
     color: #909090;

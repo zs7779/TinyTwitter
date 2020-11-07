@@ -70,6 +70,7 @@ class Migration(migrations.Migration):
             name='PostTag',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('create_time', models.DateTimeField(auto_now_add=True)),
                 ('post', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='hashtags', to='network.post')),
                 ('tag', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, related_name='posts', to='network.hashtag')),
             ],

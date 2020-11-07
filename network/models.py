@@ -304,12 +304,12 @@ class HashTag(models.Model):
             'text': self.text,
         }
 
-    def get_hashtag_posts(hashtag, requestor, count=20, after=0):
+    def get_hashtag_posts(hashtag, requestor, count=20, after=0, order_by="-create_time"):
         try:
             tag = HashTag.objects.get(text=hashtag.lower())
         except HashTag.DoesNotExist:
             return JsonResponse({"error": "Hashtag does not exist"}, status=404)
-        tags = tag.posts.all()[after:after+count]
+        tags = tag.posts.order_by(order_by)[after:after+count]
         return JsonResponse({
             "posts": [post_tag.post.serialize(requestor) for post_tag in tags],
         }, safe=False)
@@ -317,7 +317,8 @@ class HashTag(models.Model):
 
 class PostTag(models.Model):
     tag = models.ForeignKey("HashTag", on_delete=models.RESTRICT, related_name="posts")
-    post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="hashtags")    
+    post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="hashtags")
+    create_time = models.DateTimeField(auto_now_add=True)
 
     def serialize(self):
         return {

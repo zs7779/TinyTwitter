@@ -1,13 +1,13 @@
 .grid-container {
     display: grid;
-    grid-template-columns: 20% 15% 30% 15% 20%;
+    grid-template-columns: auto 240px 600px 320px auto;
     background-color: rgb(240, 240, 240);
     min-height: 100vh;
 }
 
 .navbar {
     position: fixed;
-    width: 15%;
+    width: 240px;
     height: 100vh;
     background-color: white;
     flex-direction: column;
@@ -30,10 +30,11 @@
 
 @media (max-width: 1199.98px) {
     .grid-container {
-        grid-template-columns: 15% 10% 40% 20% 15%;
+        grid-template-columns: auto 60px 600px 320px auto;
     }
     .navbar {
-        width: 10%;
+        width: 60px;
+        height: 100vh;
     }
     .nav-icon {
         display: block;
@@ -45,10 +46,10 @@
 
 @media (max-width: 991.98px) {
     .grid-container {
-        grid-template-columns: 5% 10% 57% 23% 5%;
+        grid-template-columns: auto 60px 520px 180px auto;
     }
     .navbar {
-        width: 10%;
+        height: 100vh;
     }
     .navbar-nav {
         margin: 3em auto 0 auto;
@@ -57,14 +58,25 @@
 
 @media (max-width: 767.98px) {
     .grid-container {
-        grid-template-columns: 0% 15% 85% 0% 0%;
+        grid-template-columns: auto 60px 510px 0 auto;
     }
     .navbar {
-        width: 15%;
+        height: 100vh;
+    }
+    .navbar {
         padding: .5rem 0;
     }
     .navbar-nav {
         margin: 0 auto;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .grid-container {
+        grid-template-columns: 0 60px auto 0 0;
+    }
+    .navbar {
+        height: 100vh;
     }
 }
 

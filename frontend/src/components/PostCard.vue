@@ -11,10 +11,7 @@
             @action-comment="onComment(post)" @action-repost="onRepost(post)"
             @action-like="onLike(post)" @action-delete="onDelete(post)"
         >
-            <post-body v-if='post.parent && !post.is_comment' :post='post.parent' :buttons='false' class='card p-3' />
-            <div v-if='verbose' class="card-footer bg-transparent p-0 ">
-                <span>{{ post.repost_count }} Reposts</span> <span>{{ post.like_count }} Likes</span>
-            </div>
+            <post-body v-if='post.parent && !post.is_comment' :post='post.parent' :buttons='false' class='card p-3 mb-3 mr-2' />
         </post-body>
         <div v-if='verbose' class="list-group list-group-flush">
             <post-body 

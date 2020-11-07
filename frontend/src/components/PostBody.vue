@@ -1,16 +1,19 @@
 <template>
-    <div :class="[hovering ? 'hover':'', 'p-3']" @mouseover='hovering=true' @mouseout='hovering=false'>
+    <div :class="[hovering ? 'hover':'', 'p-sm-3 p-1']" @mouseover='hovering=true' @mouseout='hovering=false'>
         <router-link
             tag='div'
             :to='{name: "post", params: {username: post.author.username, postID: post.id}}'
-            class="card-grid"
+            :class="[secondary ? '':'card-grid']"
         >
-            <router-link tag='div' :to="{ name: 'user', params: {username: post.author.username} }">
-                <img :src='post.author.avatar' class='avatar'>
-            </router-link>
+            <div v-if='!secondary'>
+                <router-link :to="{ name: 'user', params: {username: post.author.username} }">
+                    <img :src='post.author.avatar' class='avatar'>
+                </router-link>
+            </div>
             <div>
                 <h6 class="card-title mb-1">
                     <router-link :to="{ name: 'user', params: {username: post.author.username} }">
+                        <img v-if='secondary' :src='post.author.avatar' class='avatar-small'>
                         {{ post.author.username }}
                     </router-link>
                     <span class="small text-muted"> {{ postTime }}:</span>
@@ -35,7 +38,7 @@
         <div v-if='verbose' class="card-footer bg-transparent p-0 ">
             <span>{{ post.repost_count }} Reposts</span> <span>{{ post.like_count }} Likes</span>
         </div>
-        <div v-if=buttons class="card-footer bg-transparent p-0">
+        <div v-if='!secondary' class="card-footer bg-transparent p-0">
             <div class="d-flex justify-content-around">
                 <button type="button" v-b-modal.new-post class="btn btn-transparent px-1 py-0" title="Comment" @click="$emit('action-comment')">
                     <b-icon icon="chat" :class="[post.commented ? 'card-button-comment' : 'card-button']"></b-icon> {{ comment_count }}
@@ -60,7 +63,7 @@
 <script>
 
 export default{
-    props: ['post', 'buttons', 'verbose'],
+    props: ['post', 'secondary', 'verbose'],
     data() {
         return {
             hovering: false,
@@ -131,6 +134,20 @@ export default{
     display: -webkit-box;
     -webkit-box-orient: vertical;
 }
+@media (max-width: 575.98px) {
+    .card-title {
+        font-size: 0.9em;
+    }
+    .post-mentions {
+        font-size: 0.8em;
+    }
+    .card-text {
+        font-size: 0.8em;
+    }
+    .card-text-primary {
+        font-size: 1em;
+    }
+}
 .card-grid {
     display: grid;
     grid-template-columns: 3em auto;
@@ -138,6 +155,11 @@ export default{
 .avatar {
     width: 3em;
     height: 3em;
+    border-radius: 50%;
+}
+.avatar-small {
+    width: 1.25em;
+    height: 1.25em;
     border-radius: 50%;
 }
 .card-button {

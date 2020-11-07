@@ -1,5 +1,5 @@
 <template>
-    <div class="card p-3 mb-1 px-1">
+    <div class="card p-3 mb-1 px-1 profile-card">
         <img :src='user.avatar' class='avatar'>
         <div class="d-flex justify-content-between align-items-center">
             <div>
@@ -16,7 +16,7 @@
                 <button type="button" v-else class="btn btn-outline-primary rounded-pill" @click="onFollow">Follow</button>
             </div>
         </div>
-        <p class="">{{ user.bio }}</p>
+        <p>{{ user.bio }}</p>
         <div class="card-footer bg-transparent p-0">
             <span class="mx-1"><span class="font-weight-bold">{{user.following_count}}</span> Following</span>
             <span class="mx-1"><span class="font-weight-bold">{{user.follower_count}}</span> Followers</span>
@@ -47,5 +47,10 @@ export default{
     width: 5em;
     height: 5em;
     border-radius: 50%;
+}
+@media (max-width: 575.98px) {
+    .profile-card{
+        font-size: 0.8em;
+    }
 }
 </style>

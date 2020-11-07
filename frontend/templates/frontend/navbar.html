@@ -1,42 +1,67 @@
-<nav class="navpanel navbar">
-    <div class="navpanel-top d-flex align-items-center">
-        <a class="navbar-brand" href="#"><h2>TinyTwitter</h2></a>
+<nav class="navbar flex-nowrap">
+    <div class="flex-column d-flex align-items-center">
+        <a class="navbar-brand m-0" href="#"><h2><b-icon icon="globe2"></b-icon></h2></a>
 
         <ul class="navbar-nav">
             <li class="nav-item">
-                <router-link :to="{ name: 'all' }" class="nav-link">All Posts</router-link>
+                <router-link :to="{ name: 'all' }" class="text-center text-xl-left nav-link">
+                    <b-icon icon="chat-left-text"></b-icon>
+                    <span class="nav-text">All Posts</span>
+                </router-link>
             </li>
             {% if user.is_authenticated %}
             <li class="nav-item">
-                <router-link :to="{ name: 'home' }" class="nav-link">Home</router-link>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link">Notifications</a>
-            </li>
-            <li class="nav-item">
-                <router-link :to="{ name: 'user', params: {username: '{{ user.username }}' } }" class="nav-link">
-                    Profile
+                <router-link :to="{ name: 'home' }" class="text-center text-xl-left nav-link">
+                    <b-icon icon="house-door"></b-icon>
+                    <span class="nav-text">Home</span>
                 </router-link>
             </li>
-            <li>
-                <b-button v-b-modal.new-post variant="primary" class="rounded-pill py-1">Post</b-button>
+            <li class="nav-item">
+                <a href="#" class="text-center text-xl-left nav-link">
+                    <b-icon icon="bell"></b-icon>
+                    <span class="nav-text">Notifications</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <router-link :to="{ name: 'user', params: {username: '{{ user.username }}' } }" class="text-center text-xl-left nav-link">
+                    <b-icon icon="person"></b-icon>
+                    <span class="nav-text">Profile</span>
+                </router-link>
+            </li>
+            <li class="nav-item">
+                <b-button v-b-modal.new-post variant="primary" class="rounded-circle p-2 nav-icon">
+                    <b-icon icon="vector-pen"></b-icon>
+                </b-button>
+                <b-button v-b-modal.new-post variant="primary" class="rounded-pill px-5 nav-text">
+                    <span>Post</span>
+                </b-button>
             </li>
             {% endif %}
         </ul>
     </div>
-
+    <div class="flex-column d-flex align-items-center">
         <ul class="navbar-nav">
             {% if user.is_authenticated %}
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+                <a class="text-center text-xl-left nav-link" href="{% url 'logout' %}">
+                    <b-icon icon="door-closed"></b-icon>
+                    <span class="nav-text">Logout</span>
+                </a>
             </li>
             {% else %}
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'login' %}">Log In</a>
+                <a class="text-center text-xl-left nav-link" href="{% url 'login' %}">
+                    <b-icon icon="door-closed"></b-icon>
+                    <span class="nav-text">Login</span>
+                </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'register' %}">Register</a>
+                <a class="text-center text-xl-left nav-link" href="{% url 'register' %}">
+                    <b-icon icon="person-bounding-box"></b-icon>
+                    <span class="nav-text">Register</span>
+                </a>
             </li>
             {% endif %}
         </ul>
+    </div>
 </nav>

@@ -1,3 +1,15 @@
+.visitor-page {
+    display: grid;
+    place-items: center;
+    width: 75%;
+    margin: 5em auto;
+}
+.visitor-form {
+    padding: 15% 10%;
+    border: 1px solid gainsboro;
+    border-radius: 5%;
+}
+
 .grid-container {
     display: grid;
     grid-template-columns: auto 240px 600px 320px auto;

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <user-profile :user="user" @action-follow="doFollow()"></user-profile>
+        <user-profile :user="user" @user-ok="updateUser($event)"></user-profile>
     </div>
 </template>
 
@@ -24,24 +24,6 @@ export default{
         },
         updateUser(editedUser) {
             this.user = editedUser;
-        },
-        doFollow() {
-            const token = getToken(this.$root.userAuth);
-            if (!token) return;
-            axios.post(`${URLs.users(this.user.username)}`, {
-                follow: !this.user.following,
-            }, {
-                headers: {
-                    'X-CSRFTOKEN': token,
-                },
-            }).then(response => {
-                const user = {
-                    ...this.user,
-                    follower_count: this.user.following ? this.user.follower_count - 1 : this.user.follower_count + 1,
-                    following: !this.user.following,
-                }
-                this.updateUser(user);
-            })
         },
     },
     watch: {

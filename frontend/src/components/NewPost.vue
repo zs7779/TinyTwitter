@@ -6,7 +6,7 @@
             @show="checkToken"
             @hidden="doClear"
         >
-            <textarea autofocus rows=4 class="form-control border-0" v-model="postText" placeholder="Say something..."></textarea>
+            <textarea rows=4 class="form-control border-0" v-model="postText" placeholder="Say something..."></textarea>
             <template v-slot:modal-footer="{ ok }">
                 <span class="mx-1">{{ charRemaining }}</span>
                 <b-button size="sm" variant="primary" @click="ok()" :disabled="!postIsValid" class="rounded-pill py-0">

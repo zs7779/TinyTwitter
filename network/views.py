@@ -120,8 +120,8 @@ def profile_write(request, username):
     except User.DoesNotExist:
         return JsonResponse({"error": "User does not exist"}, status=404)
 
+    data = json.loads(request.body)
     if request.method == "POST":
-        data = json.loads(request.body)
         if data.get('follow') is not None:
             # Handles follow/unfollow by authorized user
             if request.user == user:
@@ -129,9 +129,11 @@ def profile_write(request, username):
             return Follow.create_follow(follow=data.get('follow'), followee=user, requestor=request.user)
 
     if request.method == "PATCH":
-        # todo: edit pofile
-        if request.user == user:
-            pass
+        # Handle edit of user profile
+        if request.user != user:
+            return JsonResponse({"message": "Forbidden"}, status=403)
+        if data.get('bio') is not None or data.get('avatar') is not None:
+            return user.edit_profile(bio=data.get('bio'), avatar=data.get('avatar'))
 
     return JsonResponse({
         "error": "Bad request"

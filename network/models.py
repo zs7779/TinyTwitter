@@ -36,6 +36,17 @@ class User(AbstractUser):
         if detail == DETAIL_FULL:
             return result
 
+    def edit_profile(self, bio=None, avatar=None):
+        self.bio = self.bio if bio is None else bio
+        self.avatar_url is self.avatar_url if avatar is None else avatar
+        try:
+            self.full_clean()
+        except ValidationError as e:
+            # print(e)
+            return JsonResponse({"error": "Profile body is illegal"}, status=400, safe=False)
+        self.save()
+        return JsonResponse({"message": "Edit succesful"}, status=200)
+
     def get_user_by_username(username, requestor):
         """
         Returns response of GET user request

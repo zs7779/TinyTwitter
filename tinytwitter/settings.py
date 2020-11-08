@@ -163,4 +163,5 @@ if not DEBUG:
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 STATIC_ROOT = '../../homepage/dist/tinytwitter/'
 STATIC_URL = '/static/' if DEBUG else 'https://zhaosean.com/dist/tinytwitter/'
+# STATIC_URL = '/static/' if DEBUG else 'https://tinytwitter.zhaosean.com/dist/tinytwitter/'
 LOGIN_URL = '/login/'

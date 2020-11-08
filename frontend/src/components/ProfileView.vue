@@ -18,8 +18,11 @@ export default{
     },
     methods: {
         getUserProfile() {
+            const path_now = this.username;
             axios.get(`${URLs.users(this.username)}`).then(response => {
-                this.user = response.data.user;
+                if (path_now === this.username) {
+                    this.user = response.data.user;
+                }
             })
         },
         updateUser(editedUser) {

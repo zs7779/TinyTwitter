@@ -23,18 +23,21 @@ export default{
     },
     methods: {
         getUserPost() {
+            const path_now = this.username + '|' + this.postID;
             axios.get(`${URLs.usersPosts(this.username, this.postID)}`, {
                 params: {
                     after: this.after < this.post.comments.length ? 0 : this.after,
                     count: this.after < this.post.comments.length ? 0 : this.count,
                 },
             }).then(response => {
-                this.post = {
-                    ...response.data.post,
-                    comments: this.post.comments,
+                if (path_now === this.username + '|' + this.postID) {
+                    this.post = {
+                        ...response.data.post,
+                        comments: this.post.comments,
+                    }
+                    this.appendComments(response.data.comments);
+                    this.after += this.count;
                 }
-                this.appendComments(response.data.comments);
-                this.after += this.count;
             })
         },
         // Update post data (comment/repost/like count) on the post currently being displayed

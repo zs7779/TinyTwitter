@@ -28,14 +28,17 @@ export default{
             var url = this.all ? `${URLs.posts()}` : `${URLs.posts('home')}`;
             if (this.username) url = `${URLs.usersPosts(this.username)}`;
             if (this.hashtag) url = `${URLs.hashtags(this.hashtag)}`;
+            const path_now = this.all + '|' + this.username + '|' + this.hashtag;
             axios.get(url, {
                 params: {
                     after: this.after,
                     count: this.count,
                 },
             }).then(response => {
-                this.appendPosts(response.data.posts);
-                this.after += this.count;
+                if (path_now === this.all + '|' + this.username + '|' + this.hashtag) {
+                    this.appendPosts(response.data.posts);
+                    this.after += this.count;
+                }
             })
         },
         prependPosts(posts) {

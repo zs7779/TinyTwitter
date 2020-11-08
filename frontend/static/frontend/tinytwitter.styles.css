@@ -30,6 +30,12 @@
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     font-weight: 600;
 }
+.navbar button span {
+    font-size: 1.1em;
+}
+.navbar a.nav-link.router-link-active, a.nav-link:hover {
+    color: #00a2ff;
+}
 .navbar-nav {
     margin: 4em auto 0 auto;
 }
@@ -92,10 +98,10 @@
         height: 100vh;
     }
     .navbar-nav{
-        font-size: 0.75em;
+        font-size: 0.9em;
     }
     .navbar-nav .btn{
-        font-size: 1.5em;
+        font-size: 1.1em;
     }
 }
 

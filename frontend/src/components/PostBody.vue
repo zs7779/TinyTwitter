@@ -150,7 +150,7 @@ export default{
 }
 .card-grid {
     display: grid;
-    grid-template-columns: 3em auto;
+    grid-template-columns: 3.25em auto;
 }
 .avatar {
     width: 3em;

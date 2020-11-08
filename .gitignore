@@ -1,12 +1,12 @@
 .idea/*
 *.pyc
 .vscode/settings.json
-quotes.txt
-frontend/package-lock.json
+db.*
 frontend/coverage/
 docker cmd.txt
-.env
-lightsail_start.sh
-mount/
 frontend/static/frontend/tinytwitter.js
-db.*
+.env
+amazon_linux_2.sh
+
+
+

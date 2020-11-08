@@ -112,6 +112,7 @@ export default{
 .avatar {
     width: 5em;
     height: 5em;
+    border: 5px solid white;
     border-radius: 50%;
 }
 @media (max-width: 575.98px) {

@@ -21,3 +21,4 @@ services:
             - .:/usr/src/app
         ports:
             - "${DJANGO_PORT}:${DJANGO_PORT}"
+        restart: unless-stopped

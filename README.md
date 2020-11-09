@@ -1,7 +1,7 @@
 # TinyTwitter
 
 
-This is a personal project with Vue/Django, trying to recreate some of Twitter's interesting functions.
+This is a personal project with Vue/Django, trying to recreate some of Twitter's interesting functions. Technologies used: HTML, CSS, Sass, Vue.js, Webpack, Django, PostgreSQL
 
 Try the demo at https://tinytwitter.zhaosean.com/
 

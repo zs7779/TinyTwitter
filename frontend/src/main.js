@@ -20,19 +20,14 @@ var vm = new Vue({
   el: '#app',
   router,
   data: {
-      pathname: window.location.pathname,
       postParams: PLACEHOLDERs.postParams(),
       user: PLACEHOLDERs.user(),
       userAuth: document.getElementById('userauth') ? true : false,
   },
   computed: {
-    updatePath() {
-      console.log('asoijsadoiuasdouasdiou');
-        this.pathname = window.location.pathname;
-    },
     pageTitle() {
       return routeNames[this.$route.name];
-    }
+    },
   },
   methods: {
     clearPost() {
@@ -51,7 +46,7 @@ var vm = new Vue({
     addComment(post) {
       if (this.$refs.post) this.$refs.post.addComment(post);
       if (this.$refs.posts) this.$refs.posts.addComment(post.root_post.id, post);
-      this.clearPost(); // not nessessary leave here so I don't dig it up
+      this.clearPost();
     },
     getCurrentUser() {
       axios.get(URLs.currentUser()).then(response => {

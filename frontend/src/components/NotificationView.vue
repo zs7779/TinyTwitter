@@ -12,9 +12,11 @@
                 </router-link>
             </li>
         </ul>
-        <notice-card v-for='post in notices'
-            :key="post.id" :post='post' :type='type'
-        />
+        <transition-group name="fade">
+            <notice-card v-for='post in notices'
+                :key="post.id" :post='post' :type='type'
+            />
+        </transition-group>
     </div>
 </template>
 

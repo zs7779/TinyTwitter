@@ -46,14 +46,17 @@
 .nav-icon {
     display: none;
 }
+
 .badge {
     position: absolute;
     top: 0;
     right: -25px;
 }
+
 .info-panel {
     background-color: white;
 }
+
 .page-title {
     padding: 0.75em;
 }
@@ -127,16 +130,15 @@
     border-color: #fff;
 }
 
-
-.list-enter-active {
-    animation: list-appear 0.5s;
+.fade-enter-active {
+    animation: fade-appear 0.5s;
     animation-timing-function: linear;
 }
-.list-leave-active {
-    animation: list-appear 0.5s reverse;
+.fade-leave-active {
+    animation: fade-appear 0.5s reverse;
     animation-timing-function: linear;
 }
-@keyframes list-appear {
+@keyframes fade-appear {
     0% {
         opacity: 0;
         /* max-height: 0px; */

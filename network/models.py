@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models import Q
 from django.http import JsonResponse
 from django.core.exceptions import ValidationError
+from django.templatetags.static import static
 
 from .utils import isHashTag, isMention
 
@@ -24,7 +25,7 @@ class User(AbstractUser):
         result = {
             "id": self.id,
             "username": self.username,
-            "avatar": self.avatar_url,
+            "avatar": static('frontend/avatar_placeholder.jpg') if self.avatar_url is None else self.avatar_url,
         }
         if detail == DETAIL_SHORT:
             return result

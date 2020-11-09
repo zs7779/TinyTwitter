@@ -25,7 +25,7 @@
             <div class="info-panel border border-bottom-0 m-0">
                 <h4 class="page-title m-0">[[ pageTitle ]]</h4>
             </div>
-            <router-view ref="profile" name="profile" :key='$route.path'></router-view>
+            <router-view ref="profile" name="profile"></router-view>
             <router-view ref="infos" name="infos"></router-view>
             <router-view ref="posts" name="posts" @action-post='postParams=$event'></router-view>
             <router-view ref="post" name="post" @action-post='postParams=$event'></router-view>

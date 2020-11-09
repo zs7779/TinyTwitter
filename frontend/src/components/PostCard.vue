@@ -6,7 +6,7 @@
                 @action-like="onLike(post.root_post)" @action-delete="onDelete(post.root_post)"
             />
         </div>
-        <post-body class="border-bottom"
+        <post-body
             :post='post' :verbose='verbose'
             @action-comment="onComment(post)" @action-repost="onRepost(post)"
             @action-like="onLike(post)" @action-delete="onDelete(post)"
@@ -16,13 +16,15 @@
                 class='card p-sm-3 mb-sm-3 mr-sm-2 p-1 mb-1 mr-1'
             />
         </post-body>
-        <div v-if='verbose' class="list-group list-group-flush">
-            <post-body 
-                v-for='comment in post.comments' :key='comment.id' :post='comment'
-                @action-comment="onComment(comment)" @action-repost="onRepost(comment)"
-                @action-like="onLike(comment)" @action-delete="onDelete(comment)"
-                class="list-group-item"
-            />
+        <div v-if='verbose' class="list-group list-group-flush border-top">
+            <transition-group name="fade">
+                <post-body 
+                    v-for='comment in post.comments' :key='comment.id' :post='comment'
+                    @action-comment="onComment(comment)" @action-repost="onRepost(comment)"
+                    @action-like="onLike(comment)" @action-delete="onDelete(comment)"
+                    class="list-group-item"
+                />
+            </transition-group>
         </div>
     </div>
 </template>

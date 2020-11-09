@@ -1,12 +1,18 @@
 <template>
     <div>
-        <post-feed :posts="posts" @like-ok="updatePosts($event.id, $event)" @delete-ok="deletePost($event)" v-on="$listeners">
-        </post-feed>
+        <transition-group name="fade">
+            <post-card
+                v-for="post in posts"
+                :key="post.id" :post="post"
+                @like-ok="updatePosts($event.id, $event)" @delete-ok="deletePost($event)"
+                v-on="$listeners">
+            </post-card>
+        </transition-group>
     </div>
 </template>
 
 <script>
-import PostFeed from './PostFeed.vue'
+import PostCard from './PostCard.vue'
 import { URLs, PLACEHOLDERs } from './utils'
 
 export default{
@@ -103,7 +109,7 @@ export default{
         this.scroll();
     },
     components: {
-        PostFeed,
+        PostCard,
     },
 }
 </script>

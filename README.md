@@ -41,16 +41,17 @@ Current functions:
 * Follow/unfollow user
 * Mentions
 * Hashtags
+* Notifications
 * Infinite scroll
 * Mobile compatible page
 
 
 Planned functions:
-* Notifications
 * User avatar
 * Image upload with tweet
 * New follow suggestion
 * Trending hashtags posts
+* Fall back page for 404/No content
 
 
 Twitter functions currently not planned:
@@ -62,6 +63,7 @@ Twitter functions currently not planned:
 * Direct messages
 * Bookmarks
 * Lists
+* Auto complete on Mentions and Hashtags
 
 
 Known bugs:

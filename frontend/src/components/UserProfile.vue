@@ -4,7 +4,7 @@
         <div class="d-flex justify-content-between align-items-center">
             <div>
                 <h5 class="card-title my-0">{{ user.username }}</h5>
-                <span class="small text-muted">@{{ user.id }}</span>
+                <span class="small text-muted">@{{ user.username }}</span>
             </div>
             <div v-if="user.owner">
                 <button v-if='!editing' type="button" class="btn btn-outline-primary rounded-pill" @click='doEdit(false)'>

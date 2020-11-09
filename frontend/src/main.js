@@ -1,6 +1,6 @@
-import routes from './components/router'
+import { routes, routeNames } from './components/router'
 import NewPost from './components/NewPost.vue'
-import { PLACEHOLDERs } from './components/utils'
+import { URLs, PLACEHOLDERs } from './components/utils'
 
 Vue.config.productionTip = false
 
@@ -22,12 +22,17 @@ var vm = new Vue({
   data: {
       pathname: window.location.pathname,
       postParams: PLACEHOLDERs.postParams(),
+      user: PLACEHOLDERs.user(),
       userAuth: document.getElementById('userauth') ? true : false,
   },
   computed: {
     updatePath() {
+      console.log('asoijsadoiuasdouasdiou');
         this.pathname = window.location.pathname;
     },
+    pageTitle() {
+      return routeNames[this.$route.name];
+    }
   },
   methods: {
     clearPost() {
@@ -48,6 +53,21 @@ var vm = new Vue({
       if (this.$refs.posts) this.$refs.posts.addComment(post.root_post.id, post);
       this.clearPost(); // not nessessary leave here so I don't dig it up
     },
+    getCurrentUser() {
+      axios.get(URLs.currentUser()).then(response => {
+        this.user = response.data.user;
+      });
+    }
+  },
+  watch: {
+    $route() {
+      axios.get(URLs.currentUser()).then(response => {
+        this.user = response.data.user;
+      });
+    },
+  },
+  mounted() {
+    this.getCurrentUser();
   },
   components: {
     NewPost,

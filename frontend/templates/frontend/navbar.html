@@ -18,10 +18,11 @@
                 </router-link>
             </li>
             <li class="nav-item">
-                <a href="#" class="text-center text-xl-left nav-link">
+                <router-link :to="{ name: 'notificationsReplies' }" class="text-center text-xl-left nav-link">
                     <b-icon icon="bell"></b-icon>
                     <span class="nav-text">Notifications</span>
-                </a>
+                    <span v-if='user.notifications' class="badge badge-pill badge-danger">[[user.notifications]]</span>
+                </router-link>
             </li>
             <li class="nav-item">
                 <router-link :to="{ name: 'user', params: {username: '{{ user.username }}' } }" class="text-center text-xl-left nav-link">

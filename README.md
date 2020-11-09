@@ -71,3 +71,4 @@ Known bugs:
 
 Todos:
 * Design diagram
+* Migrate to Vuex

@@ -5,6 +5,7 @@ from . import views
 
 urlpatterns = [
     path("api/current_user/", views.current_user, name="current_user"),
+    re_path(r"^api/current_user/(?P<path>[a-zA-Z]{1,50})?", views.current_user, name="current_user_data"),
     path("api/posts/", views.posts_view, name="posts_all"),
     re_path(r"^api/posts/(?P<path>[a-zA-Z]{1,4})$", views.posts_view, name="posts"),
     re_path(r"^api/posts/(?P<post_id>[0-9]{1,50})$", views.post_view, name="post"),

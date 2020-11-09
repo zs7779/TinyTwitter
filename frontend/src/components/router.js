@@ -1,6 +1,7 @@
 import ProfileView from './ProfileView.vue'
 import PostsView from './PostsView.vue'
 import PostView from './PostView.vue'
+import NotificationView from './NotificationView.vue'
 
 const routes = [
     {
@@ -23,6 +24,18 @@ const routes = [
         }, name: 'hashtag'
     },
     {
+        path: '/notifications/', components: {
+            infos: NotificationView,
+        }, name: 'notificationsReplies'
+    },
+    {
+        path: '/notifications/mentions', components: {
+            infos: NotificationView,
+        }, props: {
+            infos: {path: 'mentions'},
+        }, name: 'notificationsMentions'
+    },
+    {
         path: '/:username', components: {
             profile: ProfileView,
             posts: PostsView,
@@ -42,4 +55,14 @@ const routes = [
     },
 ]
 
-export default routes;
+const routeNames = {
+    'all': 'All Posts',
+    'home': 'Home',
+    'user': 'Profile',
+    'post': 'Thread',
+    'hashtag': 'Hashtag',
+    'notificationsReplies': 'Notifications',
+    'notificationsMentions': 'Notifications',
+};
+
+export { routes, routeNames };

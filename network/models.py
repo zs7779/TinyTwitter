@@ -1,3 +1,4 @@
+import datetime
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import Q
@@ -9,13 +10,15 @@ from .utils import isHashTag, isMention
 
 MAX_LENGTH = 140
 DETAIL_SHORT = 0
-DETAIL_LONG = 1
-DETAIL_FULL = 2
+DETAIL_MEDIUM = 1
+DETAIL_LONG = 2
+DETAIL_FULL = 3
 
 
 class User(AbstractUser):
     bio = models.CharField(max_length=MAX_LENGTH, default="")
     avatar_url = models.URLField(null=True, blank=True)
+    last_visit = models.DateTimeField(null=True, blank=True)
 
     def serialize(self, user=None, detail=DETAIL_FULL):
         result = {
@@ -46,6 +49,24 @@ class User(AbstractUser):
             return JsonResponse({"error": "Profile body is illegal"}, status=400, safe=False)
         self.save()
         return JsonResponse({"message": "Edit succesful"}, status=200)
+
+    def get_user_information(self, path=None, after=0, count=20, order_by='-create_time'):
+        last_visit = self.date_joined if self.last_visit is None else self.last_visit
+        user = self.serialize(self)
+        user['authenticated'] = True
+        posts_ids = self.posts.values('id')
+        if path is None:
+            user['notifications'] = Post.objects.filter(Q(mentions__user=self) | Q(root_post__id__in=posts_ids) | Q(parent__id__in=posts_ids), create_time__gt=last_visit).count()
+        else:
+            user['notifications'] = 0
+            if path == "mentions":
+                user['notices'] = [m.post.serialize(self, detail=DETAIL_LONG) for m in self.mentions.order_by(order_by)[after:after+count]]
+            if path == "replies":
+                user['notices'] = [p.serialize(self, detail=DETAIL_LONG) for p in Post.objects.filter(Q(root_post__id__in=posts_ids) | Q(parent__id__in=posts_ids)).order_by(order_by)[after:after+count]]
+            self.last_visit = datetime.datetime.now()
+            self.save()
+        return user
+            
 
     def get_user_by_username(username, requestor):
         """
@@ -139,6 +160,10 @@ class Post(models.Model):
             "comment_count": self.children.filter(is_comment=True).count() if self.is_comment else self.comments.all().count(),
             "repost_count": self.children.filter(is_comment=False).count(),
             "like_count": self.likes.all().count(),
+        })
+        if detail == DETAIL_MEDIUM:
+            return result
+        result.update({
             "commented": self.children.filter(is_comment=True, author__id=user.id).count() if self.is_comment else self.comments.filter(author__id=user.id).count(),
             "reposted": self.children.filter(is_comment=False, author__id=user.id).count(),
             "liked": self.likes.filter(user__id=user.id).count(),
@@ -369,7 +394,7 @@ class Mention(models.Model):
     def serialize(self):
         return {
             "user": self.user.serialize(detail=DETAIL_SHORT),
-            "post": self.post.serialize(detail=DETAIL_SHORT),
+            "post": self.post.serialize(detail=DETAIL_MEDIUM),
         }
 
     def create_mentions(mentions, post):

@@ -15,12 +15,17 @@ def index(request, path=None):
 
 
 @require_GET
-def current_user(request):
+def current_user(request, path=None):
     # Get current user for frontend app
+    # needed for notification
     if request.user.is_authenticated:
-        return JsonResponse({"user": request.user.serialize()})
+        data = request.GET
+        count = int(data.get("count", 20))
+        after = int(data.get("after", 0))
+        user = request.user.get_user_information(path=path, after=after, count=count)
+        return JsonResponse({"user": user})
     else:
-        return JsonResponse({"user": {}})
+        return JsonResponse({"user": {'authenticated': False}})
 
 
 @require_GET

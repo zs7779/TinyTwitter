@@ -1,10 +1,10 @@
 # TinyTwitter
 
 
-This is a personal project with Vue/Django/Postgres, trying to reacreate some of Twitter's interesting functions.
+This is a personal project with Vue/Django, trying to recreate some of Twitter's interesting functions.
 
 Try the demo at https://tinytwitter.zhaosean.com/
-**This website for demo only, it's content is not moderated and could be periodically purged!**
+**This website for demo only, its content is not moderated and could be periodically purged!**
 
 
 If you'd like to run this code on your machine, clone this directory (check out the green "Code" button), and go to it in the command line `cd <repository path>`. 
@@ -24,7 +24,7 @@ python manage.py migrate
 python manage.py runserver
 ```
 
-**Note the current setting in the master branch is not suitable for deployment! It is for testing only! Do not deploy as is and do not store personal information (such as your usual password)!**
+**Note the current setting in the master branch is not suitable for deployment! It is for demo only! Do not deploy as is and do not store personal information (such as your usual password)!**
 
 
 Current functions:
@@ -49,18 +49,6 @@ Planned functions:
 * New follow suggestion
 * Trending hashtags posts
 * Fall back page for 404/No content
-
-
-Twitter functions currently not planned:
-* Editable username
-* Video/larger media upload with tweet
-* Block user/tweet
-* Events/Polls/Emojis
-* Live update
-* Direct messages
-* Bookmarks
-* Lists
-* Auto complete on Mentions and Hashtags
 
 
 Known bugs:

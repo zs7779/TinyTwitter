@@ -4,8 +4,6 @@
 This is a personal project with Vue/Django, trying to recreate some of Twitter's interesting functions.
 
 Try the demo at https://tinytwitter.zhaosean.com/
-**This website for demo only, its content is not moderated and could be periodically purged!**
-
 
 If you'd like to run this code on your machine, clone this directory (check out the green "Code" button), and go to it in the command line `cd <repository path>`. 
 
@@ -14,7 +12,7 @@ I recommend using [docker](https://docs.docker.com/engine/install/) to test run 
 docker build -t tinytwitter .
 docker run -dp 8000:8000 tinytwitter
 ```
-Now go to http://localhost:8000/ to check out the website running on your machine!
+Now go to http://localhost:8000/ to check out the website running on your computer!
 
 
 Alternatively we don't have to use docker, you would need to first install Python3.8.6. ([virtualenv](https://pypi.org/project/virtualenv/) strongly recommended if you already have Python on your computer) set up the site by running

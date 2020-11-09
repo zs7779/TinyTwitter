@@ -1,33 +1,30 @@
 # TinyTwitter
 
 
-This is a personal project with Vue/Django/Postgres, trying to reacreate some of Twitter's interesting functions
+This is a personal project with Vue/Django/Postgres, trying to reacreate some of Twitter's interesting functions.
 
 Try the demo at https://tinytwitter.zhaosean.com/
+**This website for demo only, it's content is not moderated and could be periodically purged!**
 
 
-If you'd like to run this code on your machine, clone this directory (check out the green "Code" button), and go to it in the command line. I highly recommend [docker and docker-compose](https://docs.docker.com/engine/install/) (docker-compose needs to be installed separately if you're not using Windows).
+If you'd like to run this code on your machine, clone this directory (check out the green "Code" button), and go to it in the command line `cd <repository path>`. 
 
-If you've decided to use docker-compose, create a file called .env in this directory, write in it `DJANGO_SECRET_KEY=foobar` and save. Now you can get the code up and running by the command
+I recommend using [docker](https://docs.docker.com/engine/install/) to test run this code. If you decided to use docker, running the following commands to get the site running
 ```
-docker-compose up -d
+docker build -t tinytwitter .
+docker run -dp 8000:8000 tinytwitter
 ```
-After the container is running (which you can check by command `docker ps`), let's put some example data in the database by running (if you don't like test data remove the file `network/migrations/0002_test_data.py`)
-```
-docker exec -it <container id> python manage.py migrate
-```
+Now go to http://localhost:8000/ to check out the website running on your machine!
 
-Alternatively if you don't like docker, you would need to install Python3.8.6. Install the dependencies ([virtualenv](https://pypi.org/project/virtualenv/) highly recommended if you already have Python on your computer) by running
+
+Alternatively we don't have to use docker, you would need to first install Python3.8.6. ([virtualenv](https://pypi.org/project/virtualenv/) strongly recommended if you already have Python on your computer) set up the site by running
 ```
 pip install -r requirements.txt
-```
-Run the code
-```
 python manage.py migrate
 python manage.py runserver
 ```
 
-Now go to http://localhost:8000/ to check out the website running on your machine!
+**Note the current setting in the master branch is not suitable for deployment! It is for testing only! Do not deploy as is and do not store personal information (such as your usual password)!**
 
 
 Current functions:
@@ -69,8 +66,3 @@ Twitter functions currently not planned:
 Known bugs:
 * Infinite scroll sometimes not working on short screen (narrow screen landscape orientation)
 * Scroll position not persisted when clicking on a post then go back
-
-
-Todos:
-* Design diagram
-* Migrate to Vuex

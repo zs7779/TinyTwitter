@@ -9,13 +9,17 @@
             <textarea rows=4 class="form-control border-0" v-model="postText" placeholder="Say something..."></textarea>
             <input type="file" name="file" ref='fileUpload' @change="onFileUpload($event.target.files)" class="d-none" />
             <template v-slot:modal-footer="{ ok }">
-                <button type='button' title='Upload image' class="btn btn-transparent" @click="$refs.fileUpload.click()">
-                    <b-icon icon="image"></b-icon>{{filename}}
-                </button>
-                <span class="mx-1">{{ charRemaining }}</span>
-                <b-button size="sm" variant="primary" @click="ok()" :disabled="!postIsValid" class="rounded-pill py-0">
-                    Post
-                </b-button>
+                <div class="d-flex justify-content-between w-100">
+                    <button type='button' title='Upload image' class="btn btn-transparent p-0" @click="$refs.fileUpload.click()">
+                        <b-icon icon="image"></b-icon> {{filename}}
+                    </button>
+                    <div>
+                        <span class="mx-1">{{ charRemaining }}</span>
+                        <b-button size="sm" variant="primary" @click="ok()" :disabled="!postIsValid" class="rounded-pill py-0">
+                            Post
+                        </b-button>
+                    </div>
+                </div>
             </template>
         </b-modal>
     </div>

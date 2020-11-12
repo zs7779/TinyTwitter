@@ -6,6 +6,9 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.views.decorators.cache import cache_control
+import logging, uuid, base64, datetime
+import boto3
+from botocore.exceptions import ClientError
 
 from .models import User, Post, Follow, Like, HashTag, Mention
 
@@ -78,8 +81,8 @@ def posts_write(request):
     data = json.loads(request.body)
     if data.get('text') is not None:
         # Handle new post
-        return Post.create_post(text=data.get('text'), parent_id=data.get('parent_id'),
-                                requestor=request.user)
+        return Post.create_post(text=data.get('text'), media_url=data.get('media'),
+                                parent_id=data.get('parent_id'),requestor=request.user)
     return JsonResponse({
         "error": "Bad request"
     }, status=400)
@@ -109,8 +112,9 @@ def post_write(request, post_id):
         
         if data.get('text') is not None:
             # Handles new comments, which compare to normal posts, have root_post
-            return Post.create_post(text=data.get('text'), parent_id=data.get('parent_id'),
-                                    root_post=post, is_comment=True, requestor=request.user)
+            return Post.create_post(text=data.get('text'), media_url=data.get('media'),
+                                    parent_id=data.get('parent_id'), root_post=post,
+                                    is_comment=True, requestor=request.user)
 
     return JsonResponse({
         "error": "Bad request"
@@ -143,6 +147,31 @@ def profile_write(request, username):
     return JsonResponse({
         "error": "Bad request"
     }, status=400)
+
+
+@login_required
+@require_GET
+def upload(request):
+    s3_client = boto3.client('s3')
+    bucket = 'project-tt-bucket'
+    key = str(base64.urlsafe_b64encode(uuid.uuid5(uuid.NAMESPACE_URL, f'{request.user.id}-{datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}').bytes).rstrip(b'='), 'utf-8')
+    
+    data = request.GET
+    avatar = data.get("avatar", False)
+    folder = 'avatar/' if avatar else 'images/'
+    try:
+        response = s3_client.generate_presigned_post(bucket,
+                                                     folder+key,
+                                                     Fields=None,
+                                                     Conditions=None,
+                                                     ExpiresIn=300)
+    except ClientError as e:
+        logging.error(e)
+        return JsonResponse({
+        "error": "Storage service down"
+    }, status=503)
+
+    return JsonResponse(response, status=200)
 
 
 def posts_view(request, path=None, username=None):

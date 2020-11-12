@@ -1,11 +1,7 @@
 .idea/*
 *.pyc
-.vscode/settings.json
+.*
 db.*
 frontend/coverage/
 docker cmd.txt
-.env
 amazon_linux_2.sh
-
-
-

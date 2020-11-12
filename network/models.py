@@ -1,6 +1,6 @@
 import datetime
 from django.contrib.auth.models import AbstractUser
-from django.db import models
+from django.db import models, DatabaseError, transaction
 from django.db.models import Q
 from django.http import JsonResponse
 from django.core.exceptions import ValidationError
@@ -128,7 +128,6 @@ class Follow(models.Model):
 class Post(models.Model):
     author = models.ForeignKey("User", on_delete=models.CASCADE, related_name="posts")
     text = models.CharField(max_length=MAX_LENGTH)
-    media_url = models.URLField(null=True, blank=True)
     parent = models.ForeignKey("Post", on_delete=models.SET_NULL, null=True, blank=True, related_name="children")
     create_time = models.DateTimeField(auto_now_add=True)
     is_comment = models.BooleanField(default=False)
@@ -154,7 +153,7 @@ class Post(models.Model):
             return result
         result.update({
             "text": self.text,
-            "media_url": self.media_url,
+            "medias": [media.serialize() for media in self.medias.all()],
             "create_time": self.create_time.strftime("%I:%M %p %b %d %Y"),
             "is_comment": self.is_comment,
             "mentions": self.get_mentions(),
@@ -255,12 +254,13 @@ class Post(models.Model):
             "comments": comments,
         }, safe=False)
 
-    def create_post(text, parent_id, requestor, root_post=None, is_comment=False):
+    def create_post(text, media_url, parent_id, requestor, root_post=None, is_comment=False):
         """
         Returns response of POST new post request, used to create new post or comment
 
         Parameters:
         text (str): text content of the new post
+        media (str): url of uploaded media
         parent_id (id): id of parent post, None if the post has no parent
         requestor (User): User instance of the user requesting
         root_post (Post): Post instance of the root post in case of a comment, default None
@@ -277,15 +277,24 @@ class Post(models.Model):
                 return JsonResponse({"error": "Parent post does not exist"}, status=404)      
         else:
             parent_post = None
-        post = Post(author=requestor, text=text, parent=parent_post,
-                    root_post=root_post, is_comment=is_comment)
 
-        try:
-            post.full_clean()
-        except ValidationError as e:
-            # print(e)
-            return JsonResponse({"error": "Post body is illegal"}, status=400, safe=False)
-        post.save()
+        with transaction.atomic():
+            post = Post(author=requestor, text=text, parent=parent_post,
+                        root_post=root_post, is_comment=is_comment)
+            try:
+                post.full_clean()
+            except ValidationError as e:
+                return JsonResponse({"error": "Post body is illegal"}, status=400, safe=False)
+            post.save()
+
+            if media_url is not None:
+                media = Media(user=requestor, post=post, media_url=media_url, media_type='IMG')
+                try:
+                    media.full_clean()
+                except ValidationError as e:
+                    print(e)
+                    return JsonResponse({"error": "Post body is illegal"}, status=400, safe=False)
+                media.save()
 
         # Process hashtags and mentions
         words = text.split()
@@ -419,3 +428,23 @@ class Mention(models.Model):
             mention.save()
             mentions_array.append(mention.serialize())
         return mentions_array
+
+class Media(models.Model):
+    MEDIA_TYPES = [
+        ('IMG', 'Photo'),
+        ('GIF', 'Animated Picture'),
+        ('VID', 'Video'),
+    ]
+    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="medias")
+    post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="medias")
+    media_url = models.URLField()
+    media_type = models.CharField(
+        max_length=3,
+        choices=MEDIA_TYPES,
+        default='IMG',
+    )
+
+    def serialize(self):
+        return {
+            'media_url': self.media_url
+        }

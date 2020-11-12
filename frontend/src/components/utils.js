@@ -4,6 +4,7 @@ const URLs = {
     usersPosts: (userID='', postID='') => `/api/users/${userID}/posts/${postID}`,
     hashtags: (hashtag='') => `/api/hashtags/${hashtag}`,
     currentUser: (path='') => `/api/current_user/${path}`,
+    upload: () => '/api/upload',
 };
 
 
@@ -22,7 +23,7 @@ const PLACEHOLDERs = {
             id: -1,
             author: {id: -1, username: 'username'},
             text: "",
-            media_url: "",
+            medias: [],
             parent: null,
             create_time: null,
             is_comment: false,

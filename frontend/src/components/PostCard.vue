@@ -13,7 +13,7 @@
         >
             <post-body v-if='post.parent && !post.is_comment'
                 :post='post.parent' :secondary='true'
-                class='card p-sm-3 mb-sm-3 mr-sm-2 p-1 mb-1 mr-1'
+                class='card p-sm-3 mb-sm-3 mr-sm-2 p-1 mb-1 mr-1 post-repost'
             />
         </post-body>
         <div v-if='verbose' class="list-group list-group-flush border-top">
@@ -87,4 +87,7 @@ export default{
 </script>
 
 <style scoped>
+.post-repost {
+    border-radius: 25px;
+}
 </style>

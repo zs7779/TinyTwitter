@@ -35,13 +35,13 @@
 </template>
 
 <script>
-import { URLs, PLACEHOLDERs, getToken } from './utils'
+import { URLS, PLACEHOLDERS, getToken } from './utils'
 
 export default{
     name: "user-profile",
     props: {user: {
         type: Object,
-        default(){ return PLACEHOLDERs.user(); },
+        default(){ return PLACEHOLDERS.user(); },
     }},
     data() {
         return {
@@ -53,7 +53,7 @@ export default{
         doFollow() {
             const token = getToken(this.$root.userAuth);
             if (!token) return;
-            axios.post(`${URLs.users(this.user.username)}`, {
+            axios.post(`${URLS.users(this.user.username)}`, {
                 follow: !this.user.following,
             }, {
                 headers: {
@@ -72,7 +72,7 @@ export default{
             if (doSubmit) {
                 const token = getToken(this.$root.userAuth);
                 if (!token) return;
-                axios.patch(`${URLs.users(this.user.username)}`, {
+                axios.patch(`${URLS.users(this.user.username)}`, {
                     bio: this.editBio,
                 }, {
                     headers: {

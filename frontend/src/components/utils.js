@@ -1,4 +1,4 @@
-const URLs = {
+const URLS = {
     posts: (postID='') => `/api/posts/${postID}`,
     users: (userID='') => `/api/users/${userID}`,
     usersPosts: (userID='', postID='') => `/api/users/${userID}/posts/${postID}`,
@@ -8,15 +8,12 @@ const URLs = {
 };
 
 
-const SIGNALs = {
-    updatePost: 'edit-ok',
-    deletePost: 'delete-ok',
-    fetchPosts: 'post-ok',
-    updateUser: 'user-ok',
+const CONSTS = {
+    fileSizeLimit: 5242880,
 };
 
 
-const PLACEHOLDERs = {
+const PLACEHOLDERS = {
     user: () => { return {id: -1, username: 'username'}; },
     post: () => {
         return {
@@ -74,9 +71,9 @@ function getToken(userAuth) {
 
 
 export {
-    URLs,
-    SIGNALs,
-    PLACEHOLDERs,
+    URLS,
+    CONSTS,
+    PLACEHOLDERS,
     printError,
     getToken,
 }

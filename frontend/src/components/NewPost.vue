@@ -10,9 +10,10 @@
             <input type="file" name="file" ref='fileUpload' @change="onFileUpload($event.target.files)" class="d-none" />
             <template v-slot:modal-footer="{ ok }">
                 <div class="d-flex justify-content-between w-100">
-                    <button type='button' title='Upload image' class="btn btn-transparent p-0" @click="$refs.fileUpload.click()">
+                    <button type='button' title='Upload image' class="btn btn-transparent upload-button p-0" @click="$refs.fileUpload.click()">
                         <b-icon icon="image"></b-icon> {{filename}}
                     </button>
+                    <span v-if='errorMessage.length > 0' class="">{{ errorMessage }}</span>
                     <div>
                         <span class="mx-1">{{ charRemaining }}</span>
                         <b-button size="sm" variant="primary" @click="ok()" :disabled="!postIsValid" class="rounded-pill py-0">
@@ -26,7 +27,7 @@
 </template>
 
 <script>
-import { URLs, getToken, printError } from './utils'
+import { URLS, getToken, printError } from './utils'
 
 export default{
     name: "new-post",
@@ -36,6 +37,7 @@ export default{
             postText: '',
             postMedia: null,
             fileList: [],
+            errorMessage: '',
             token: null,
         };
     },
@@ -56,21 +58,26 @@ export default{
             return axios.post;
         },
         postURL() {
-            if (this.postParams.oldPost) return `${URLs.usersPosts(this.postParams.oldPost.author.username, this.postParams.oldPost.id)}`;
-            if (this.postParams.isComment) return `${URLs.usersPosts(this.postParams.rootPost.author.username, this.postParams.rootPost.id)}`;
-            return `${URLs.posts()}`;
+            if (this.postParams.oldPost) return `${URLS.usersPosts(this.postParams.oldPost.author.username, this.postParams.oldPost.id)}`;
+            if (this.postParams.isComment) return `${URLS.usersPosts(this.postParams.rootPost.author.username, this.postParams.rootPost.id)}`;
+            return `${URLS.posts()}`;
         },
     },
     methods: {
         onFileUpload(fileList) {
-            if (fileList.length == 0) return;
-            
+            if (!fileList[0].type.startsWith('image/')) {
+                return;
+            }
+            if (fileList[0].size > 5242880) {
+                return;
+            }
             this.fileList = fileList;
+            console.log(this.fileList[0]);
         },
         doSendFile() {
             if (this.fileList.length == 0) return;
 
-            return axios.get(URLs.upload())
+            return axios.get(URLS.upload())
                 .then(response => response.data)
                 .then(s3 => {
                     let formData = new FormData();
@@ -146,4 +153,7 @@ export default{
 </script>
 
 <style scoped>
+.upload-button:hover {
+    color: #00a2ff;
+}
 </style>

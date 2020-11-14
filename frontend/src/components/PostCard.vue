@@ -31,7 +31,7 @@
 
 <script>
 import PostBody from './PostBody.vue'
-import { URLs, getToken } from './utils'
+import { URLS, getToken } from './utils'
 
 export default{
     name: "post-card",
@@ -54,7 +54,7 @@ export default{
         onLike(post) {
             const token = getToken(this.$root.userAuth);
             if (!token) return;
-            axios.post(`${URLs.posts(post.id)}`, {
+            axios.post(`${URLS.posts(post.id)}`, {
                 like: !post.liked,
             }, {
                 headers: {
@@ -71,7 +71,7 @@ export default{
         onDelete(post) {
             const token = getToken(this.$root.userAuth);
             if (!token) return;
-            axios.delete(`${URLs.posts(post.id)}`, {
+            axios.delete(`${URLS.posts(post.id)}`, {
                 headers: {
                     'X-CSRFTOKEN': token,
                 },

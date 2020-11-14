@@ -6,20 +6,20 @@
 
 <script>
 import UserProfile from './UserProfile.vue'
-import { URLs, PLACEHOLDERs, getToken } from './utils'
+import { URLS, PLACEHOLDERS, getToken } from './utils'
 
 export default{
     name: "profile-view",
     props: ['username'],
     data() {
         return {
-            user: PLACEHOLDERs.user(),
+            user: PLACEHOLDERS.user(),
         }
     },
     methods: {
         getUserProfile() {
             const path_now = this.username;
-            axios.get(`${URLs.users(this.username)}`).then(response => {
+            axios.get(`${URLS.users(this.username)}`).then(response => {
                 if (path_now === this.username) {
                     this.user = response.data.user;
                 }

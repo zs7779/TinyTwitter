@@ -1,6 +1,6 @@
 import { routes, routeNames } from './components/router'
 import NewPost from './components/NewPost.vue'
-import { URLs, PLACEHOLDERs } from './components/utils'
+import { URLS, PLACEHOLDERS } from './components/utils'
 
 Vue.config.productionTip = false
 
@@ -20,8 +20,8 @@ var vm = new Vue({
   el: '#app',
   router,
   data: {
-      postParams: PLACEHOLDERs.postParams(),
-      user: PLACEHOLDERs.user(),
+      postParams: PLACEHOLDERS.postParams(),
+      user: PLACEHOLDERS.user(),
       userAuth: document.getElementById('userauth') ? true : false,
   },
   computed: {
@@ -31,7 +31,7 @@ var vm = new Vue({
   },
   methods: {
     clearPost() {
-      this.postParams = PLACEHOLDERs.postParams();
+      this.postParams = PLACEHOLDERS.postParams();
     },
     updateContent(post) {
       if (this.$refs.post) this.$refs.post.updatePost(post.id, post);
@@ -49,14 +49,14 @@ var vm = new Vue({
       this.clearPost();
     },
     getCurrentUser() {
-      axios.get(URLs.currentUser()).then(response => {
+      axios.get(URLS.currentUser()).then(response => {
         this.user = response.data.user;
       });
     }
   },
   watch: {
     $route() {
-      axios.get(URLs.currentUser()).then(response => {
+      axios.get(URLS.currentUser()).then(response => {
         this.user = response.data.user;
       });
     },

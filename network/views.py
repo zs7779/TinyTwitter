@@ -152,6 +152,9 @@ def profile_write(request, username):
 @login_required
 @require_GET
 def upload(request):
+    if request.user.medias.count() >= 10:
+        return JsonResponse({"error": "File number limit reached"}, status=400)
+    
     s3_client = boto3.client('s3')
     bucket = 'project-tt-bucket'
     key = str(base64.urlsafe_b64encode(uuid.uuid5(uuid.NAMESPACE_URL, f'{request.user.id}-{datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}').bytes).rstrip(b'='), 'utf-8')
@@ -163,12 +166,15 @@ def upload(request):
         response = s3_client.generate_presigned_post(bucket,
                                                      folder+key,
                                                      Fields=None,
-                                                     Conditions=None,
+                                                     Conditions=[
+                                                        ["content-length-range", 0, 5500000],
+                                                        ["starts-with", "$Content-Type", "image/"],
+                                                     ],
                                                      ExpiresIn=300)
     except ClientError as e:
         logging.error(e)
         return JsonResponse({
-        "error": "Storage service down"
+        "error": "Storage service unavailable"
     }, status=503)
 
     return JsonResponse(response, status=200)

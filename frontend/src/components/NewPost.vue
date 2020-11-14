@@ -11,7 +11,7 @@
             <template v-slot:modal-footer="{ ok }">
                 <div class="d-flex justify-content-between w-100">
                     <button type='button' title='Upload image' class="btn btn-transparent upload-button p-0" @click="$refs.fileUpload.click()">
-                        <b-icon icon="image"></b-icon> {{filename}}
+                        <b-icon icon="image"></b-icon> {{ filename }}
                     </button>
                     <span v-if='errorMessage.length > 0' class="">{{ errorMessage }}</span>
                     <div>
@@ -65,6 +65,9 @@ export default{
     },
     methods: {
         onFileUpload(fileList) {
+            if (fileList.length === 0) {
+                this.fileList = [];
+            }
             if (!fileList[0].type.startsWith('image/')) {
                 return;
             }
@@ -72,12 +75,15 @@ export default{
                 return;
             }
             this.fileList = fileList;
-            console.log(this.fileList[0]);
         },
-        doSendFile() {
+        sendFile() {
             if (this.fileList.length == 0) return;
 
-            return axios.get(URLS.upload())
+            axios.get(URLS.upload(), {
+                params: {
+                    type: `.${this.fileList[0].name.split('.').pop()}`,
+                }
+            })
                 .then(response => response.data)
                 .then(s3 => {
                     let formData = new FormData();
@@ -85,6 +91,7 @@ export default{
                     formData.append('AWSAccessKeyId', s3.fields.AWSAccessKeyId);
                     formData.append('policy', s3.fields.policy);
                     formData.append('signature', s3.fields.signature);
+                    formData.append('Content-Type', this.fileList[0].type);
                     formData.append('file', this.fileList[0], this.fileList[0].name);
                     
                     axios.post(s3.url, formData, {
@@ -93,11 +100,11 @@ export default{
                         }
                     }).then(response => {
                         this.postMedia = s3.url + s3.fields.key;
-                        this.doSendText();
+                        this.sendText();
                     });
                 });
         },
-        doSendText() {
+        sendText() {
             this.postMethod(this.postURL, {
                 text: this.postText,
                 media: this.postMedia,
@@ -123,9 +130,9 @@ export default{
             if (this.postText.length == 0 || this.postText.length >= 140) return;
 
             if (this.fileList.length > 0) {
-                this.doSendFile();
+                this.sendFile();
             } else {
-                this.doSendText();
+                this.sendText();
             }
         },
         doClear() {

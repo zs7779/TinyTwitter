@@ -42,7 +42,7 @@ class User(AbstractUser):
 
     def edit_profile(self, bio=None, avatar=None):
         self.bio = self.bio if bio is None else bio
-        self.avatar_url is self.avatar_url if avatar is None else avatar
+        self.avatar_url = self.avatar_url if avatar is None else avatar
         try:
             self.full_clean()
         except ValidationError as e:

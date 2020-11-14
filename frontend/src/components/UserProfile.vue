@@ -1,6 +1,14 @@
 <template>
     <div class="card p-3 mb-1 px-1 profile-card">
-        <img :src='user.avatar' class='avatar'>
+        <div class="position-relative">
+            <img :src='avatar' :class="[editing ? 'editing' : '', 'avatar']">
+            <div v-if='editing' class='edit-upload'>
+                <input type="file" name="file" ref='fileUpload' @change="onFileUpload($event.target.files)" class="d-none" />
+                <button type='button' title='Upload image' class="btn btn-transparent px-1 py-0 upload-button" @click="$refs.fileUpload.click()">
+                    <b-icon icon="image"></b-icon> {{filename}}
+                </button>
+            </div>
+        </div>
         <div class="d-flex justify-content-between align-items-center">
             <div>
                 <h5 class="card-title my-0">{{ user.username }}</h5>
@@ -23,7 +31,7 @@
                 Cancel
             </button>
             <button class="btn btn-primary btn-sm rounded-pill py-1 m-1" @click="doEdit(true)" :disabled="!bioIsValid">
-                Post
+                Save
             </button>
         </div>
         <p v-else>{{ user.bio }}</p>
@@ -45,8 +53,10 @@ export default{
     }},
     data() {
         return {
+            avatar: "",
             editing: false,
             editBio: "",
+            fileList: [],
         }
     },
     methods: {
@@ -68,30 +78,74 @@ export default{
                 this.$emit('user-ok', user);
             });
         },
+        onFileUpload(fileList) {
+            if (fileList.length === 0) {
+                return;
+            }
+            if (!fileList[0].type.startsWith('image/')) {
+                return;
+            }
+            if (fileList[0].size > 5242880) {
+                return;
+            }
+            axios.get(URLS.upload(), {
+                params: {
+                    avatar: true,
+                    type: `.${fileList[0].name.split('.').pop()}`,
+                }
+            })
+                .then(response => response.data)
+                .then(s3 => {
+                    let formData = new FormData();
+                    formData.append('key', s3.fields.key);
+                    formData.append('AWSAccessKeyId', s3.fields.AWSAccessKeyId);
+                    formData.append('policy', s3.fields.policy);
+                    formData.append('signature', s3.fields.signature);
+                    formData.append('Content-Type', fileList[0].type);
+                    formData.append('file', fileList[0], fileList[0].name);
+                    
+                    axios.post(s3.url, formData, {
+                        headers: {
+                            'content-type': "multipart/form-data",
+                        }
+                    }).then(response => {
+                        this.avatar = s3.url + s3.fields.key;
+                    });
+                });
+        },
+        sendText() {
+            const token = getToken(this.$root.userAuth);
+            if (!token) return;
+            axios.patch(`${URLS.users(this.user.username)}`, {
+                avatar: this.avatar,
+                bio: this.editBio,
+            }, {
+                headers: {
+                    'X-CSRFTOKEN': token,
+                },
+            }).then(response => {
+                const user = {
+                    ...this.user,
+                    avatar: this.avatar,
+                    bio: this.editBio,
+                }
+                this.$emit('user-ok', user);
+            });
+        },
         doEdit(doSubmit) {
             if (doSubmit) {
-                const token = getToken(this.$root.userAuth);
-                if (!token) return;
-                axios.patch(`${URLS.users(this.user.username)}`, {
-                    bio: this.editBio,
-                }, {
-                    headers: {
-                        'X-CSRFTOKEN': token,
-                    },
-                }).then(response => {
-                    const user = {
-                        ...this.user,
-                        bio: this.editBio,
-                    }
-                    this.$emit('user-ok', user);
-                    this.editing = !this.editing;
-                });
+                this.sendText();
             } else {
-                this.editing = !this.editing;
+                this.avatar = this.user.avatar;
             }
+            this.editing = !this.editing;
         },
     },
     computed: {
+        filename() {
+            if (this.fileList.length === 0) return "";
+            return this.fileList[0].name;
+        },
         charRemaining() {
             this.editBio = this.editBio.substr(0, 1400);
             return `${this.editBio.length}/140`;
@@ -102,6 +156,7 @@ export default{
     },
     watch: {
         user() {
+            this.avatar = this.user.avatar;
             this.editBio = this.user.bio;
         },
     },
@@ -112,8 +167,25 @@ export default{
 .avatar {
     width: 5em;
     height: 5em;
-    border: 5px solid white;
     border-radius: 50%;
+}
+.avatar.editing {
+    border: 3px solid #9adaff;
+    padding: 3px;
+}
+.edit-upload {
+    position: absolute;
+    top:3.5em;
+    left:3.5em;
+    border: 3px solid #9adaff;
+    border-radius: 10px;
+    background-color: white;
+}
+.upload-button:hover {
+    color: #00a2ff;
+}
+textarea {
+    border-color: #9adaff;
 }
 @media (max-width: 575.98px) {
     .profile-card{

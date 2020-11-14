@@ -162,6 +162,7 @@ def upload(request):
     data = request.GET
     avatar = data.get("avatar", False)
     folder = 'avatar/' if avatar else 'images/'
+    key += data.get("type", "")
     try:
         response = s3_client.generate_presigned_post(bucket,
                                                      folder+key,

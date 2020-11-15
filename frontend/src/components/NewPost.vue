@@ -47,7 +47,7 @@ export default{
             return this.fileList[0].name;
         },
         charRemaining() {
-            this.postText = this.postText.substr(0, 1400);
+            this.postText = this.postText.substr(0, 700);
             return `${this.postText.length}/140`;
         },
         postIsValid() {
@@ -100,6 +100,7 @@ export default{
                         }
                     }).then(response => {
                         this.postMedia = s3.url + s3.fields.key;
+                        // this.postMedia = s3.url.replace('compress', 'bucket') + s3.fields.key;
                         this.sendText();
                     });
                 });

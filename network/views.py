@@ -6,11 +6,9 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.views.decorators.cache import cache_control
-import logging, uuid, base64, datetime
-import boto3
-from botocore.exceptions import ClientError
 
 from .models import User, Post, Follow, Like, HashTag, Mention
+from .utils import presign_s3_post
 
 
 def index(request, path=None):
@@ -155,28 +153,17 @@ def upload(request):
     if request.user.medias.count() >= 10:
         return JsonResponse({"error": "File number limit reached"}, status=400)
     
-    s3_client = boto3.client('s3')
-    bucket = 'project-tt-bucket'
-    key = str(base64.urlsafe_b64encode(uuid.uuid5(uuid.NAMESPACE_URL, f'{request.user.id}-{datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}').bytes).rstrip(b'='), 'utf-8')
-    
     data = request.GET
     avatar = data.get("avatar", False)
-    folder = 'avatar/' if avatar else 'images/'
-    key += data.get("type", "")
-    try:
-        response = s3_client.generate_presigned_post(bucket,
-                                                     folder+key,
-                                                     Fields=None,
-                                                     Conditions=[
-                                                        ["content-length-range", 0, 5500000],
-                                                        ["starts-with", "$Content-Type", "image/"],
-                                                     ],
-                                                     ExpiresIn=300)
-    except ClientError as e:
-        logging.error(e)
+    file_type = data.get("type", "")
+
+    response = presign_s3_post(request.user, avatar=avatar, file_type=file_type, file_size_limit=5500000,
+                               bucket='project-tt-bucket', expiration=300)
+
+    if response is None:
         return JsonResponse({
-        "error": "Storage service unavailable"
-    }, status=503)
+            "error": "Storage service unavailable"
+        }, status=503)
 
     return JsonResponse(response, status=200)
 

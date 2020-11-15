@@ -1,12 +1,13 @@
 import datetime
 from django.contrib.auth.models import AbstractUser
 from django.db import models, DatabaseError, transaction
-from django.db.models import Q
+from django.db.models import Q, signals
+from django.dispatch import receiver
 from django.http import JsonResponse
 from django.core.exceptions import ValidationError
 from django.templatetags.static import static
 
-from .utils import isHashTag, isMention
+from .utils import isHashTag, isMention, presign_s3_post, s3_delete
 
 
 MAX_LENGTH = 140
@@ -448,3 +449,12 @@ class Media(models.Model):
         return {
             'media_url': self.media_url
         }
+
+@receiver(signals.post_delete, sender=Media)
+def delete_media(sender, instance, *args, **kwargs):
+    if "amazonaws.com" not in instance.media_url:
+        return
+
+    media_key = instance.media_url.split('amazonaws.com/')[-1]
+    response = s3_delete(key=media_key, bucket='project-tt-bucket')
+    

@@ -85,7 +85,7 @@ export default{
             if (!fileList[0].type.startsWith('image/')) {
                 return;
             }
-            if (fileList[0].size > 5242880) {
+            if (fileList[0].size > 2097152) {
                 return;
             }
             axios.get(URLS.upload(), {
@@ -110,6 +110,7 @@ export default{
                         }
                     }).then(response => {
                         this.avatar = s3.url + s3.fields.key;
+                        // this.avatar = s3.url.replace('compress', 'bucket') + s3.fields.key;
                     });
                 });
         },

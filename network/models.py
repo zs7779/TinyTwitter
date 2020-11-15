@@ -43,7 +43,13 @@ class User(AbstractUser):
 
     def edit_profile(self, bio=None, avatar=None):
         self.bio = self.bio if bio is None else bio
-        self.avatar_url = self.avatar_url if avatar is None else avatar
+
+        if avatar is not None:
+            if "amazonaws.com" in self.avatar_url:
+                media_key = self.avatar_url.split('amazonaws.com/')[-1]
+                response = s3_delete(key=media_key, bucket='project-tt-bucket')
+            self.avatar_url = avatar
+
         try:
             self.full_clean()
         except ValidationError as e:

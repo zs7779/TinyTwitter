@@ -65,9 +65,6 @@ export default{
     },
     methods: {
         onFileUpload(fileList) {
-            if (fileList.length === 0) {
-                this.fileList = [];
-            }
             if (!fileList[0].type.startsWith('image/')) {
                 return;
             }

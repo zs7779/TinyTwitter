@@ -59,6 +59,19 @@ export default{
             fileList: [],
         }
     },
+    computed: {
+        filename() {
+            if (this.fileList.length === 0) return "";
+            return this.fileList[0].name;
+        },
+        charRemaining() {
+            this.editBio = this.editBio.substr(0, 1400);
+            return `${this.editBio.length}/140`;
+        },
+        bioIsValid() {
+            return this.editBio.length <= 140;
+        },
+    },
     methods: {
         doFollow() {
             const token = getToken(this.$root.userAuth);
@@ -79,19 +92,19 @@ export default{
             });
         },
         onFileUpload(fileList) {
-            if (fileList.length === 0) {
-                return;
-            }
             if (!fileList[0].type.startsWith('image/')) {
                 return;
             }
             if (fileList[0].size > 2097152) {
                 return;
             }
+            this.fileList = fileList;
+        },
+        sendAvatar() {
             axios.get(URLS.upload(), {
                 params: {
                     avatar: true,
-                    type: `.${fileList[0].name.split('.').pop()}`,
+                    type: `.${this.fileList[0].name.split('.').pop()}`,
                 }
             })
                 .then(response => response.data)
@@ -101,8 +114,8 @@ export default{
                     formData.append('AWSAccessKeyId', s3.fields.AWSAccessKeyId);
                     formData.append('policy', s3.fields.policy);
                     formData.append('signature', s3.fields.signature);
-                    formData.append('Content-Type', fileList[0].type);
-                    formData.append('file', fileList[0], fileList[0].name);
+                    formData.append('Content-Type', this.fileList[0].type);
+                    formData.append('file', this.fileList[0], this.fileList[0].name);
                     
                     axios.post(s3.url, formData, {
                         headers: {
@@ -111,6 +124,7 @@ export default{
                     }).then(response => {
                         this.avatar = s3.url + s3.fields.key;
                         // this.avatar = s3.url.replace('compress', 'bucket') + s3.fields.key;
+                        this.sendText();
                     });
                 });
         },
@@ -135,24 +149,16 @@ export default{
         },
         doEdit(doSubmit) {
             if (doSubmit) {
-                this.sendText();
+                if (this.fileList.length > 0) {
+                    this.sendAvatar();
+                } else {
+                    this.sendText();
+                }
             } else {
                 this.avatar = this.user.avatar;
             }
             this.editing = !this.editing;
-        },
-    },
-    computed: {
-        filename() {
-            if (this.fileList.length === 0) return "";
-            return this.fileList[0].name;
-        },
-        charRemaining() {
-            this.editBio = this.editBio.substr(0, 1400);
-            return `${this.editBio.length}/140`;
-        },
-        bioIsValid() {
-            return this.editBio.length <= 140;
+            this.fileList = [];
         },
     },
     watch: {

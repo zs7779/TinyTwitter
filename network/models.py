@@ -34,9 +34,9 @@ class User(AbstractUser):
             "bio": self.bio,
             "following_count": self.following.all().count(),
             "follower_count": self.followers.all().count(),
-            "following": self.followers.filter(user__id=self.id, follower__id=requestor.id).count() > 0,
-            "followed": self.followers.filter(user__id=requestor.id, follower__id=self.id).count() > 0,
-            "owner": self == requestor,
+            "following": self.followers.filter(user__id=self.id, follower__id=requestor.id).count() > 0 if requestor else False,
+            "followed": self.followers.filter(user__id=requestor.id, follower__id=self.id).count() > 0 if requestor else False,
+            "owner": self == requestor if requestor else False,
         })
         if detail == DETAIL_FULL:
             return result
@@ -170,10 +170,10 @@ class Post(models.Model):
         if detail == DETAIL_MEDIUM:
             return result
         result.update({
-            "commented": self.children.filter(is_comment=True, author__id=user.id).count() if self.is_comment else self.comments.filter(author__id=user.id).count(),
-            "reposted": self.children.filter(is_comment=False, author__id=user.id).count(),
-            "liked": self.likes.filter(user__id=user.id).count(),
-            "owner": self.author == user,
+            "commented": self.children.filter(is_comment=True, author__id=user.id).count() if self.is_comment else self.comments.filter(author__id=user.id).count() if user else False,
+            "reposted": self.children.filter(is_comment=False, author__id=user.id).count() if user else False,
+            "liked": self.likes.filter(user__id=user.id).count() if user else False,
+            "owner": self.author == user if user else False,
         })
         if detail == DETAIL_LONG:
             return result
@@ -189,7 +189,7 @@ class Post(models.Model):
         top_posts = Post.objects.filter(~Q(author=requestor)) \
                                 .annotate(hotness=Count("likes")+Count("children")+Count("comments")) \
                                 .order_by("-hotness")[:10]
-        top_users = set([p.author for p in top_posts if p.author.followers.filter(user__id=p.author.id, follower__id=requestor.id).count() == 0])
+        top_users = set([p.author for p in top_posts if p.author.followers.filter(user__id=p.author.id, follower__id=requestor.id if requestor else None).count() == 0])
         top_hashtags = HashTag.objects.annotate(hotness=Count("posts")) \
                                       .order_by("-hotness")[:3]
         return {
@@ -348,6 +348,7 @@ class Like(models.Model):
         Returns:
         response (JsonResponse): JsonResponse with success message
         """
+        # Can be replaced by 'get_or_create' method
         if like:
             try:
                 like = Like.objects.get(user=requestor, post=post)

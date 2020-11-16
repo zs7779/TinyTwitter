@@ -110,16 +110,4 @@ export default{
     height: 1.25em;
     border-radius: 50%;
 }
-.card-button {
-    color: #909090;
-}
-.card-button-comment {
-    color: darkturquoise;
-}
-.card-button-repost {
-    color: limegreen;
-}
-.card-button-like {
-    color: red;
-}
 </style>

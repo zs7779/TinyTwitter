@@ -32,7 +32,10 @@ var vm = new Vue({
   },
   computed: {
     pageTitle() {
-      return routeNames[this.$route.name];
+      let title = routeNames[this.$route.name];
+      if (this.$route.name === 'hashtag')
+        title += ' #' + this.$route.params.hashtag;
+      return title;
     },
   },
   methods: {
@@ -61,16 +64,18 @@ var vm = new Vue({
     getCurrentUser() {
       axios.get(URLS.currentUser()).then(response => {
         this.user = response.data.user;
-        this.trending.users = response.data.trends.users;
-        this.trending.posts = response.data.trends.posts;
-        this.trending.hashtags = response.data.trends.hashtags;
+        if (response.data.trends) {
+          this.trending.users = response.data.trends.users;
+          this.trending.posts = response.data.trends.posts;
+          this.trending.hashtags = response.data.trends.hashtags;
+        }
       });
     }
   },
   watch: {
     $route() {
       axios.get(URLS.currentUser()).then(response => {
-        this.user = response.data.user;
+        this.getCurrentUser();
       });
     },
   },

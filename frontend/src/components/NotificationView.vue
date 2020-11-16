@@ -1,5 +1,5 @@
 <template>
-    <div class="info-panel border-left border-right">
+    <div class="info-panel">
         <ul class="nav nav-tabs">
             <li class="nav-item">
                 <router-link :to="{ name: 'notificationsReplies' }" class="text-center nav-link">

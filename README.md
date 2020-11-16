@@ -24,17 +24,19 @@ python manage.py runserver
 
 
 Current functions:
-* New Post
+* New Tweet
 * Comment
 * Retweet
-* Delete post
+* Upload image with tweet/comment
+* Delete tweet
 * Like/unlike
 * home page
 * Profile page
 * Follow/unfollow user
+* Modify Bio/Avatar image
 * Mentions
 * Hashtags
-* Trending user/hashtag/post
+* Trending user/hashtag/tweet
 * Notifications
 * Infinite scroll
 * Responsive page
@@ -43,8 +45,7 @@ Current functions:
 Known issues:
 * Infinite scroll sometimes not working on short screen (narrow screen landscape orientation)
 * Scroll position not persisted when clicking on a post then go back
-* Images and posts containing images do not work if you run this code locally. This is because they
-are hosted on AWS S3 and require permission to perform some of the operations.
+* Images and tweets containing images do not work if you run this code locally. This is because they are hosted on AWS S3 and require permission to perform some of the operations.
 
 
 Credits:

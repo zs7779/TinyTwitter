@@ -33,12 +33,19 @@
         </div>
         <!-- Discovery Panel -->
         <div class="right-panel">
-            <!-- <router-view ref="gallery" name="gallery"></router-view> -->
-            <trends-view :users='trending.users'
-                         :posts='trending.posts'
-                         :hashtags='trending.hashtags'
-                         @user-ok='updateUser($event)'
-            />
+            <div class="position-fixed discover-panel">
+                <!-- <router-view ref="gallery" name="gallery"></router-view> -->
+                <div>
+                    <trends-view :users='trending.users'
+                                :posts='trending.posts'
+                                :hashtags='trending.hashtags'
+                                @user-ok='updateUser($event)'
+                    />
+                </div>
+                <div class="text-center">
+                    <p>Copyright &copy; 2020 Sean Zhao</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>

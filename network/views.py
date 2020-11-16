@@ -27,7 +27,8 @@ def current_user(request, path=None):
         trends = Post.get_trends(request.user)
         return JsonResponse({"user": user, "trends": trends})
     else:
-        return JsonResponse({"user": {'authenticated': False}})
+        trends = Post.get_trends(None)
+        return JsonResponse({"user": {'authenticated': False}, "trends": trends})
 
 
 @require_GET

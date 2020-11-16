@@ -1,7 +1,7 @@
 <template>
     <div>
         <transition-group name="fade">
-            <div key="trendusers" class="card m-3 trend-panel">
+            <div v-if='users.length > 0' key="trendusers" class="card m-3 trend-panel">
                 <h5 class="px-3 py-2 m-0">You might like</h5>
                 <trend-card
                     v-for="user in users"
@@ -9,7 +9,9 @@
                     v-on="$listeners">
                 </trend-card>
             </div>
-            <div key="trendothers" class="card m-3 trend-panel">
+            <div v-if='posts.length > 0 || hashtags.length > 0' key="trendothers"
+                class="card m-3 trend-panel"
+            >
                 <h5 class="px-3 py-2 m-0">What's happening</h5>
                 <trend-card
                     v-for="hashtag in hashtags"

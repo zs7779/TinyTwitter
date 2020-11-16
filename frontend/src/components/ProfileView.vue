@@ -1,11 +1,11 @@
 <template>
     <div>
-        <user-profile :user="user" @user-ok="updateUser($event)"></user-profile>
+        <profile-card :user="user" @user-ok="updateUser($event)"></profile-card>
     </div>
 </template>
 
 <script>
-import UserProfile from './UserProfile.vue'
+import ProfileCard from './ProfileCard.vue'
 import { URLS, PLACEHOLDERS, getToken } from './utils'
 
 export default{
@@ -26,7 +26,8 @@ export default{
             })
         },
         updateUser(editedUser) {
-            this.user = editedUser;
+            if (editedUser.id === this.user.id)
+                this.user = editedUser;
         },
     },
     watch: {
@@ -38,7 +39,7 @@ export default{
         this.getUserProfile();
     },
     components: {
-        UserProfile,
+        ProfileCard,
     },
 }
 </script>

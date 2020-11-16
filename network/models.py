@@ -1,7 +1,7 @@
 import datetime
 from django.contrib.auth.models import AbstractUser
 from django.db import models, DatabaseError, transaction
-from django.db.models import Q, signals
+from django.db.models import Count, Q, signals
 from django.dispatch import receiver
 from django.http import JsonResponse
 from django.core.exceptions import ValidationError
@@ -22,7 +22,7 @@ class User(AbstractUser):
     avatar_url = models.URLField(null=True, blank=True)
     last_visit = models.DateTimeField(null=True, blank=True)
 
-    def serialize(self, user=None, detail=DETAIL_FULL):
+    def serialize(self, requestor=None, detail=DETAIL_FULL):
         result = {
             "id": self.id,
             "username": self.username,
@@ -34,9 +34,9 @@ class User(AbstractUser):
             "bio": self.bio,
             "following_count": self.following.all().count(),
             "follower_count": self.followers.all().count(),
-            "following": self.followers.filter(user__id=self.id, follower__id=user.id).count() > 0,
-            "followed": self.followers.filter(user__id=user.id, follower__id=self.id).count() > 0,
-            "owner": self == user,
+            "following": self.followers.filter(user__id=self.id, follower__id=requestor.id).count() > 0,
+            "followed": self.followers.filter(user__id=requestor.id, follower__id=self.id).count() > 0,
+            "owner": self == requestor,
         })
         if detail == DETAIL_FULL:
             return result
@@ -74,7 +74,6 @@ class User(AbstractUser):
             self.last_visit = datetime.datetime.now()
             self.save()
         return user
-            
 
     def get_user_by_username(username, requestor):
         """
@@ -184,6 +183,20 @@ class Post(models.Model):
         })
         if detail == DETAIL_FULL:  
             return result
+    
+    def get_trends(requestor):
+        # From all posts cuz we don't have enough data, probably should be truncated by time
+        top_posts = Post.objects.filter(~Q(author=requestor)) \
+                                .annotate(hotness=Count("likes")+Count("children")+Count("comments")) \
+                                .order_by("-hotness")[:5]
+        top_users = [p.author for p in top_posts]
+        top_hashtags = HashTag.objects.annotate(hotness=Count("posts")) \
+                                      .order_by("-hotness")[:3]
+        return {
+            'users': [user.serialize(requestor=requestor, detail=DETAIL_FULL) for user in top_users[:2]],
+            'posts': [post.serialize(detail=DETAIL_MEDIUM) for post in top_posts[:2]],
+            'hashtags': [hashtag.serialize() for hashtag in top_hashtags[:2]],
+        }
 
     def get_posts_by_user(username, requestor, count=20, after=0, order_by="-create_time"):
         """
@@ -354,7 +367,9 @@ class HashTag(models.Model):
 
     def serialize(self):
         return {
+            'id': self.id,
             'text': self.text,
+            'num_posts': self.posts.count(),
         }
 
     def get_hashtag_posts(hashtag, requestor, count=20, after=0, order_by="-create_time"):

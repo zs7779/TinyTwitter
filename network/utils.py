@@ -46,6 +46,7 @@ def presign_s3_post(user, avatar=False, file_type="", file_size_limit=5500000,
         logging.error(e)
         return None
 
+    logging.info(f'Presign for {user.username} successful')
     return response
 
 def s3_delete(key, bucket='project-tt-bucket'):
@@ -60,4 +61,5 @@ def s3_delete(key, bucket='project-tt-bucket'):
         logging.error(e)
         return None
 
+    logging.info(f'Delete {bucket}/{key} successful')
     return response

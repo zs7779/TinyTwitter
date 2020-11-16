@@ -46,7 +46,7 @@
 import { URLS, PLACEHOLDERS, getToken } from './utils'
 
 export default{
-    name: "user-profile",
+    name: "profile-card",
     props: {user: {
         type: Object,
         default(){ return PLACEHOLDERS.user(); },
@@ -124,6 +124,7 @@ export default{
                     }).then(response => {
                         this.avatar = s3.url + s3.fields.key;
                         // this.avatar = s3.url.replace('compress', 'bucket') + s3.fields.key;
+                        this.fileList = [];
                         this.sendText();
                     });
                 });
@@ -156,9 +157,9 @@ export default{
                 }
             } else {
                 this.avatar = this.user.avatar;
+                this.fileList = [];
             }
             this.editing = !this.editing;
-            this.fileList = [];
         },
     },
     watch: {

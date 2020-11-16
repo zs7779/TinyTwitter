@@ -24,7 +24,8 @@ def current_user(request, path=None):
         count = int(data.get("count", 20))
         after = int(data.get("after", 0))
         user = request.user.get_user_information(path=path, after=after, count=count)
-        return JsonResponse({"user": user})
+        trends = Post.get_trends(request.user)
+        return JsonResponse({"user": user, "trends": trends})
     else:
         return JsonResponse({"user": {'authenticated': False}})
 

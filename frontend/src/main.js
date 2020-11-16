@@ -1,5 +1,6 @@
 import { routes, routeNames } from './components/router'
 import NewPost from './components/NewPost.vue'
+import TrendsView from './components/TrendsView.vue'
 import { URLS, PLACEHOLDERS } from './components/utils'
 
 Vue.config.productionTip = false
@@ -22,7 +23,12 @@ var vm = new Vue({
   data: {
       postParams: PLACEHOLDERS.postParams(),
       user: PLACEHOLDERS.user(),
-      userAuth: document.getElementById('userauth') ? true : false,
+      userAuth: document.getElementById('userauth') ? true : false, // slightly more reliable check
+      trending: {
+        users: [],
+        posts: [],
+        hashtags: [],
+      }
   },
   computed: {
     pageTitle() {
@@ -32,6 +38,10 @@ var vm = new Vue({
   methods: {
     clearPost() {
       this.postParams = PLACEHOLDERS.postParams();
+    },
+    updateUser(user) {
+      if (this.$refs.profile) this.$refs.profile.updateUser(user);
+      this.trending.users = this.trending.users.map(u => u.id === user.id ? user : u);
     },
     updateContent(post) {
       if (this.$refs.post) this.$refs.post.updatePost(post.id, post);
@@ -51,6 +61,9 @@ var vm = new Vue({
     getCurrentUser() {
       axios.get(URLS.currentUser()).then(response => {
         this.user = response.data.user;
+        this.trending.users = response.data.trends.users;
+        this.trending.posts = response.data.trends.posts;
+        this.trending.hashtags = response.data.trends.hashtags;
       });
     }
   },
@@ -66,6 +79,7 @@ var vm = new Vue({
   },
   components: {
     NewPost,
+    TrendsView,
   },
   delimiters: ['[[', ']]'],
 })

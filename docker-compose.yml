@@ -4,8 +4,6 @@ services:
     web:
         build: .
         command: gunicorn -b 0.0.0.0:${DJANGO_PORT} tinytwitter.wsgi
-        # gunicorn not good for development
-        # command: python manage.py runserver 0.0.0.0:${DJANGO_PORT}
         environment: 
             - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
             - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}

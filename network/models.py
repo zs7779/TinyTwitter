@@ -64,13 +64,13 @@ class User(AbstractUser):
         user['authenticated'] = True
         posts_ids = self.posts.values('id')
         if path is None:
-            user['notifications'] = Post.objects.filter(Q(mentions__user=self) | Q(root_post__id__in=posts_ids) | Q(parent__id__in=posts_ids), create_time__gt=last_visit).count()
+            user['notifications'] = Post.objects.filter(Q(mentions__user=self) | Q(root_post__id__in=posts_ids) | Q(parent__id__in=posts_ids), create_time__gt=last_visit).distinct().count()
         else:
             user['notifications'] = 0
             if path == "mentions":
                 user['notices'] = [m.post.serialize(self, detail=DETAIL_LONG) for m in self.mentions.order_by(order_by)[after:after+count]]
             if path == "replies":
-                user['notices'] = [p.serialize(self, detail=DETAIL_LONG) for p in Post.objects.filter(Q(root_post__id__in=posts_ids) | Q(parent__id__in=posts_ids)).order_by(order_by)[after:after+count]]
+                user['notices'] = [p.serialize(self, detail=DETAIL_LONG) for p in Post.objects.filter(Q(root_post__id__in=posts_ids) | Q(parent__id__in=posts_ids)).distinct().order_by(order_by)[after:after+count]]
             self.last_visit = datetime.datetime.now()
             self.save()
         return user
@@ -236,12 +236,14 @@ class Post(models.Model):
         response (JsonResponse): JsonResponse to the get request, with serialized Post objects if succesful
         """
         if path == "home":
-            posts = Post.objects.filter(Q(author__followers__follower=requestor) | Q(author=requestor), is_comment=False).order_by(order_by)[after:after+count]
+            posts = Post.objects.filter(Q(author__followers__follower=requestor) | Q(author=requestor), is_comment=False).distinct().order_by(order_by)[after:after+count]
+            print(posts)
             return JsonResponse({
                 "posts": [post.serialize(requestor) for post in posts],
             }, safe=False)
         else:
             posts = Post.objects.filter(is_comment=False).order_by(order_by)[after:after+count]
+            print(posts)
             return JsonResponse({
                 "posts": [post.serialize(requestor) for post in posts],
             }, safe=False)

@@ -1,5 +1,5 @@
 <template>
-    <div :class="[hovering ? 'hover':'', 'p-sm-3 p-1']" @mouseover='hovering=true' @mouseout='hovering=false'>
+    <div :class="[hovering ? 'hover':'', 'px-sm-3 pt-sm-3 p-2']" @mouseover='hovering=true' @mouseout='hovering=false'>
         <router-link
             tag='div'
             :to='{name: "post", params: {username: post.author.username, postID: post.id}}'
@@ -13,7 +13,7 @@
             <div>
                 <h6 class="card-title mb-1">
                     <router-link :to="{ name: 'user', params: {username: post.author.username} }">
-                        <img v-if='secondary' :src='post.author.avatar' class='avatar-small'>
+                        <img v-if='secondary' :src='post.author.avatar' class='avatar avatar-small'>
                         {{ post.author.username }}
                     </router-link>
                     <span class="small text-muted"> {{ postTime }}:</span>
@@ -32,13 +32,14 @@
                         <template v-else>{{part}}</template>
                     </span></p>
                 </div>
+                <img v-if='post.medias.length > 0' :src='post.medias[0].media_url' class='post-image mb-sm-3 mb-2'>
                 <slot></slot>
             </div>
         </router-link>
-        <div v-if='verbose' class="card-footer bg-transparent p-0 ">
+        <div v-if='verbose' class="card-footer bg-transparent p-2">
             <span>{{ post.repost_count }} Reposts</span> <span>{{ post.like_count }} Likes</span>
         </div>
-        <div v-if='!secondary' class="card-footer bg-transparent p-0">
+        <div v-if='!secondary' :class="[verbose ? 'p-2' : 'border-0 p-0', 'card-footer bg-transparent']">
             <div class="d-flex justify-content-around">
                 <button type="button" v-b-modal.new-post class="btn btn-transparent px-1 py-0" title="Comment" @click="$emit('action-comment')">
                     <b-icon icon="chat" :class="[post.commented ? 'card-button-comment' : 'card-button']"></b-icon> {{ comment_count }}
@@ -123,6 +124,7 @@ export default{
 }
 .card-text {
     white-space: pre-line;
+    overflow-wrap: anywhere;
 }
 .card-text-primary {
     font-size: 1.5em;
@@ -160,7 +162,10 @@ export default{
 .avatar-small {
     width: 1.25em;
     height: 1.25em;
-    border-radius: 50%;
+}
+.post-image {
+    width: 100%;
+    border-radius: 25px;
 }
 .card-button {
     color: #909090;

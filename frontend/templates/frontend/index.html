@@ -22,7 +22,7 @@
                 @comment-ok='addComment($event)'
                 @action-clear='clearPost()'
             ></new-post>
-            <div class="info-panel border border-bottom-0 m-0">
+            <div class="info-panel m-0">
                 <h4 class="page-title m-0">[[ pageTitle ]]</h4>
             </div>
             <router-view ref="profile" name="profile"></router-view>
@@ -33,6 +33,19 @@
         </div>
         <!-- Discovery Panel -->
         <div class="right-panel">
+            <div class="position-fixed discover-panel">
+                <!-- <router-view ref="gallery" name="gallery"></router-view> -->
+                <div>
+                    <trends-view :users='trending.users'
+                                :posts='trending.posts'
+                                :hashtags='trending.hashtags'
+                                @user-ok='updateUser($event)'
+                    />
+                </div>
+                <div class="text-center">
+                    <p>Copyright &copy; 2020 Sean Zhao</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>

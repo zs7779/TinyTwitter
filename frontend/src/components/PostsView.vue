@@ -13,14 +13,14 @@
 
 <script>
 import PostCard from './PostCard.vue'
-import { URLs, PLACEHOLDERs } from './utils'
+import { URLS, PLACEHOLDERS } from './utils'
 
 export default{
     name: "posts-view",
     props: ['all', 'username', 'hashtag'],
     data () {
         return {
-            posts: PLACEHOLDERs.posts(),
+            posts: PLACEHOLDERS.posts(),
             after: 0,
             count: 20,
         }
@@ -31,9 +31,9 @@ export default{
                 this.after = this.posts.length;
                 return;
             }
-            var url = this.all ? `${URLs.posts()}` : `${URLs.posts('home')}`;
-            if (this.username) url = `${URLs.usersPosts(this.username)}`;
-            if (this.hashtag) url = `${URLs.hashtags(this.hashtag)}`;
+            var url = this.all ? `${URLS.posts()}` : `${URLS.posts('home')}`;
+            if (this.username) url = `${URLS.usersPosts(this.username)}`;
+            if (this.hashtag) url = `${URLS.hashtags(this.hashtag)}`;
             const path_now = this.all + '|' + this.username + '|' + this.hashtag;
             axios.get(url, {
                 params: {
@@ -91,7 +91,7 @@ export default{
             };
         },
         resetView() {
-            this.posts = PLACEHOLDERs.posts();
+            this.posts = PLACEHOLDERS.posts();
             this.after = 0;
             this.count = 20;
         },

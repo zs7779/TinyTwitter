@@ -1,5 +1,5 @@
 <template>
-    <div class="info-panel border-left border-right">
+    <div class="info-panel">
         <ul class="nav nav-tabs">
             <li class="nav-item">
                 <router-link :to="{ name: 'notificationsReplies' }" class="text-center nav-link">
@@ -22,14 +22,14 @@
 
 <script>
 import NoticeCard from './NoticeCard.vue'
-import { URLs, PLACEHOLDERs } from './utils'
+import { URLS, PLACEHOLDERS } from './utils'
 
 export default{
     name: "notification-view",
     props: ['path'],
     data () {
         return {
-            notices: PLACEHOLDERs.posts(),
+            notices: PLACEHOLDERS.posts(),
             after: {replies: 0, mentions: 0},
             count: 20,
         }
@@ -50,7 +50,7 @@ export default{
                 return;
             }
             const path_now = this.type;
-            axios.get(URLs.currentUser(this.type), {
+            axios.get(URLS.currentUser(this.type), {
                 params: {
                     after: this.after[this.type],
                     count: this.count,
@@ -76,7 +76,7 @@ export default{
             };
         },
         resetView() {
-            this.notices = PLACEHOLDERs.posts();
+            this.notices = PLACEHOLDERS.posts();
             this.after = {replies: 0, mentions: 0};
             this.count = 20;
         },

@@ -8,6 +8,7 @@ from django.core.exceptions import ValidationError
 from django.views.decorators.cache import cache_control
 
 from .models import User, Post, Follow, Like, HashTag, Mention
+from .utils import presign_s3_post
 
 
 def index(request, path=None):
@@ -23,9 +24,11 @@ def current_user(request, path=None):
         count = int(data.get("count", 20))
         after = int(data.get("after", 0))
         user = request.user.get_user_information(path=path, after=after, count=count)
-        return JsonResponse({"user": user})
+        trends = Post.get_trends(request.user)
+        return JsonResponse({"user": user, "trends": trends})
     else:
-        return JsonResponse({"user": {'authenticated': False}})
+        trends = Post.get_trends(None)
+        return JsonResponse({"user": {'authenticated': False}, "trends": trends})
 
 
 @require_GET
@@ -78,8 +81,8 @@ def posts_write(request):
     data = json.loads(request.body)
     if data.get('text') is not None:
         # Handle new post
-        return Post.create_post(text=data.get('text'), parent_id=data.get('parent_id'),
-                                requestor=request.user)
+        return Post.create_post(text=data.get('text'), media_url=data.get('media'),
+                                parent_id=data.get('parent_id'),requestor=request.user)
     return JsonResponse({
         "error": "Bad request"
     }, status=400)
@@ -109,8 +112,9 @@ def post_write(request, post_id):
         
         if data.get('text') is not None:
             # Handles new comments, which compare to normal posts, have root_post
-            return Post.create_post(text=data.get('text'), parent_id=data.get('parent_id'),
-                                    root_post=post, is_comment=True, requestor=request.user)
+            return Post.create_post(text=data.get('text'), media_url=data.get('media'),
+                                    parent_id=data.get('parent_id'), root_post=post,
+                                    is_comment=True, requestor=request.user)
 
     return JsonResponse({
         "error": "Bad request"
@@ -143,6 +147,27 @@ def profile_write(request, username):
     return JsonResponse({
         "error": "Bad request"
     }, status=400)
+
+
+@login_required
+@require_GET
+def upload(request):
+    if request.user.medias.count() >= 10:
+        return JsonResponse({"error": "File number limit reached"}, status=400)
+    
+    data = request.GET
+    avatar = data.get("avatar", False)
+    file_type = data.get("type", "")
+
+    response = presign_s3_post(request.user, avatar=avatar, file_type=file_type, file_size_limit=5500000,
+                               bucket='project-tt-bucket', expiration=300)
+
+    if response is None:
+        return JsonResponse({
+            "error": "Storage service unavailable"
+        }, status=503)
+
+    return JsonResponse(response, status=200)
 
 
 def posts_view(request, path=None, username=None):

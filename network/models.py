@@ -1,12 +1,13 @@
 import datetime
 from django.contrib.auth.models import AbstractUser
-from django.db import models
-from django.db.models import Q
+from django.db import models, DatabaseError, transaction
+from django.db.models import Count, Q, signals
+from django.dispatch import receiver
 from django.http import JsonResponse
 from django.core.exceptions import ValidationError
 from django.templatetags.static import static
 
-from .utils import isHashTag, isMention
+from .utils import isHashTag, isMention, presign_s3_post, s3_delete
 
 
 MAX_LENGTH = 140
@@ -21,7 +22,7 @@ class User(AbstractUser):
     avatar_url = models.URLField(null=True, blank=True)
     last_visit = models.DateTimeField(null=True, blank=True)
 
-    def serialize(self, user=None, detail=DETAIL_FULL):
+    def serialize(self, requestor=None, detail=DETAIL_FULL):
         result = {
             "id": self.id,
             "username": self.username,
@@ -33,16 +34,22 @@ class User(AbstractUser):
             "bio": self.bio,
             "following_count": self.following.all().count(),
             "follower_count": self.followers.all().count(),
-            "following": self.followers.filter(user__id=self.id, follower__id=user.id).count() > 0,
-            "followed": self.followers.filter(user__id=user.id, follower__id=self.id).count() > 0,
-            "owner": self == user,
+            "following": self.followers.filter(user__id=self.id, follower__id=requestor.id).count() > 0 if requestor else False,
+            "followed": self.followers.filter(user__id=requestor.id, follower__id=self.id).count() > 0 if requestor else False,
+            "owner": self == requestor if requestor else False,
         })
         if detail == DETAIL_FULL:
             return result
 
     def edit_profile(self, bio=None, avatar=None):
         self.bio = self.bio if bio is None else bio
-        self.avatar_url is self.avatar_url if avatar is None else avatar
+
+        if avatar is not None:
+            if "amazonaws.com" in self.avatar_url:
+                media_key = self.avatar_url.split('amazonaws.com/')[-1]
+                response = s3_delete(key=media_key, bucket='project-tt-bucket')
+            self.avatar_url = avatar
+
         try:
             self.full_clean()
         except ValidationError as e:
@@ -57,17 +64,16 @@ class User(AbstractUser):
         user['authenticated'] = True
         posts_ids = self.posts.values('id')
         if path is None:
-            user['notifications'] = Post.objects.filter(Q(mentions__user=self) | Q(root_post__id__in=posts_ids) | Q(parent__id__in=posts_ids), create_time__gt=last_visit).count()
+            user['notifications'] = Post.objects.filter(Q(mentions__user=self) | Q(root_post__id__in=posts_ids) | Q(parent__id__in=posts_ids), create_time__gt=last_visit).distinct().count()
         else:
             user['notifications'] = 0
             if path == "mentions":
                 user['notices'] = [m.post.serialize(self, detail=DETAIL_LONG) for m in self.mentions.order_by(order_by)[after:after+count]]
             if path == "replies":
-                user['notices'] = [p.serialize(self, detail=DETAIL_LONG) for p in Post.objects.filter(Q(root_post__id__in=posts_ids) | Q(parent__id__in=posts_ids)).order_by(order_by)[after:after+count]]
+                user['notices'] = [p.serialize(self, detail=DETAIL_LONG) for p in Post.objects.filter(Q(root_post__id__in=posts_ids) | Q(parent__id__in=posts_ids)).distinct().order_by(order_by)[after:after+count]]
             self.last_visit = datetime.datetime.now()
             self.save()
         return user
-            
 
     def get_user_by_username(username, requestor):
         """
@@ -128,7 +134,6 @@ class Follow(models.Model):
 class Post(models.Model):
     author = models.ForeignKey("User", on_delete=models.CASCADE, related_name="posts")
     text = models.CharField(max_length=MAX_LENGTH)
-    media_url = models.URLField(null=True, blank=True)
     parent = models.ForeignKey("Post", on_delete=models.SET_NULL, null=True, blank=True, related_name="children")
     create_time = models.DateTimeField(auto_now_add=True)
     is_comment = models.BooleanField(default=False)
@@ -154,7 +159,7 @@ class Post(models.Model):
             return result
         result.update({
             "text": self.text,
-            "media_url": self.media_url,
+            "medias": [media.serialize() for media in self.medias.all()],
             "create_time": self.create_time.strftime("%I:%M %p %b %d %Y"),
             "is_comment": self.is_comment,
             "mentions": self.get_mentions(),
@@ -165,10 +170,10 @@ class Post(models.Model):
         if detail == DETAIL_MEDIUM:
             return result
         result.update({
-            "commented": self.children.filter(is_comment=True, author__id=user.id).count() if self.is_comment else self.comments.filter(author__id=user.id).count(),
-            "reposted": self.children.filter(is_comment=False, author__id=user.id).count(),
-            "liked": self.likes.filter(user__id=user.id).count(),
-            "owner": self.author == user,
+            "commented": self.children.filter(is_comment=True, author__id=user.id).count() if self.is_comment else self.comments.filter(author__id=user.id).count() if user else False,
+            "reposted": self.children.filter(is_comment=False, author__id=user.id).count() if user else False,
+            "liked": self.likes.filter(user__id=user.id).count() if user else False,
+            "owner": self.author == user if user else False,
         })
         if detail == DETAIL_LONG:
             return result
@@ -178,6 +183,20 @@ class Post(models.Model):
         })
         if detail == DETAIL_FULL:  
             return result
+    
+    def get_trends(requestor):
+        # From all posts cuz we don't have enough data, probably should be truncated by time
+        top_posts = Post.objects.filter(~Q(author=requestor)) \
+                                .annotate(hotness=Count("likes")+Count("children")+Count("comments")) \
+                                .order_by("-hotness")[:10]
+        top_users = set([p.author for p in top_posts if p.author.followers.filter(user__id=p.author.id, follower__id=requestor.id if requestor else None).count() == 0])
+        top_hashtags = HashTag.objects.annotate(hotness=Count("posts")) \
+                                      .order_by("-hotness")[:3]
+        return {
+            'users': [user.serialize(requestor=requestor, detail=DETAIL_FULL) for user in top_users][:2],
+            'posts': [post.serialize(detail=DETAIL_MEDIUM) for post in top_posts[:2]],
+            'hashtags': [hashtag.serialize() for hashtag in top_hashtags[:3]],
+        }
 
     def get_posts_by_user(username, requestor, count=20, after=0, order_by="-create_time"):
         """
@@ -217,12 +236,14 @@ class Post(models.Model):
         response (JsonResponse): JsonResponse to the get request, with serialized Post objects if succesful
         """
         if path == "home":
-            posts = Post.objects.filter(Q(author__followers__follower=requestor) | Q(author=requestor), is_comment=False).order_by(order_by)[after:after+count]
+            posts = Post.objects.filter(Q(author__followers__follower=requestor) | Q(author=requestor), is_comment=False).distinct().order_by(order_by)[after:after+count]
+            print(posts)
             return JsonResponse({
                 "posts": [post.serialize(requestor) for post in posts],
             }, safe=False)
         else:
             posts = Post.objects.filter(is_comment=False).order_by(order_by)[after:after+count]
+            print(posts)
             return JsonResponse({
                 "posts": [post.serialize(requestor) for post in posts],
             }, safe=False)
@@ -255,12 +276,13 @@ class Post(models.Model):
             "comments": comments,
         }, safe=False)
 
-    def create_post(text, parent_id, requestor, root_post=None, is_comment=False):
+    def create_post(text, media_url, parent_id, requestor, root_post=None, is_comment=False):
         """
         Returns response of POST new post request, used to create new post or comment
 
         Parameters:
         text (str): text content of the new post
+        media (str): url of uploaded media
         parent_id (id): id of parent post, None if the post has no parent
         requestor (User): User instance of the user requesting
         root_post (Post): Post instance of the root post in case of a comment, default None
@@ -277,15 +299,24 @@ class Post(models.Model):
                 return JsonResponse({"error": "Parent post does not exist"}, status=404)      
         else:
             parent_post = None
-        post = Post(author=requestor, text=text, parent=parent_post,
-                    root_post=root_post, is_comment=is_comment)
 
-        try:
-            post.full_clean()
-        except ValidationError as e:
-            # print(e)
-            return JsonResponse({"error": "Post body is illegal"}, status=400, safe=False)
-        post.save()
+        with transaction.atomic():
+            post = Post(author=requestor, text=text, parent=parent_post,
+                        root_post=root_post, is_comment=is_comment)
+            try:
+                post.full_clean()
+            except ValidationError as e:
+                return JsonResponse({"error": "Post body is illegal"}, status=400, safe=False)
+            post.save()
+
+            if media_url is not None:
+                media = Media(user=requestor, post=post, media_url=media_url, media_type='IMG')
+                try:
+                    media.full_clean()
+                except ValidationError as e:
+                    print(e)
+                    return JsonResponse({"error": "Post body is illegal"}, status=400, safe=False)
+                media.save()
 
         # Process hashtags and mentions
         words = text.split()
@@ -319,6 +350,7 @@ class Like(models.Model):
         Returns:
         response (JsonResponse): JsonResponse with success message
         """
+        # Can be replaced by 'get_or_create' method
         if like:
             try:
                 like = Like.objects.get(user=requestor, post=post)
@@ -338,7 +370,9 @@ class HashTag(models.Model):
 
     def serialize(self):
         return {
+            'id': self.id,
             'text': self.text,
+            'num_posts': self.posts.count(),
         }
 
     def get_hashtag_posts(hashtag, requestor, count=20, after=0, order_by="-create_time"):
@@ -419,3 +453,32 @@ class Mention(models.Model):
             mention.save()
             mentions_array.append(mention.serialize())
         return mentions_array
+
+class Media(models.Model):
+    MEDIA_TYPES = [
+        ('IMG', 'Photo'),
+        ('GIF', 'Animated Picture'),
+        ('VID', 'Video'),
+    ]
+    user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="medias")
+    post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="medias")
+    media_url = models.URLField()
+    media_type = models.CharField(
+        max_length=3,
+        choices=MEDIA_TYPES,
+        default='IMG',
+    )
+
+    def serialize(self):
+        return {
+            'media_url': self.media_url
+        }
+
+@receiver(signals.post_delete, sender=Media)
+def delete_media(sender, instance, *args, **kwargs):
+    if "amazonaws.com" not in instance.media_url:
+        return
+
+    media_key = instance.media_url.split('amazonaws.com/')[-1]
+    response = s3_delete(key=media_key, bucket='project-tt-bucket')
+    

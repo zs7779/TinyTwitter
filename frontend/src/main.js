@@ -1,6 +1,7 @@
 import { routes, routeNames } from './components/router'
 import NewPost from './components/NewPost.vue'
-import { URLs, PLACEHOLDERs } from './components/utils'
+import TrendsView from './components/TrendsView.vue'
+import { URLS, PLACEHOLDERS } from './components/utils'
 
 Vue.config.productionTip = false
 
@@ -20,18 +21,30 @@ var vm = new Vue({
   el: '#app',
   router,
   data: {
-      postParams: PLACEHOLDERs.postParams(),
-      user: PLACEHOLDERs.user(),
-      userAuth: document.getElementById('userauth') ? true : false,
+      postParams: PLACEHOLDERS.postParams(),
+      user: PLACEHOLDERS.user(),
+      userAuth: document.getElementById('userauth') ? true : false, // slightly more reliable check
+      trending: {
+        users: [],
+        posts: [],
+        hashtags: [],
+      }
   },
   computed: {
     pageTitle() {
-      return routeNames[this.$route.name];
+      let title = routeNames[this.$route.name];
+      if (this.$route.name === 'hashtag')
+        title += ' #' + this.$route.params.hashtag;
+      return title;
     },
   },
   methods: {
     clearPost() {
-      this.postParams = PLACEHOLDERs.postParams();
+      this.postParams = PLACEHOLDERS.postParams();
+    },
+    updateUser(user) {
+      if (this.$refs.profile) this.$refs.profile.updateUser(user);
+      this.trending.users = this.trending.users.map(u => u.id === user.id ? user : u);
     },
     updateContent(post) {
       if (this.$refs.post) this.$refs.post.updatePost(post.id, post);
@@ -49,15 +62,20 @@ var vm = new Vue({
       this.clearPost();
     },
     getCurrentUser() {
-      axios.get(URLs.currentUser()).then(response => {
+      axios.get(URLS.currentUser()).then(response => {
         this.user = response.data.user;
+        if (response.data.trends) {
+          this.trending.users = response.data.trends.users;
+          this.trending.posts = response.data.trends.posts;
+          this.trending.hashtags = response.data.trends.hashtags;
+        }
       });
     }
   },
   watch: {
     $route() {
-      axios.get(URLs.currentUser()).then(response => {
-        this.user = response.data.user;
+      axios.get(URLS.currentUser()).then(response => {
+        this.getCurrentUser();
       });
     },
   },
@@ -66,6 +84,7 @@ var vm = new Vue({
   },
   components: {
     NewPost,
+    TrendsView,
   },
   delimiters: ['[[', ']]'],
 })

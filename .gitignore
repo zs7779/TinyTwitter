@@ -1,12 +1,7 @@
 .idea/*
 *.pyc
-.vscode/settings.json
+.*
 db.*
 frontend/coverage/
 docker cmd.txt
-frontend/static/frontend/tinytwitter.js
-.env
 amazon_linux_2.sh
-
-
-

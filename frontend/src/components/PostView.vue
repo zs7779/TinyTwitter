@@ -9,14 +9,14 @@
 <script>
 import axios from 'axios'
 import PostCard from './PostCard.vue'
-import { URLs, PLACEHOLDERs } from './utils'
+import { URLS, PLACEHOLDERS } from './utils'
 
 export default{
     name: "user-post-view",
     props: ['username', 'postID'],
     data() {
         return {
-            post: PLACEHOLDERs.post(),
+            post: PLACEHOLDERS.post(),
             after: 0,
             count: 20,
         }
@@ -24,7 +24,7 @@ export default{
     methods: {
         getUserPost() {
             const path_now = this.username + '|' + this.postID;
-            axios.get(`${URLs.usersPosts(this.username, this.postID)}`, {
+            axios.get(`${URLS.usersPosts(this.username, this.postID)}`, {
                 params: {
                     after: this.after < this.post.comments.length ? 0 : this.after,
                     count: this.after < this.post.comments.length ? 0 : this.count,
@@ -137,7 +137,7 @@ export default{
             };
         },
         resetView() {
-            this.post = PLACEHOLDERs.post();
+            this.post = PLACEHOLDERS.post();
             this.after = 0;
             this.count = 20;
         },

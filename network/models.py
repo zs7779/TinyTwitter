@@ -188,14 +188,14 @@ class Post(models.Model):
         # From all posts cuz we don't have enough data, probably should be truncated by time
         top_posts = Post.objects.filter(~Q(author=requestor)) \
                                 .annotate(hotness=Count("likes")+Count("children")+Count("comments")) \
-                                .order_by("-hotness")[:5]
-        top_users = [p.author for p in top_posts]
+                                .order_by("-hotness")[:10]
+        top_users = set([p.author for p in top_posts if p.author.followers.filter(user__id=p.author.id, follower__id=requestor.id).count() == 0])
         top_hashtags = HashTag.objects.annotate(hotness=Count("posts")) \
                                       .order_by("-hotness")[:3]
         return {
-            'users': [user.serialize(requestor=requestor, detail=DETAIL_FULL) for user in top_users[:2]],
+            'users': [user.serialize(requestor=requestor, detail=DETAIL_FULL) for user in top_users][:2],
             'posts': [post.serialize(detail=DETAIL_MEDIUM) for post in top_posts[:2]],
-            'hashtags': [hashtag.serialize() for hashtag in top_hashtags[:2]],
+            'hashtags': [hashtag.serialize() for hashtag in top_hashtags[:3]],
         }
 
     def get_posts_by_user(username, requestor, count=20, after=0, order_by="-create_time"):

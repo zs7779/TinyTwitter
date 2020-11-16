@@ -1,5 +1,5 @@
 <template>
-    <div :class="[hovering ? 'hover':'', 'px-sm-3 pt-sm-3 p-1']" @mouseover='hovering=true' @mouseout='hovering=false'>
+    <div :class="[hovering ? 'hover':'', 'px-sm-3 pt-sm-3 p-2']" @mouseover='hovering=true' @mouseout='hovering=false'>
         <router-link
             tag='div'
             :to='{name: "post", params: {username: post.author.username, postID: post.id}}'

@@ -12,8 +12,8 @@
 
 .grid-container {
     display: grid;
-    grid-template-columns: auto 240px 600px 320px auto;
-    background-color: rgb(240, 240, 240);
+    grid-template-columns: auto 240px 600px 350px auto;
+    background-color: rgb(255, 255, 255);
     min-height: 100vh;
 }
 
@@ -34,7 +34,7 @@
     font-size: 1.1em;
 }
 .navbar a.nav-link.router-link-active, a.nav-link:hover {
-    color: #00a2ff;
+    color: #2db2ff;
 }
 .navbar-nav {
     margin: 4em auto 0 auto;
@@ -61,6 +61,14 @@
     padding: 0.75em;
 }
 
+.info-panel {
+    border: 1px solid rgb(236, 236, 236);;
+}
+
+.card, .info-panel {
+    border-color: rgb(236, 236, 236);
+}
+
 @media (max-width: 1199.98px) {
     .grid-container {
         grid-template-columns: auto 60px 600px 320px auto;
@@ -84,7 +92,10 @@
 
 @media (max-width: 991.98px) {
     .grid-container {
-        grid-template-columns: auto 60px 520px 180px auto;
+        grid-template-columns: auto 60px 600px 0px auto;
+    }
+    .right-panel {
+        display: none;
     }
     .navbar {
         height: 100vh;

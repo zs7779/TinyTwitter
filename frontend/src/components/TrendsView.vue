@@ -41,7 +41,7 @@ export default{
 
 <style scoped>
 .card {
-    background-color: rgb(247, 249, 255);
+    background-color: rgb(246, 250, 255);
     border: none;
 }
 .trend-panel {

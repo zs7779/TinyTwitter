@@ -1,6 +1,6 @@
 <template>
     <div class="p-3 trend-card">
-        <div v-if='trend.username' class="d-flex justify-content-between">
+        <div v-if='trend.username' class="d-flex justify-content-between align-items-center">
             <router-link :to="routerPath" tag='div'>
                 <img :src='trend.avatar' class="avatar">
                 <span class="text-dark font-weight-bold">{{ trend.username }}</span>
@@ -68,8 +68,8 @@ export default{
     background-color: rgb(237, 245, 253);
 }
 .avatar {
-    width: 3em;
-    height: 3em;
+    width: 2.5em;
+    height: 2.5em;
     border-radius: 50%;
 }
 .avatar-small {
@@ -78,5 +78,8 @@ export default{
 }
 a {
     text-decoration: none;
+}
+button {
+    font-size: 0.7em;
 }
 </style>

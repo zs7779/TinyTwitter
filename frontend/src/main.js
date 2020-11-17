@@ -74,9 +74,7 @@ var vm = new Vue({
   },
   watch: {
     $route() {
-      axios.get(URLS.currentUser()).then(response => {
-        this.getCurrentUser();
-      });
+      this.getCurrentUser();
     },
   },
   mounted() {

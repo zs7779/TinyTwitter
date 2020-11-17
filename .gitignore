@@ -3,5 +3,3 @@
 .*
 db.*
 frontend/coverage/
-docker cmd.txt
-amazon_linux_2.sh

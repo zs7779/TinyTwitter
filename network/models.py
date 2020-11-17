@@ -135,7 +135,7 @@ class Post(models.Model):
     author = models.ForeignKey("User", on_delete=models.CASCADE, related_name="posts")
     text = models.CharField(max_length=MAX_LENGTH)
     parent = models.ForeignKey("Post", on_delete=models.SET_NULL, null=True, blank=True, related_name="children")
-    create_time = models.DateTimeField(auto_now_add=True)
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
     is_comment = models.BooleanField(default=False)
     root_post = models.ForeignKey("Post", on_delete=models.CASCADE, null=True, blank=True, related_name="comments")
 
@@ -237,13 +237,11 @@ class Post(models.Model):
         """
         if path == "home":
             posts = Post.objects.filter(Q(author__followers__follower=requestor) | Q(author=requestor), is_comment=False).distinct().order_by(order_by)[after:after+count]
-            print(posts)
             return JsonResponse({
                 "posts": [post.serialize(requestor) for post in posts],
             }, safe=False)
         else:
             posts = Post.objects.filter(is_comment=False).order_by(order_by)[after:after+count]
-            print(posts)
             return JsonResponse({
                 "posts": [post.serialize(requestor) for post in posts],
             }, safe=False)
@@ -389,7 +387,7 @@ class HashTag(models.Model):
 class PostTag(models.Model):
     tag = models.ForeignKey("HashTag", on_delete=models.RESTRICT, related_name="posts")
     post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="hashtags")
-    create_time = models.DateTimeField(auto_now_add=True)
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
 
     def serialize(self):
         return {
@@ -424,7 +422,7 @@ class PostTag(models.Model):
 class Mention(models.Model):
     user = models.ForeignKey("User", on_delete=models.CASCADE, related_name="mentions")
     post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="mentions")
-    create_time = models.DateTimeField(auto_now_add=True)
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True)
 
     def serialize(self):
         return {

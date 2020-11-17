@@ -3,6 +3,7 @@ version: '3'
 services:
     web:
         build: .
+        command: gunicorn -b 0.0.0.0:${DJANGO_PORT} --workers 3 tinytwitter.wsgi
         environment: 
             - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
             - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}

@@ -18,7 +18,7 @@ DETAIL_FULL = 3
 
 
 class User(AbstractUser):
-    bio = models.CharField(max_length=MAX_LENGTH, default="")
+    bio = models.CharField(max_length=MAX_LENGTH, blank=True, default="")
     avatar_url = models.URLField(null=True, blank=True)
     last_visit = models.DateTimeField(null=True, blank=True)
 
@@ -71,7 +71,7 @@ class User(AbstractUser):
                 user['notices'] = [m.post.serialize(self, detail=DETAIL_LONG) for m in self.mentions.order_by(order_by)[after:after+count]]
             if path == "replies":
                 user['notices'] = [p.serialize(self, detail=DETAIL_LONG) for p in Post.objects.filter(Q(root_post__id__in=posts_ids) | Q(parent__id__in=posts_ids)).distinct().order_by(order_by)[after:after+count]]
-            self.last_visit = datetime.datetime.now()
+            self.last_visit = datetime.datetime.utcnow()
             self.save()
         return user
 

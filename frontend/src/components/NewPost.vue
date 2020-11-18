@@ -141,9 +141,8 @@ export default{
             this.token = null;
         },
         checkToken(event) {
-            if (!this.token) {
-                this.token = getToken(this.$root.userAuth);
-            }
+            this.token = getToken(this.$root.userAuth);
+            if (!this.token) event.preventDefault();
         },
     },
     watch: {

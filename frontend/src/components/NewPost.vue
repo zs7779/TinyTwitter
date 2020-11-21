@@ -6,7 +6,12 @@
             @show="checkToken"
             @hidden="doClear"
         >
+            <post-body v-if='postParams.rootPost' :post='postParams.rootPost' :secondary='true' class='mb-1' />
             <textarea rows=4 class="form-control border-0" v-model="postText" placeholder="Say something..."></textarea>
+            <post-body v-if='postParams.parentPost && !postParams.rootPost'
+                :post='postParams.parentPost' :secondary='true'
+                class='card p-sm-3 mb-sm-3 mr-sm-2 p-1 my-1 mr-1 post-repost'
+            />
             <input type="file" name="file" ref='fileUpload' @change="onFileUpload($event.target.files)" class="d-none" />
             <template v-slot:modal-footer="{ ok }">
                 <div class="d-flex justify-content-between w-100">
@@ -27,6 +32,7 @@
 </template>
 
 <script>
+import PostBody from './PostBody.vue'
 import { URLS, getToken, printError } from './utils'
 
 export default{
@@ -152,6 +158,9 @@ export default{
     },
     created() {
         if (this.postParams.oldPost) this.postText = this.postParams.oldPost.text;
+    },
+    components: {
+        PostBody
     }
 }
 </script>
@@ -159,5 +168,8 @@ export default{
 <style scoped>
 .upload-button:hover {
     color: #00a2ff;
+}
+.post-repost {
+    border-radius: 25px;
 }
 </style>

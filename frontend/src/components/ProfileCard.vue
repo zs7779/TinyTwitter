@@ -124,7 +124,6 @@ export default{
                     }).then(response => {
                         this.avatar = s3.url + s3.fields.key;
                         // this.avatar = s3.url.replace('compress', 'bucket') + s3.fields.key;
-                        this.fileList = [];
                         this.sendText();
                     });
                 });
@@ -140,6 +139,7 @@ export default{
                     'X-CSRFTOKEN': token,
                 },
             }).then(response => {
+                this.fileList = [];
                 const user = {
                     ...this.user,
                     avatar: this.avatar,

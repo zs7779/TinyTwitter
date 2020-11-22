@@ -152,7 +152,7 @@ def profile_write(request, username):
 @login_required
 @require_GET
 def upload(request):
-    if request.user.medias.count() >= 10:
+    if request.user.medias.count() >= 15:
         return JsonResponse({"error": "File number limit reached"}, status=400)
     
     data = request.GET

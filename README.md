@@ -23,7 +23,7 @@ python manage.py runserver
 ```
 
 
-Created features:
+Features:
 * Tweet, Comment, Retweet, Upload Picture with Tweet, Delete Tweet, Like/Unlike
 <p align="center">
   <img src="/demo_imgs/tweet_image.gif?raw=true" alt="Tweet" width=400 />

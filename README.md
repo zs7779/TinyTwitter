@@ -6,7 +6,7 @@ This is a personal project using Vue/Django/PostgreSQL, recreating some of Twitt
 Try the demo at https://tinytwitter.zhaosean.com/ (Sign up doesn't require real email)
 
 
-If you'd like to run this code on your computer, clone this directory (check out the green "Code" button), and go to it in the command line `cd <repository path>`.  
+If you'd like to run this code on your computer, clone this repository, and go to it in the command line `cd <repository path>`.  
 I recommend using [Docker](https://docs.docker.com/engine/install/) to test run this code. If you decided to use Docker, use the following commands to get the site running:
 ```
 docker build -t tinytwitter .

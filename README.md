@@ -1,7 +1,7 @@
 # TinyTwitter
 
 
-This is a personal project using Vue/Django/PostgreSQL, recreating some of Twitter's interesting features. Technologies used: HTML, CSS, Sass, Vue.js, Webpack, Django, PostgreSQL. Deployed on AWS EC2 using Nginx and Gunicorn.
+This is a personal project using Vue/Django/PostgreSQL, recreating some of Twitter's interesting features. Technologies used: HTML, CSS, Sass, JavaScript, Vue.js, Webpack, Python, Django, PostgreSQL. Deployed on AWS EC2 using Nginx and Gunicorn.
 
 Try the demo at https://tinytwitter.zhaosean.com/ (Sign up doesn't require real email)
 

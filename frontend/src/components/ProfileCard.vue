@@ -133,7 +133,7 @@ export default{
             const token = getToken(this.$root.userAuth);
             if (!token) return;
             axios.patch(`${URLS.users(this.user.username)}`, {
-                avatar: this.avatar,
+                avatar: this.fileList.length > 0 ? this.avatar : null,
                 bio: this.editBio,
             }, {
                 headers: {
@@ -158,6 +158,7 @@ export default{
             } else {
                 this.avatar = this.user.avatar;
                 this.fileList = [];
+                this.editBio = this.user.bio;
             }
             this.editing = !this.editing;
         },

@@ -24,25 +24,25 @@ python manage.py runserver
 
 
 Current functions:
-* New Tweet
-* Comment
-* Retweet
-* Upload image with tweet/comment
-* Delete tweet
-* Like/unlike
-![Tweet Picture](demo_imgs/tweet_image.gif?raw=true "Tweet Picture") ![Retweet](demo_imgs/retweet.gif?raw=true "Retweet") ![Like and Comment](demo_imgs/like_comment.gif?raw=true "Like and Comment")
-* home page
-* Profile page
-* Follow/unfollow user
-* Modify Bio/Avatar image
-* Mentions
-* Hashtags
-![Edit Profile](demo_imgs/edit_profile.gif?raw=true "Edit Profile") ![Follow](demo_imgs/follow.gif?raw=true "Follow") ![Hashtag and Mention](demo_imgs/hashtag_mention.gif?raw=true "Hashtag and Mention")
-* Trending user/hashtag/tweet
-* Notifications
-* Infinite scroll
-* Responsive page
-![Infinite Scroll](demo_imgs/infinite_scroll.gif?raw=true "Infinite Scroll") ![Responsive Design](demo_imgs/responsive.gif?raw=true "Responsive Design")
+* Tweet, Comment, Retweet, Upload Picture with Tweet, Delete Tweet, Like/Unlike
+<p align="center">
+  <img src="/demo_imgs/tweet_image.gif?raw=true" alt="Tweet" width=310 />
+  <img src="/demo_imgs/retweet.gif?raw=true" alt="Retweet" width=310 /> 
+  <img src="/demo_imgs/like_comment.gif" alt="Like and Comment" width=310 />
+</p>
+
+* Home Page, Profile Page, Follow/Unfollow User, Modify Bio/Avatar, Mentions, Hashtags
+<p align="center">
+  <img src="/demo_imgs/edit_profile.gif?raw=true" alt="Edit Profile" width=310 />
+  <img src="/demo_imgs/follow.gif?raw=true" alt="Follow" width=310 /> 
+  <img src="/demo_imgs/hashtag_mention.gif" alt="Hashtag and Mention" width=310 />
+</p>
+
+* Trending User/Hashtag/Tweet, Notifications, Infinite scroll, Responsive Design
+<p align="center">
+  <img src="/demo_imgs/infinite_scroll.gif?raw=true" alt="Infinite Scroll" width=310 />
+  <img src="/demo_imgs/responsive.gif?raw=true" alt="Responsive Design" width=310 /> 
+</p>
 
 
 Known issues:

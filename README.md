@@ -26,22 +26,22 @@ python manage.py runserver
 Created features:
 * Tweet, Comment, Retweet, Upload Picture with Tweet, Delete Tweet, Like/Unlike
 <p align="center">
-  <img src="/demo_imgs/tweet_image.gif?raw=true" alt="Tweet" width=450 />
-  <img src="/demo_imgs/retweet.gif?raw=true" alt="Retweet" width=450 /> 
-  <img src="/demo_imgs/like_comment.gif" alt="Like and Comment" width=450 />
+  <img src="/demo_imgs/tweet_image.gif?raw=true" alt="Tweet" width=400 />
+  <img src="/demo_imgs/retweet.gif?raw=true" alt="Retweet" width=400 /> 
+  <img src="/demo_imgs/like_comment.gif" alt="Like and Comment" width=400 />
 </p>
 
 * Home Page, Profile Page, Follow/Unfollow User, Modify Bio/Avatar, Mentions, Hashtags
 <p align="center">
-  <img src="/demo_imgs/edit_profile.gif?raw=true" alt="Edit Profile" width=450 />
-  <img src="/demo_imgs/follow.gif?raw=true" alt="Follow" width=450 /> 
-  <img src="/demo_imgs/hashtag_mention.gif" alt="Hashtag and Mention" width=450 />
+  <img src="/demo_imgs/edit_profile.gif?raw=true" alt="Edit Profile" width=400 />
+  <img src="/demo_imgs/follow.gif?raw=true" alt="Follow" width=400 /> 
+  <img src="/demo_imgs/hashtag_mention.gif" alt="Hashtag and Mention" width=400 />
 </p>
 
 * Trending User/Hashtag/Tweet, Notifications, Infinite scroll, Responsive Design
 <p align="center">
-  <img src="/demo_imgs/infinite_scroll.gif?raw=true" alt="Infinite Scroll" width=450 />
-  <img src="/demo_imgs/responsive.gif?raw=true" alt="Responsive Design" width=450 /> 
+  <img src="/demo_imgs/infinite_scroll.gif?raw=true" alt="Infinite Scroll" width=400 />
+  <img src="/demo_imgs/responsive.gif?raw=true" alt="Responsive Design" width=400 /> 
 </p>
 
 

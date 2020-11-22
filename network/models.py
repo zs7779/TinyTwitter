@@ -45,11 +45,10 @@ class User(AbstractUser):
         self.bio = self.bio if bio is None else bio
 
         if avatar is not None:
-            if "amazonaws.com" in self.avatar_url:
+            if self.avatar_url is not None and "amazonaws.com" in self.avatar_url:
                 media_key = self.avatar_url.split('amazonaws.com/')[-1]
                 response = s3_delete(key=media_key, bucket='project-tt-bucket')
             self.avatar_url = avatar
-
         try:
             self.full_clean()
         except ValidationError as e:

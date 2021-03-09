@@ -1,0 +1,14 @@
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: ~/TinyTwitter/
+hooks:
+  ApplicationStart:
+    - location: scripts/application_start
+      timeout: 300
+      runas: root
+  ApplicationStop:
+    - location: scripts/application_stop
+      timeout: 120
+      runas: root

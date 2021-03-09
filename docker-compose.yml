@@ -2,8 +2,9 @@ version: '3'
 
 services:
     web:
+        container_name: tinytwitter_web
         build: .
-        command: gunicorn -b 0.0.0.0:${DJANGO_PORT} --workers 3 tinytwitter.wsgi
+        command: gunicorn -b 0.0.0.0:${DJANGO_PORT} --workers 2 tinytwitter.wsgi
         environment: 
             - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
             - DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS}
@@ -19,7 +20,7 @@ services:
             - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
             - DEBUG=${DEBUG}
         volumes:
-            - .:/usr/src/app
+            - /var/www/tinytwitter.zhaosean.com/public/:/var/www/tinytwitter.zhaosean.com/public/
         ports:
             - "${DJANGO_PORT}:${DJANGO_PORT}"
         restart: unless-stopped

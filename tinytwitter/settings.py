@@ -160,7 +160,7 @@ logging.config.dictConfig({
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
-STATIC_ROOT = '../../homepage/dist/tinytwitter/'
-STATIC_URL = '/static/' if DEBUG else 'https://zhaosean.com/dist/tinytwitter/'
-# STATIC_URL = '/static/' if DEBUG else 'https://tinytwitter.zhaosean.com/dist/tinytwitter/'
+STATIC_ROOT = '/var/www/tinytwitter.zhaosean.com/public/'
+# STATIC_URL = '/static/' if DEBUG else 'https://zhaosean.com/dist/tinytwitter/'
+STATIC_URL = '/static/' if DEBUG else 'https://tinytwitter.zhaosean.com/'
 LOGIN_URL = '/login/'

@@ -10,4 +10,4 @@ docker run -d \
            --env-file .env \
            tinytwitter
 
-docker exec -it tinytwitter_web python manage.py collectstatic
+docker exec tinytwitter_web python manage.py collectstatic

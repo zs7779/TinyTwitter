@@ -3,10 +3,10 @@
 cd /home/ec2-user/TinyTwitter
 
 docker build -t tinytwitter .
-docker run --detach \
+docker run -d \
            --name tinytwitter_web \
-           --expose 8000:8000 \
-           --volume /var/www/tinytwitter.zhaosean.com/public:/var/www/tinytwitter.zhaosean.com/public \
+           -p 8000:8000 \
+           -v /var/www/tinytwitter.zhaosean.com/public:/var/www/tinytwitter.zhaosean.com/public \
            --env-file .env \
            tinytwitter
 

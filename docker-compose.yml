@@ -19,8 +19,11 @@ services:
             - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
             - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
             - DEBUG=${DEBUG}
+<<<<<<< HEAD
         volumes:
             - /var/www/tinytwitter.zhaosean.com/public/:/var/www/tinytwitter.zhaosean.com/public/
+=======
+>>>>>>> b003bfb274f141c0a1fa10e71fac761edf1f5f5a
         ports:
             - "${DJANGO_PORT}:${DJANGO_PORT}"
         restart: unless-stopped

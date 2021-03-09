@@ -11,3 +11,5 @@ RUN \
  apk --purge del .build-deps
  
 COPY . .
+
+CMD [ "gunicorn", "-b", "0.0.0.0:$DJANGO_PORT", "--workers", "2", "tinytwitter.wsgi" ]

@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 files:
   - source: /
-    destination: ~/TinyTwitter/
+    destination: /home/ec2-user/TinyTwitter/
 hooks:
   ApplicationStart:
     - location: scripts/application_start

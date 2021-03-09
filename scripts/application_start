@@ -1,5 +1,5 @@
 #!/bin/bash
 
-cd ~/TinyTwitter
+cd /home/ec2-user/TinyTwitter
 docker-compose up -d --build
 docker exec -it tinytwitter_web python manage.py collectstatic

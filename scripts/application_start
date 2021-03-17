@@ -1,0 +1,13 @@
+#!/bin/bash
+
+cd /home/ec2-user/TinyTwitter
+
+docker build -t tinytwitter .
+docker run -d \
+           --name tinytwitter_web \
+           -p 8000:8000 \
+           -v /var/www/tinytwitter.zhaosean.com/public:/var/www/tinytwitter.zhaosean.com/public \
+           --env-file .env \
+           tinytwitter
+
+docker exec tinytwitter_web python manage.py collectstatic --noinput

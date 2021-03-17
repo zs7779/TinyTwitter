@@ -42,9 +42,12 @@
                                 @user-ok='updateUser($event)'
                     />
                 </div>
-                <div class="text-center text-muted">
-                    <small>Copyright &copy; 2020 Sean Zhao</small><br>
-                    <small>V 21.03.09.19.43</small>
+                <div class="text-center text-muted footer-text">
+                    <small>Copyright &copy; 2020 Sean Zhao</small>
+                    <small>V21.0317.1741</small>
+                    {% if debug %}
+                        <small>DEBUG mode is ON</small>
+                    {% endif %}
                 </div>
             </div>
         </div>

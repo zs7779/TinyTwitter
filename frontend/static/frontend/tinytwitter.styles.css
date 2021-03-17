@@ -73,6 +73,10 @@
     border-color: rgb(236, 236, 236);
 }
 
+.footer-text small {
+    display: block;
+}
+
 @media (max-width: 1199.98px) {
     .grid-container {
         grid-template-columns: auto 60px 600px 320px auto;
